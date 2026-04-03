@@ -1,8 +1,10 @@
 /* @refresh reload */
-import { render } from 'solid-js/web'
-import './index.css'
-import App from './App.tsx'
+import "./index.css";
 
-const root = document.getElementById('root')
+import { render } from "solid-js/web";
 
-render(() => <App />, root!)
+import { App } from "./App.tsx";
+
+const root = document.querySelector("#root");
+
+render(() => <App />, root!);
