@@ -20,16 +20,20 @@
 
 pragma solidity ^0.8.34;
 
+/*
+This is Chainlink's standard oracle interface for fetching real-world price data.
+*/
 interface AggregatorV3Interface {
-  function decimals() external view returns (uint8);
-  function latestRoundData()
-    external
-    view
-    returns (
-      uint80 roundId,
-      int256 answer,
-      uint256 startedAt,
-      uint256 updatedAt,
-      uint80 answeredInRound
-    );
+    function decimals() external view returns (uint8);
+
+    function latestRoundData()
+        external
+        view
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        );
 }
