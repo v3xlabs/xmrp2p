@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "type": "module",
-    "description": "Simple TypeScript bot scaffold with typed env config",
+    "description": "Simple market maker bot for XMRP2P",
     "engines": {
         "node": ">=20"
     },

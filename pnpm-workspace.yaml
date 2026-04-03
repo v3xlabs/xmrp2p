@@ -2,3 +2,4 @@ autoInstallPeers: false
 packages:
  - "lib"
  - "web"
+ - "bot"
