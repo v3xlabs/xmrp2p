@@ -9,14 +9,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "solid-js": "^1.9.11"
+    "@kobalte/core": "^0.13.11",
+    "@tanstack/solid-query": "^5.96.2",
+    "@wagmi/solid": "^0.0.5",
+    "solid-icons": "^1.2.0",
+    "solid-js": "^1.9.11",
+    "viem": "^2.47.6"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
-    "tailwindcss": "^4.2.2",
     "@types/node": "^24.12.0",
     "eslint": "^9.39.2",
     "eslint-plugin-v3xlabs": "^1.7.14",
+    "tailwindcss": "^4.2.2",
     "typescript": "~5.9.3",
     "vite": "^8.0.1",
     "vite-plugin-solid": "^2.11.11"

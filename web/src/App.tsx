@@ -12,13 +12,14 @@ export const App = () => {
                 <section class="w-[400px] space-y-2">
                     <h2 class="px-2">Create Offer</h2>
                     <div class="card p-4">
-                        hi
+                        <input placeholder="0" />
+                        <input placeholder="0" />
                     </div>
                 </section>
                 <section class="grow space-y-2">
                     <h2 class="px-2">Your orders</h2>
                     <div class="card p-4">
-                        hi
+                        No open orders
                     </div>
                 </section>
             </div>
