@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.30;
+
+import {console} from "forge-std/Test.sol";
+import {Script} from "forge-std/Script.sol";
+import {MoneroSwap} from "../src/main/solidity/MoneroSwap.sol";
+
+//
+// Default deployer 0x4e59b44847b379578588920ca78fbf26c0b4956c
+//
+// Ethereum
+// Base
+// BSC
+// Gnosis
+// Arbitrum
+// Optimism
+// Polygon
+// Ink
+// Avalanche C-Chain
+// Linea
+// Sonic
+//
+
+//
+// Run with
+// forge script --via-ir --optimize true --optimizer-runs $(optimizer-runs) --rpc-url https://rpc.gnosischain.com/ --trezor --verify --value 0.1ether --broadcast script/MoneroSwapDeployer.s.sol
+// Replace --trezor by either --ledger or --mnemonic
+//
+
+contract MoneroSwapDeployer is Script {
+
+    address OWNER = address(MONEROSWAP_OWNER);
+    bytes32 constant SALT = DEPLOYMENT_SALT;
+    uint256 constant VALUE = 0;
+
+    function run() public {
+        vm.startBroadcast();
+
+        MoneroSwap moneroswap = new MoneroSwap{salt: SALT, value: VALUE}(OWNER);
+        console.log('Contract addresss: ',address(moneroswap));
+
+        vm.stopBroadcast();
+    }
+}

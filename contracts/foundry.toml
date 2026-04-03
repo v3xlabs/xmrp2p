@@ -1,0 +1,20 @@
+[profile.default]
+# So the JSON contains the literal content of .sol files
+use_literal_content = true
+src = "src"
+out = "out"
+libs = ["lib"]
+# Configuration to enable deterministic deployments
+solc = "0.8.34"
+solc_version = "0.8.34"
+evm_version = "prague"
+always_use_create_2_factory = true
+##
+## The following 2 lines can be uncommented to remove metadata hash addition to the bytecode
+## Doing so would prevent Exact Matches during verification but would allow more flexibility
+## as source files could have comments changed for example without altering the contract address
+##
+#bytecode_hash = "none"
+#cbor_metadata = false
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
