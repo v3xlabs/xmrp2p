@@ -1,0 +1,10 @@
+{
+  "languages": {
+    "JavaScript": {
+      "formatter": "none",
+    },
+    "TypeScript": {
+      "formatter": "none",
+    },
+  },
+}
