@@ -1,5 +1,5 @@
 
-import { ConnectModal } from "./connectmodal";
+import { UserProfile } from "./profile";
 
 export const Navbar = () => (
     <>
@@ -8,7 +8,7 @@ export const Navbar = () => (
                 xmrp2p.eth
             </div>
             <div>
-                <ConnectModal />
+                <UserProfile />
             </div>
         </nav>
     </>
