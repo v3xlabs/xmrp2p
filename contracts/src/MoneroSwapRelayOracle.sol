@@ -20,7 +20,7 @@
 
 pragma solidity ^0.8.34;
 
-import {AggregatorV3Interface} from "../../main/solidity/AggregatorV3Interface.sol";
+import {AggregatorV3Interface} from "./AggregatorV3Interface.sol";
 
 contract MoneroSwapRelayOracle is AggregatorV3Interface {
 
