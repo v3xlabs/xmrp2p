@@ -1,0 +1,29 @@
+{
+    "name": "xmrp2p-bot",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "Simple TypeScript bot scaffold with typed env config",
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc -p tsconfig.json",
+        "start": "node dist/index.js",
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix"
+    },
+    "dependencies": {
+        "dotenv": "^16.4.7",
+        "zod": "^3.24.2"
+    },
+    "devDependencies": {
+        "@types/node": "^22.13.10",
+        "eslint": "^9.22.0",
+        "eslint-plugin-v3xlabs": "^1.7.14",
+        "tsx": "^4.19.3",
+        "typescript": "^5.8.2"
+    }
+}
