@@ -23,7 +23,7 @@ export const Swap = () => {
                     <input type="range" min="0" max="100" value="10" class="w-full" />
                 </div>
             </div>
-            <button class="btn-primary w-full" disabled>
+            <button class="btn-primary btn-lg w-full" disabled>
                 Create Order
             </button>
         </div>
