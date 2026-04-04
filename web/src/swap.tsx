@@ -2,6 +2,7 @@ import { SegmentedControl } from "@kobalte/core/segmented-control";
 import { Select } from "@kobalte/core/select";
 import { FaSolidArrowsUpDown, FaSolidCheck } from "solid-icons/fa";
 import { type Accessor, type Component, createSignal, For } from "solid-js";
+import { ArrowDownUp } from "lucide-solid";
 
 import eth from "./assets/eth.svg";
 import xmr from "./assets/xmr.svg";
@@ -71,10 +72,9 @@ export const Swap = () => {
         </div>
         <input placeholder="0" class="input w-full" id="input_amount" />
       </div>
-
-      <div>
+      <div class="flex justify-center">
         <button
-          class="btn aspect-square p-2 group"
+          class="aspect-square p-2 group border border-(--thorin-border) rounded-md bg-(--thorin-background-primary) hover:bg-(--thorin-background-secondary) hover:cursor-pointer"
           onClick={() => {
             const temp = fromToken();
 
@@ -82,7 +82,7 @@ export const Swap = () => {
             setToToken(temp);
           }}
         >
-          <FaSolidArrowsUpDown class="group-hover:rotate-180 transition-all" />
+          <ArrowDownUp class="group-hover:rotate-180 transition-all w-5 h-5" />
         </button>
       </div>
 
