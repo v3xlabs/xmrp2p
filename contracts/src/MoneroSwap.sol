@@ -25,12 +25,99 @@ import "./Errors.sol";
 import "./Enums.sol";
 import "./Structs.sol";
 
-// See https://docs.soliditylang.org/en/develop/natspec-format.html
-
 /// @title A MoneroSwap contract for performing Atomic swaps between the native currency of an EVM based blockchain and Monero
 /// @author hbs
 /// @notice Use this contract responsibly
-contract MoneroSwap {
+contract XMRP2P {
+    enum OfferType {
+        INVALID, // Used so the default value 0 is invalid
+        BUY,
+        SELL
+    }
+
+    enum OfferState {
+        INVALID, // Used so the default value 0 is invalid
+        OPEN, // Open offers are those still seeking a counterparty
+        TAKEN, // Taken offers are those with both a buyer and a seller
+        CANCELLED, // Cancelled offers are those no longer valid
+        REFUNDED, // Refunded offers are those for which the buyer requested a refund
+        READY, // Ready offers are those for which the Monero deposit was confirmed by the buyer
+        CLAIMED, // Claimed offers are those whose Monero seller has claimed the amount of EVM currency paid for its XMR
+        UPDATING // This is a temporary state during offer parameters update
+    }
+
+    /// The Offer structure is used to describe both buy and sell offers
+    struct Offer {
+        /// Type of offer
+        OfferType type_;
+        /// State of the offer
+        OfferState state;
+        /// Flag indicating wheter the offer was funded via a FundingRequest or not
+        bool funded;
+        /// Owner of the offer, the address which called create{Buy,Sell}Offer
+        address owner;
+        /// Manager of the offer, another address able to change the price. Only the owner can later change the manager.
+        address manager;
+        /// Counterparty of the offer. This can be set at creation time, in which case only that counterparty can take the offer,
+        /// or will be filled when the offer is taken.
+        address counterparty;
+        /// Id of the offer
+        uint256 id;
+        /// Maximum trade amount (in wei). This is set from the value transfered during the call to create{Buy,Sell}Offer
+        /// and updated by calls to update{Buy,Sell}Offer
+        uint256 maxamount;
+        /// Fixed price of the offer, in wei per XMR. If this is 0, then reliance on the oracle is assumed and an oracle MUST be defined.
+        uint256 price;
+        /// Price ratio vs oracle price, in parts of RATIO_DENOMINATOR
+        uint256 oracleRatio;
+        /// Price offset vs oracle price, in wei. This is so one can set a price to be the oracle price minus 1000 gwei for example.
+        int256 oracleOffset;
+        /// Minimum amount of XMR the owner is willing to buy (Buy offers)
+        uint256 minxmr;
+        /// Maximum amount of XMR the owner is willing to sell (Sell offers)
+        uint256 maxxmr;
+        /// Maximum price in wei per XMR the owner is willing to pay (for Buy offers)
+        uint256 maxprice;
+        /// Minimum price in wei per XMR the owner is willing to get for its XMR (for Sell offers)
+        uint256 minprice;
+        /// Deposit related to the offer
+        uint256 deposit;
+        /// Timestamp when the offer was created or last updated (so users can asses of its freshness)
+        uint256 lastupdate;
+        /// Block number when the offer was taken. This is needed so retrieving messages can be done from a specific block.
+        uint256 blockTaken;
+        /// Monero ublic spend key of the EVM side of the trade
+        uint256 evmPublicSpendKey;
+        /// Monero private spend key of the EVM side of the trade. Set during a call to refund.
+        uint256 evmPrivateSpendKey;
+        /// Public view key provided by the EVM side of the trade. This is needed to compute the Monero address
+        /// and to verify the private view key during a refund as the private view key may have been generated in a non standard way
+        uint256 evmPublicViewKey;
+        /// Monero private view key of the EVM side of the trade. Set during a call to refund.
+        uint256 evmPrivateViewKey;
+        /// Monero public spend key of the XMR side of the trade
+        uint256 xmrPublicSpendKey;
+        /// Monero private spend key of the XMR side of the trade. Set during a call to claim
+        uint256 xmrPrivateSpendKey;
+        /// Monero private view key of the XMR side of the trade. The EVM side of the trade doesn't need to share its private view key.
+        uint256 xmrPrivateViewKey;
+        /// index of the offer in the id list
+        uint256 index;
+        /// Final price of the taken offer, in wei per XMR
+        uint256 finalprice;
+        /// Amount to refund to the offer taker, in wei
+        uint256 takerDeposit;
+        /// Final amount of XMR of the taken offer (in piconeros)
+        uint256 finalxmr;
+        /// Timestamp until which 'ready' can be called, after, taken offer is considered in the READY state
+        uint256 t0;
+        /// Timestamp after which 'claim' can be called, after, taken offer can be refunded
+        uint256 t1;
+        /// Public keys for exchanging messages (using ECDH to compute the encryption key) between the two parties
+        uint256 xmrPublicMsgKey;
+        uint256 evmPublicMsgKey;
+    }
+
     /// Number of decimals used by the EVM native currency
     uint256 constant EVM_DECIMALS = 18;
 
@@ -48,7 +135,7 @@ contract MoneroSwap {
     uint256 constant MINIMUM_DELAY = 24 * 3_600; // twenty-four hours
 
     /// Contract Parameters.
-    /// Those parameters may be set by the constructor or via the setParameters / setSavingsXDAIParameters functions
+    /// Those parameters may be set by the constructor or via the setParameters / setPriceOracle / setSavingsXDAIParameters functions
     struct Parameters {
         /// Maximum balance for requesting funding. Any account with a balance over this limit will not be able to create a funding request.
         /// Set this to 1 to disable the possibility to create funding requests
@@ -70,6 +157,8 @@ contract MoneroSwap {
         /// The sell offer coverage ratio. A sell offer with a deposit of X cannot be taken
         /// for more than X * RATIO_DENOMINATOR / SELL_OFFER_COVERAGE_RATIO
         uint256 SELL_OFFER_COVERAGE_RATIO;
+        /// Maximum age of oracle price, in seconds.
+        uint256 XMREVMMaxage;
         //
         // The atomic swap protocol relies on two milestones t0 and t1 which define what each party can do.
         //
@@ -87,16 +176,18 @@ contract MoneroSwap {
         uint256 T0_DELAY;
         /// Delay (in s) between t0 and t1
         uint256 T1_DELAY;
+        //
+        // Oracle parameters
+        //
+
+        /// Oracle contract for determining the XMR price in EVM base unit (xDAI, POL, ETH, ...)
+        /// This contract must implement ChainLink's AggregatorV3Interface
+        address XMREVM;
+        /// Oracle decimals. Number of decimals used for expressing the price of XMR in the native EVM curreny
+        uint8 XMREVMDecimals;
     }
 
-    //
-    // Contract parameters
-    //
-    Parameters PARAMETERS;
-
-    //
-    // Non parameter state
-    //
+    Parameters public PARAMETERS;
 
     ///
     /// Total liability of the contract (in wei). This includes deposits for Buy and Sell offers
@@ -104,28 +195,13 @@ contract MoneroSwap {
     ///
     /// The total liability is used to compute how much of the optionally accrued interests (from sDAI deposits) can
     /// be withdrawn.
-    uint256 private liability;
+    uint256 public liability;
 
     /// Id of the next Offer to create. This is common to both Buy and Sell offers.
-    uint256 private nextOfferId = 1;
+    uint256 public nextOfferId = 1;
 
     /// Mapping from buy offer id to buy offer
-    mapping(uint256 => Offer) private buyOffers;
-
-    /// List of active buy offer ids.
-    uint256[] private buyOfferIds;
-
-    /// Mapping from sell offer id to sell offer
-    mapping(uint256 => Offer) private sellOffers;
-
-    /// List of active sell offer ids
-    uint256[] private sellOfferIds;
-
-    /// Mapping of address to FundingRequest. An address can only have a single active FundingRequest.
-    mapping(address => FundingRequest) private fundingRequests;
-
-    /// List of active funding requests
-    address[] private activeFundingRequesters;
+    mapping(uint256 => Offer) public offers;
 
     /// Mapping of used public keys. This is kept track of so
     /// a public key cannot be reused as a public spend key, otherwise, if an offer which used
@@ -172,16 +248,6 @@ contract MoneroSwap {
         OfferState indexed state
     );
 
-    /// Event emitted when a new FundingRequest is created. Funders can monitor those events to trigger their participation.
-    event FundingEvent(
-        /// Address requesting funding
-        address requester,
-        /// Amount requested (in wei)
-        uint256 amount,
-        /// Fee the requester is agreeing to pay (in wei)
-        uint256 fee
-    );
-
     constructor(address ownerAddress) payable {
         require(address(0) != ownerAddress);
         // No value is accepted since it cannot be withdrawn
@@ -218,17 +284,27 @@ contract MoneroSwap {
     /// Create a new buy offer
     ///
     /// @param counterparty The address of a designated counterparty for the offer. Set to 0 to allow offer to be taken by any address.
-    /// @param price The (fixed) price of the offer, in wei per XMR.
+    /// @param manager An additional address which can manage, i.e. change parameters, of the offer. The manager cannot update the manager's address.
+    /// @param price The (fixed) price of the offer. If this value is not 0, the price will be used as-is. If this value is 0, the price will be determined by the oracle.
+    /// @param oracleRatio The oracle ratio of the offer. This is only used if the price is 0. It is a percentage of the oracle price (expressed in parts of RATIO_DENOMINATOR).
+    /// @param oracleOffset The oracle offset of the offer. This is only used when using the oracle price, it is an offset to apply to the oracle price multiplied by oracleRatio. This can be used to set an offer price 1 xDAI above the oracle price for example.
     /// @param minxmr The minimum amount of XMR the offer is willing to buy. The offer cannot be taken if it would lead to less than this minimum. Value is expressed in piconeros
+    /// @param maxprice The maximum price the offer is willing to pay. Value is expressed in wei per XMR.
     /// @param publicspendkey The Monero public spend key.
     /// @param publicviewkey The Monero public view key.
+    /// @param msgpubkey The messaging public key. This key is used to derive an encryption key to encrypt messages between the owner and its counterparty.
     ///
     function createBuyOffer(
         address counterparty,
+        address manager,
         uint256 price,
+        uint256 oracleRatio,
+        int256 oracleOffset,
         uint256 minxmr,
+        uint256 maxprice,
         uint256 publicspendkey,
-        uint256 publicviewkey
+        uint256 publicviewkey,
+        uint256 msgpubkey
     ) public payable {
         //
         // Check if maximum number of active offers is reached
@@ -241,16 +317,22 @@ contract MoneroSwap {
         );
 
         //
-        // Check if the Monero public spend key has been used. First add the public view key.
+        // Check if the Monero public spend key has been used. First add the public view/message keys.
         //
 
         usedPublicKeys[publicviewkey] = true;
+        bool usedMsgKey = usedPublicKeys[msgpubkey];
+        usedPublicKeys[msgpubkey] = true;
 
         require(
             !usedPublicKeys[publicspendkey],
             ErrorBuyOfferPublicSpendKeyAlreadyUsed()
         );
         usedPublicKeys[publicspendkey] = true;
+
+        // The message key must not have been previously used. Note that if the message key is
+        // equal to the public spend key, the error above will have been raised.
+        require(0 == msgpubkey || !usedMsgKey, ErrorBuyOfferUsedMessageKey());
 
         //
         // EOA with a current FundingRequest cannot create BuyOffers
@@ -274,8 +356,35 @@ contract MoneroSwap {
             ErrorBuyOfferAmountAboveMaximum(PARAMETERS.MAXIMUM_BUY_OFFER)
         );
 
-        // Price must be specified (no oracle fallback)
-        require(0 != price, ErrorBuyOfferNoPriceDefined());
+        // Offer must either have a fixed price or a dynamic one with a non 0 ratio
+        require(0 != price || 0 != oracleRatio, ErrorBuyOfferNoPriceDefined());
+
+        //
+        // When no oracle is defined, price cannot be 0
+        //
+
+        if (address(0) == address(PARAMETERS.XMREVM)) {
+            require(0 != price, ErrorBuyOfferNoPriceOracleDefined());
+        }
+
+        if (0 != price) {
+            require(
+                0 == oracleRatio,
+                ErrorBuyOfferNoPriceRatioWithFixedPrice()
+            );
+            require(
+                0 == oracleOffset,
+                ErrorBuyOfferNoPriceOffsetWithFixedPrice()
+            );
+            // Force maxprice to the fixed price
+            maxprice = price;
+        } else {
+            // Require that maxprice be set
+            require(
+                0 != maxprice,
+                ErrorBuyOfferMandatoryMaxpriceWithOraclePrice()
+            );
+        }
 
         Offer memory offer;
 
@@ -285,13 +394,18 @@ contract MoneroSwap {
         offer.lastupdate = block.timestamp;
         offer.owner = msg.sender;
         offer.counterparty = counterparty;
-        offer.manager = msg.sender;
+        // If the manager was not explicitely set, set it to the owner.
+        offer.manager = address(0) == manager ? msg.sender : manager;
         offer.maxamount = msg.value;
         offer.deposit = msg.value;
         offer.price = price;
+        offer.oracleRatio = oracleRatio;
+        offer.oracleOffset = oracleOffset;
         offer.minxmr = minxmr;
+        offer.maxprice = maxprice;
         offer.evmPublicSpendKey = publicspendkey;
         offer.evmPublicViewKey = publicviewkey;
+        offer.evmPublicMsgKey = msgpubkey;
 
         buyOffers[offer.id] = offer;
         buyOfferIds.push(offer.id);
@@ -311,25 +425,36 @@ contract MoneroSwap {
         emit OfferEvent(offer.id, offer.type_, offer.state);
     }
 
-    /// Update an existing buy offer. Only the owner can update the offer.
+    /// Update an existing buy offer. The owner and the manager (if defined) can update the offer.
+    /// Only the owner can modify the manager.
     /// @param id the id of the offer to update
     /// @param counterparty address of explicit counterparty. Use 0x0 to allow any account to take the offer
+    /// @param manager address of a manager acount able to modify offer parameters
     /// @param maxamount maximum amount to spend for buying Monero. This is used to reduce the maximum amount, in which case part of the deposit will be sent back
-    /// @param price fixed price at which the buyer is willing to buy Monero (in wei per Monero)
+    /// @param price fixed price at which the buyer is willing to buy Monero (in wei per Monero). If 0, the price will be determined by the oracle
+    /// @param oracleRatio the oracle ratio of the offer. This is only used if the price is 0. It is a percentage of the oracle price (expressed in parts of RATIO_DENOMINATOR)
+    /// @param oracleOffset the oracle offset of the offer. This is only used when using the oracle price, it is an offset to apply to the oracle price multiplied by oracleRatio. This can be used to set an offer price 1 xDAI above the oracle price for example
     /// @param minxmr the minimum amount of XMR the buyer is willing to buy. The offer cannot be taken if it would lead to less than this minimum. Value is expressed in piconeros
+    /// @param maxprice the maximum price the buyer is willing to pay. Value is expressed in wei per XMR. When using fixed pricing, maxprice is forced to the price.
+    /// @param msgpubkey The messaging public key. This key is used to derive an encryption key to encrypt messages between the owner and its counterparty
     function updateBuyOffer(
         uint256 id,
         address counterparty,
+        address manager,
         uint256 maxamount,
         uint256 price,
-        uint256 minxmr
+        uint256 oracleRatio,
+        int256 oracleOffset,
+        uint256 minxmr,
+        uint256 maxprice,
+        uint256 msgpubkey
     ) public payable nonReentrant {
         Offer storage offer = buyOffers[id];
 
         require(OfferType.BUY == offer.type_, ErrorBuyOfferUnknown());
 
         require(
-            msg.sender == offer.owner,
+            msg.sender == offer.owner || msg.sender == offer.manager,
             ErrorBuyOfferInvalidCallerForUpdate()
         );
 
@@ -373,16 +498,56 @@ contract MoneroSwap {
             }
         }
 
+        // Only the owner can change the manager
+        if (address(0) != manager) {
+            require(msg.sender == offer.owner, ErrorBuyOfferNotOwner());
+            offer.manager = manager;
+        }
+
         if (0 != minxmr) {
             offer.minxmr = minxmr;
         }
 
-        if (0 != price) {
+        if (0 != maxprice) {
+            offer.maxprice = maxprice;
+        }
+
+        if (0 != price || 0 != oracleRatio) {
+            //
+            // When no oracle is defined, price cannot be 0
+            //
+            if (address(0) == address(PARAMETERS.XMREVM)) {
+                require(0 != price, ErrorBuyOfferNoPriceOracleDefined());
+            }
+
+            if (0 != price) {
+                require(
+                    0 == oracleRatio,
+                    ErrorBuyOfferNoPriceRatioWithFixedPrice()
+                );
+                require(
+                    0 == oracleOffset,
+                    ErrorBuyOfferNoPriceOffsetWithFixedPrice()
+                );
+                // price is fixed, force maxprice to the same value
+                offer.maxprice = price;
+            } else {
+                require(
+                    0 != maxprice,
+                    ErrorBuyOfferMandatoryMaxpriceWithOraclePrice()
+                );
+            }
+
             offer.price = price;
+            offer.oracleRatio = oracleRatio;
+            offer.oracleOffset = oracleOffset;
         }
 
         //
         // If value was sent with the call, update maxamount and deposit
+        // This is kind of weird as the final maxamount could become greater than the
+        // maxamount passed as parameter, so maybe we should prohibit msg.value > 0 when
+        // maxamount is not 0 in the parameters? => nope, if maxamount is 0 is voids the offer currently.
         //
 
         if (msg.value > 0) {
@@ -402,6 +567,15 @@ contract MoneroSwap {
             liability += msg.value;
         }
 
+        bool usedMsgKey = usedPublicKeys[msgpubkey];
+        usedPublicKeys[msgpubkey] = true;
+
+        require(
+            0 == msgpubkey || offer.evmPublicMsgKey == msgpubkey || !usedMsgKey,
+            ErrorBuyOfferUsedMessageKey()
+        );
+
+        offer.evmPublicMsgKey = msgpubkey;
         offer.counterparty = counterparty;
 
         offer.lastupdate = block.timestamp;
@@ -429,13 +603,15 @@ contract MoneroSwap {
     /// @param minprice Minimum price (in wei) of 1 XMR
     /// @param publicspendkey Monero Public spend key
     /// @param privateviewkey Monero Private view key
+    /// @param msgpubkey The public key to use for exchanging messages with the maker
     ///
     function takeBuyOffer(
         uint256 id,
         uint256 maxxmr,
         uint256 minprice,
         uint256 publicspendkey,
-        uint256 privateviewkey
+        uint256 privateviewkey,
+        uint256 msgpubkey
     ) public payable nonReentrant {
         // Ensure the buy offer exists and is not yet taken
         Offer storage offer = buyOffers[id];
@@ -500,6 +676,8 @@ contract MoneroSwap {
             Ed25519.compressPoint(x, y)
         );
         usedPublicKeys[publicviewkey] = true;
+        bool usedMsgKey = usedPublicKeys[msgpubkey];
+        usedPublicKeys[msgpubkey] = true;
 
         // Ensure the provided public key has not yet been used
         require(
@@ -508,12 +686,24 @@ contract MoneroSwap {
         );
         usedPublicKeys[publicspendkey] = true;
 
-        // Verify the offer's fixed price meets the taker's minimum
-        require(
-            offer.price >= minprice,
-            ErrorBuyOfferPriceTooLow(offer.price, minprice)
+        require(0 == msgpubkey || !usedMsgKey, ErrorBuyOfferUsedMessageKey());
+
+        // Compute the buy offer current price (by querying the oracle if need be)
+        // Price is in wei per XMR
+        // The minprice limit will be checked in getXMRPrice
+        uint256 price = getXMRPrice(
+            offer.type_,
+            offer.price,
+            offer.oracleRatio,
+            offer.oracleOffset,
+            minprice
         );
-        uint256 price = offer.price;
+
+        // Price computed from the oracle may be above the maximum for the offer
+        require(
+            price <= offer.maxprice,
+            ErrorBuyOfferPriceTooHigh(price, offer.maxprice)
+        );
 
         // Compute the maximum transaction amount (in wei) given the deposit/funding and the coverage ratio
         amount =
@@ -549,6 +739,7 @@ contract MoneroSwap {
         offer.blockTaken = block.number;
         offer.xmrPublicSpendKey = publicspendkey;
         offer.xmrPrivateViewKey = privateviewkey;
+        offer.xmrPublicMsgKey = msgpubkey;
         offer.finalprice = price;
         offer.finalxmr = picoxmramount;
         offer.state = OfferState.TAKEN;
@@ -584,33 +775,6 @@ contract MoneroSwap {
         // Emit an offer event
         //
         emit OfferEvent(offer.id, offer.type_, offer.state);
-    }
-
-    /// Return a slice of buy offers. Note that given the way the offers are managed by the contract,
-    /// pagination may return duplicate results or miss results when offers were refunded/cancelled/claimed between the calls to listBuyOffers
-    /// @param offset offset in the list of the first offer to return
-    /// @param count maximum number of offers to return
-    function listBuyOffers(
-        uint offset,
-        uint count
-    ) public view returns (Offer[] memory) {
-        // If the offset is past the end of the array, set count to 0
-        if (offset >= buyOfferIds.length) {
-            count = 0;
-        } else {
-            uint256 c = buyOfferIds.length - offset;
-            if (c < count) {
-                count = c;
-            }
-        }
-
-        Offer[] memory result = new Offer[](count);
-
-        for (uint i = offset; i < offset + count; i++) {
-            result[i - offset] = buyOffers[buyOfferIds[i]];
-        }
-
-        return result;
     }
 
     /// Cancel a buy offer.
@@ -652,18 +816,28 @@ contract MoneroSwap {
 
     /// Create a sell offer.
     /// @param counterparty address of an explicit counterparty. Use 0x0 to allow any account to take the offer
-    /// @param price fixed price, in wei per XMR
+    /// @param manager address of an account allowed to update the offer
+    /// @param price fixed price, in wei per XMR. Use 0 if you want to use dynamic pricing
+    /// @param oracleRatio when using dynamic pricing, this is a ratio to apply to the price returned by the oracle. actual ratio if this value divided by RATIO_DENOMINATOR
+    /// @param oracleOffset when using dynamic pricing, apply this offset to the price computed using oracleRatio. Offset is expressed in wei.
     /// @param minxmr minimum amount of XMR (in piconeros) the seller is willing to sell
+    /// @param minprice minimum price, in wei per XMR, the seller is asking. When using a fixed price, minprice is forced to price.
     /// @param maxxmr maximum amount of XMR (in piconeros) the seller can provide.
     /// @param publicspendkey Monero public spend key
     /// @param privateviewkey Monero private view key
+    /// @param msgpubkey The public key to use for exchanging messages with the taker of the offer
     function createSellOffer(
         address counterparty,
+        address manager,
         uint256 price,
+        uint256 oracleRatio,
+        int256 oracleOffset,
         uint256 minxmr,
+        uint256 minprice,
         uint256 maxxmr,
         uint256 publicspendkey,
-        uint256 privateviewkey
+        uint256 privateviewkey,
+        uint256 msgpubkey
     ) public payable {
         //
         // Check if maximum number of active offers is reached
@@ -676,7 +850,7 @@ contract MoneroSwap {
         );
 
         //
-        // Check if the pubkey has been used. Add the public view key
+        // Check if the pubkey has been used. Add the public view and message keys
         //
 
         (uint256 x, uint256 y) = Ed25519.scalarMultBase(privateviewkey);
@@ -684,11 +858,15 @@ contract MoneroSwap {
             Ed25519.compressPoint(x, y)
         );
         usedPublicKeys[publicviewkey] = true;
+        bool usedMsgKey = usedPublicKeys[msgpubkey];
+        usedPublicKeys[msgpubkey] = true;
         require(
             !usedPublicKeys[publicspendkey],
             ErrorSellOfferPublicSpendKeyAlreadyUsed()
         );
         usedPublicKeys[publicspendkey] = true;
+
+        require(0 == msgpubkey || !usedMsgKey, ErrorSellOfferUsedMessageKey());
 
         //
         // If no amount was sent, check if there is a funded FundingRequest for the sender
@@ -755,13 +933,40 @@ contract MoneroSwap {
             ErrorSellOfferAmountAboveMaximum(PARAMETERS.MAXIMUM_SELL_OFFER)
         );
 
-        // Price must be specified
-        require(0 != price, ErrorSellOfferNoPriceDefined());
+        // Offer must either have a fixed price or a dynamic one with a non 0 ratio
+        require(0 != price || 0 != oracleRatio, ErrorSellOfferNoPriceDefined());
+
+        //
+        // When no oracle is defined, price cannot be 0
+        //
+
+        if (address(0) == address(PARAMETERS.XMREVM)) {
+            require(0 != price, ErrorSellOfferNoPriceOracleDefined());
+        }
+
+        if (0 != price) {
+            require(
+                0 == oracleRatio,
+                ErrorSellOfferNoPriceRatioWithFixedPrice()
+            );
+            require(
+                0 == oracleOffset,
+                ErrorSellOfferNoPriceOffsetWithFixedPrice()
+            );
+            // When using a fixed price, force minprice to that value
+            minprice = price;
+        } else {
+            require(0 != oracleRatio, ErrorSellOfferInvalidOraclePriceRatio());
+            require(
+                0 != minprice,
+                ErrorSellOfferMandatoryMinpriceWithOraclePrice()
+            );
+        }
 
         // If the offer is funded by a FundingRequest ensure that the minimum settlement amount covers the fee
         if (offer.funded) {
             require(
-                (price * minxmr) / UNITS_PER_XMR >= freq.fee,
+                (minprice * minxmr) / UNITS_PER_XMR >= freq.fee,
                 ErrorSellOfferAmountTooLowToCoverFundingFee()
             );
         }
@@ -772,13 +977,17 @@ contract MoneroSwap {
         offer.owner = msg.sender;
         offer.counterparty = counterparty;
         offer.lastupdate = block.timestamp;
-        offer.manager = msg.sender;
+        offer.manager = manager;
         offer.maxamount = amount;
         offer.price = price;
+        offer.oracleRatio = oracleRatio;
+        offer.oracleOffset = oracleOffset;
         offer.minxmr = minxmr;
+        offer.minprice = minprice;
         offer.maxxmr = maxxmr;
         offer.xmrPublicSpendKey = publicspendkey;
         offer.xmrPrivateViewKey = privateviewkey;
+        offer.xmrPublicMsgKey = msgpubkey;
 
         sellOffers[offer.id] = offer;
         sellOfferIds.push(offer.id);
@@ -795,15 +1004,25 @@ contract MoneroSwap {
     /// Update a sell offer
     /// @param id id of the offer to update
     /// @param counterparty address of an explicit counterparty, or 0x0 to allow any account to take the offer
+    /// @param manager address of an account allowed to update the offer
     /// @param price Fixed price at which the XMR will be sold
+    /// @param oracleRatio Price ratio vs oracle price, in parts of RATIO_DENOMINATOR
+    /// @param oracleOffset Price offset vs oracle price, in wei
     /// @param minxmr Minimum amount of XMR (in piconeros) the owner is willing to sell
+    /// @param minprice Minimum price in wei per XMR the owner is willing to get per XMR. This will be set to price if price is not 0. This must be non 0 when using a price oracle.
     /// @param maxxmr Maximum amount of XMR (in piconeros) the owner is willing to sell
+    /// @param msgpubkey Public key for exchanging messages (using ECDH to compute the encryption key) between the two parties
     function updateSellOffer(
         uint256 id,
         address counterparty,
+        address manager,
         uint256 price,
+        uint256 oracleRatio,
+        int256 oracleOffset,
         uint256 minxmr,
-        uint256 maxxmr
+        uint256 minprice,
+        uint256 maxxmr,
+        uint256 msgpubkey
     ) public payable {
         Offer storage offer = sellOffers[id];
 
@@ -815,7 +1034,7 @@ contract MoneroSwap {
         );
 
         require(
-            msg.sender == offer.owner,
+            msg.sender == offer.owner || msg.sender == offer.manager,
             ErrorSellOfferInvalidCallerForUpdate()
         );
 
@@ -842,18 +1061,73 @@ contract MoneroSwap {
             liability += msg.value;
         }
 
-        if (0 != price) {
+        // Only the owner can change the manager
+        if (address(0) != manager) {
+            require(msg.sender == offer.owner, ErrorSellOfferNotOwner());
+            offer.manager = manager;
+        }
+
+        if (0 != minprice) {
+            offer.minprice = minprice;
+        }
+
+        if (0 != price || 0 != oracleRatio) {
+            //
+            // When no oracle is defined, price cannot be 0
+            //
+            if (address(0) == address(PARAMETERS.XMREVM)) {
+                require(0 != price, ErrorSellOfferNoPriceOracleDefined());
+            }
+
+            if (0 != price) {
+                require(
+                    0 == oracleRatio,
+                    ErrorSellOfferNoPriceRatioWithFixedPrice()
+                );
+                require(
+                    0 == oracleOffset,
+                    ErrorSellOfferNoPriceOffsetWithFixedPrice()
+                );
+                // If using a fixed price, force minprice to the same value
+                offer.minprice = price;
+            } else {
+                // This should never happen, but just in case we check the requirement
+                require(
+                    0 != offer.minprice,
+                    ErrorSellOfferMandatoryMinpriceWithOraclePrice()
+                );
+            }
+
             offer.price = price;
+            offer.oracleRatio = oracleRatio;
+            offer.oracleOffset = oracleOffset;
         }
 
         if (0 != minxmr) {
             offer.minxmr = minxmr;
         }
 
+        // If the offer is funded by a FundingRequest ensure that the minimum settlement amount covers the fee
+        if (offer.funded) {
+            require(
+                (offer.minprice * offer.minxmr) / UNITS_PER_XMR >= freq.fee,
+                ErrorSellOfferAmountTooLowToCoverFundingFee()
+            );
+        }
+
         if (0 != maxxmr) {
             offer.maxxmr = maxxmr;
         }
 
+        bool usedMsgKey = usedPublicKeys[msgpubkey];
+        usedPublicKeys[msgpubkey] = true;
+
+        require(
+            0 == msgpubkey || offer.xmrPublicMsgKey == msgpubkey || !usedMsgKey,
+            ErrorSellOfferUsedMessageKey()
+        );
+
+        offer.xmrPublicMsgKey = msgpubkey;
         offer.counterparty = counterparty;
 
         offer.lastupdate = block.timestamp;
@@ -864,16 +1138,6 @@ contract MoneroSwap {
         emit OfferEvent(offer.id, offer.type_, offer.state);
     }
 
-    /// Retrieve a Sell Offer by id
-    /// @param id id of the offer to retrieve
-    function getSellOffer(uint256 id) public view returns (Offer memory) {
-        require(
-            OfferState.INVALID != sellOffers[id].state,
-            ErrorSellOfferUnknown()
-        );
-        return sellOffers[id];
-    }
-
     ///
     /// Take a sell offer. This will determine the counterparty and will set the timestamps t0 and t1.
     ///
@@ -882,14 +1146,16 @@ contract MoneroSwap {
     /// @param maxprice The maximum price per XMR (in wei) that the taker is willing to pay
     /// @param publicspendkey Monero public spend key generated by the taker
     /// @param publicviewkey Monero public view key generated by the taker
+    /// @param msgpubkey Public key for exchanging messages (using ECDH to compute the encryption key) between the two parties of the offer
     function takeSellOffer(
         uint256 id,
         uint256 minxmr,
         uint256 maxprice,
         uint256 publicspendkey,
-        uint256 publicviewkey
+        uint256 publicviewkey,
+        uint256 msgpubkey
     ) public payable nonReentrant {
-        // Ensure the sell offer exists and is not yet taken
+        // Ensure the buy offer exists and is not yet taken
         Offer storage offer = sellOffers[id];
 
         require(OfferType.SELL == offer.type_, ErrorSellOfferUnknown());
@@ -907,18 +1173,25 @@ contract MoneroSwap {
 
         // Ensure the provided public key has not yet been used
         usedPublicKeys[publicviewkey] = true;
+        bool usedMsgKey = usedPublicKeys[msgpubkey];
+        usedPublicKeys[msgpubkey] = true;
         require(
             !usedPublicKeys[publicspendkey],
             ErrorSellOfferPublicSpendKeyAlreadyUsed()
         );
         usedPublicKeys[publicspendkey] = true;
 
-        // Verify the offer's fixed price meets the taker's maximum
-        require(
-            offer.price <= maxprice,
-            ErrorSellOfferPriceTooHigh(offer.price, maxprice)
+        require(0 == msgpubkey || !usedMsgKey, ErrorSellOfferUsedMessageKey());
+
+        // Compute the buy offer current price (by querying the oracle if need be)
+        // Price is in wei per XMR
+        uint256 price = getXMRPrice(
+            offer.type_,
+            offer.price,
+            offer.oracleRatio,
+            offer.oracleOffset,
+            maxprice
         );
-        uint256 price = offer.price;
 
         // Compute the amount of picoxmr the taker can buy (limited by the offer's maxamount)
         uint256 picoxmr = ((
@@ -972,6 +1245,7 @@ contract MoneroSwap {
 
         offer.evmPublicSpendKey = publicspendkey;
         offer.evmPublicViewKey = publicviewkey;
+        offer.evmPublicMsgKey = msgpubkey;
         offer.finalprice = price;
         offer.finalxmr = picoxmr;
         offer.state = OfferState.TAKEN;
@@ -996,33 +1270,6 @@ contract MoneroSwap {
         // Emit an OfferEvent
         //
         emit OfferEvent(offer.id, offer.type_, offer.state);
-    }
-
-    /// Return a slice of sell offers
-    /// As for listBuyOffers, depending on created/claimed/refunded offers, pagination may miss some offers or return duplicates across calls
-    /// @param offset offset of the first offer to return
-    /// @param count number of offers to return
-    function listSellOffers(
-        uint offset,
-        uint count
-    ) public view returns (Offer[] memory) {
-        // If the offset is past the end of the array, set count to 0
-        if (offset >= sellOfferIds.length) {
-            count = 0;
-        } else {
-            uint256 c = sellOfferIds.length - offset;
-            if (c < count) {
-                count = c;
-            }
-        }
-
-        Offer[] memory result = new Offer[](count);
-
-        for (uint i = offset; i < offset + count; i++) {
-            result[i - offset] = sellOffers[sellOfferIds[i]];
-        }
-
-        return result;
     }
 
     /// Cancel a sell offer.
@@ -1532,259 +1779,6 @@ contract MoneroSwap {
     }
 
     ///
-    /// FundingRequest related functions
-    ///
-    // ################################################################################
-
-    /// Create a funding request
-    /// @param amount requested funding amount (in wei)
-    /// @param fee reward offered to the funder in case the funded amount was used in a successfully completed sell offer (in wei)
-    function createFundingRequest(uint256 amount, uint256 fee) external {
-        //
-        // If msg.sender already has an active FundingRequest, the call fails
-        //
-
-        require(
-            address(0) == fundingRequests[msg.sender].requester,
-            ErrorFundingRequestAlreadyExistsForAddress()
-        );
-
-        //
-        // If msg.sender has a balance above the configured threshold, no FundingRequest can be created
-        //
-
-        if (PARAMETERS.FUNDING_REQUEST_MAXBALANCE > 0) {
-            require(
-                msg.sender.balance <= PARAMETERS.FUNDING_REQUEST_MAXBALANCE,
-                ErrorFundingRequestBalanceTooHigh(
-                    msg.sender.balance,
-                    PARAMETERS.FUNDING_REQUEST_MAXBALANCE
-                )
-            );
-        }
-
-        //
-        // Only EOAs can request funding (see EIP-1052)
-        // TODO(hbs): we may need to adapt this post Pectra upgrade since EIP-7702 is now live
-        // As of now post Pectra, EOAs with a delegation will not be able to request funding
-        //
-
-        require(
-            bytes32(
-                0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
-            ) == msg.sender.codehash,
-            ErrorFundingRequestNotAnEOA()
-        );
-
-        // Check that amount is > 0
-        require(amount > 0, ErrorFundingRequestZero());
-
-        // Check that the fee is above the minimum fee
-        require(
-            fee >=
-                ((PARAMETERS.FUNDING_REQUEST_MIN_FEE_RATIO * amount) /
-                    RATIO_DENOMINATOR),
-            ErrorFundingRequestFeeBelowMinimumRatio(
-                PARAMETERS.FUNDING_REQUEST_MIN_FEE_RATIO
-            )
-        );
-
-        // Ensure the requested amount is greater or equal to the fee so the funder can be paid
-        require(amount >= fee, ErrorFundingRequestAmountBelowFee());
-
-        //
-        // TODO(hbs) if msg.sender has a buy or sell offer, no FundingRequest can be requested?
-        //
-
-        FundingRequest memory freq;
-        freq.requester = msg.sender;
-        freq.amount = amount;
-        freq.fee = fee;
-        freq.funder = address(0);
-        freq.fundedOn = 0;
-
-        //
-        // Add the FundingRequest to the mapping
-        //
-        fundingRequests[msg.sender] = freq;
-
-        //
-        // Add the requester of the FundingRequest at the end of the array of active requesters
-        //
-
-        // Update the index, note that we do not use freq but the mapping entry directly as freq is in memory and was copied
-        fundingRequests[msg.sender].index = activeFundingRequesters.length;
-        activeFundingRequesters.push(msg.sender);
-
-        emit FundingEvent(freq.requester, freq.amount, freq.fee);
-    }
-
-    /// Get the details of a funding request created by a specific address
-    /// @param requester address for which to retrieve the funding request
-    function getFundingRequest(
-        address requester
-    ) public view returns (FundingRequest memory) {
-        FundingRequest storage freq = fundingRequests[requester];
-        require(freq.requester == requester, ErrorFundingRequestNotFound());
-        return freq;
-    }
-
-    /// Returns a slice of the active FundingRequests.
-    /// As for listBuyOffers and listSellOffers, pagination may miss results or return duplicated across calls if funding requests were removed in the interval.
-    /// @param offset offset where to start the pagination in the list of funding requests
-    /// @param count number of funding requests to return
-    function listFundingRequests(
-        uint offset,
-        uint count
-    ) public view returns (FundingRequest[] memory) {
-        // If the offset is past the end of the array, set count to 0
-        if (offset >= activeFundingRequesters.length) {
-            count = 0;
-        } else {
-            uint256 c = activeFundingRequesters.length - offset;
-            if (c < count) {
-                count = c;
-            }
-        }
-
-        FundingRequest[] memory result = new FundingRequest[](count);
-
-        for (uint i = offset; i < offset + count; i++) {
-            result[i - offset] = fundingRequests[activeFundingRequesters[i]];
-        }
-
-        return result;
-    }
-
-    /// Fund a FundingRequest.
-    /// The exact amount requested in the funding request must be sent alongside the call to this function.
-    /// @param requester address of the requester whose funding request the caller wants to fund
-    function fundFundingRequest(address requester) public payable {
-        FundingRequest storage freq = fundingRequests[requester];
-
-        require(address(0) == freq.funder, ErrorFundingRequestAlreadyFunded());
-        require(
-            msg.sender != freq.requester,
-            ErrorFundingRequestCannotSelfFund()
-        );
-        require(freq.amount > 0, ErrorFundingRequestNotFound());
-        require(
-            msg.value == freq.amount,
-            ErrorFundingRequestIncorrectAmount(msg.value, freq.amount)
-        );
-
-        freq.funder = msg.sender;
-        freq.fundedOn = block.timestamp;
-
-        //
-        // Update liability
-        //
-        liability += msg.value;
-    }
-
-    /// Cancel a FundingRequest. This can be called by the requester BEFORE the request is funded
-    function cancelFundingRequest() public {
-        FundingRequest memory freq = fundingRequests[msg.sender];
-
-        require(
-            address(0) == freq.funder,
-            ErrorFundingRequestCurrentlyFunded()
-        );
-
-        if (msg.sender == freq.requester) {
-            address lastfreq = activeFundingRequesters[
-                activeFundingRequesters.length - 1
-            ];
-            activeFundingRequesters[freq.index] = lastfreq;
-            fundingRequests[lastfreq].index = freq.index;
-            activeFundingRequesters.pop();
-            delete fundingRequests[msg.sender];
-        }
-    }
-
-    /// Defund a FundingRequest. This can be called by a funder BEFORE the funding is used.
-    /// @param addr address of the creator of the funding request
-    function defundFundingRequest(address addr) public nonReentrant {
-        FundingRequest storage freq = fundingRequests[addr];
-
-        require(0 == freq.usedby, ErrorFundingRequestInUse());
-
-        require(
-            msg.sender == freq.funder,
-            ErrorFundingRequestDefundableOnlyByFunder()
-        );
-
-        // Set the funder to 0 and send the funded amount back to the funder
-        freq.funder = address(0);
-        freq.fundedOn = 0;
-
-        liability -= freq.amount;
-
-        (bool res, ) = payable(msg.sender).call{value: freq.amount}("");
-        require(res, ErrorFundingRequestUnableToRefund());
-    }
-
-    /// Claim a FundingRequest. This can be called by a funder or a fundee of a FundingRequest that has been
-    /// used AFTER the offer in which it was used was put in the READY state or its timestamp t0 has passed.
-    /// This function exists to ensure that the funder can get its money back even if the funded
-    /// account never claims the offer in which the funded funding request was used. Or if the call to claim failed to send funds back to the funder.
-    /// In normal situations the fee should be paid during the call to claim.
-    /// @param addr address of the creator of the funding request
-    function claimFundingRequest(address addr) public nonReentrant {
-        FundingRequest storage freq = fundingRequests[addr];
-
-        require(
-            msg.sender == freq.funder || msg.sender == addr,
-            ErrorFundingRequestClaimableOnlyByFunderOrFundee()
-        );
-        require(0 != freq.usedby, ErrorFundingRequestNotInUse());
-
-        Offer memory offer = buyOffers[freq.usedby];
-
-        if (OfferType.INVALID == offer.type_) {
-            // Offer was not a buy offer, check sell offers
-            offer = sellOffers[freq.usedby];
-        }
-
-        // This test failing would indicate a bug elsewhere in the contract, it is there as a safety measure
-        require(OfferType.INVALID != offer.type_, ErrorInvalidOffer());
-
-        // The funding request can be claimed only if the offer is in the READY state or
-        // if the offer is in the TAKEN state and the timestamp is after t0
-
-        require(
-            OfferState.READY == offer.state ||
-                OfferState.CLAIMED == offer.state ||
-                (OfferState.TAKEN == offer.state && block.timestamp > offer.t0),
-            ErrorFundingRequestNotClaimable()
-        );
-
-        uint256 amount = freq.amount;
-
-        // If the offer is CLAIMED, the call will claim the fee too
-        // This is to cover the case when the call to claim failed to send the fee back to the funder
-        if (OfferState.CLAIMED == offer.state) {
-            amount = amount + freq.fee;
-            freq.fee = 0;
-        }
-
-        liability -= amount;
-
-        // Clear the amount of the FundingRequest, if the offer is claimed, only the fee will then be paid
-        freq.amount = 0;
-
-        if (amount > 0) {
-            (bool res, ) = payable(freq.funder).call{value: amount}("");
-            require(res, ErrorFundingRequestUnableToRefund());
-
-            // If the offer was CLAIMED, delete the funding request after a successful payment
-            if (OfferState.CLAIMED == offer.state) {
-                delete fundingRequests[addr];
-            }
-        }
-    }
-
-    ///
     /// Return the current liability of the contract, in wei.
     /// The liability is the total amount held by the contract which belongs to participants (fundings for funding requests, deposits for both sell and buy offers).
     ///
@@ -1796,11 +1790,6 @@ contract MoneroSwap {
     /// when creating or taking an offer
     function isKeyUsed(uint256 key) public view returns (bool) {
         return usedPublicKeys[key];
-    }
-
-    /// Retrieve the market parameters
-    function getParameters() public view returns (Parameters memory) {
-        return PARAMETERS;
     }
 
     /// Set the market parameters
