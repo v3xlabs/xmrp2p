@@ -22,5 +22,8 @@
   },
   "peerDependencies": {
     "ox": "^0.14.10"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.0.1"
   }
 }

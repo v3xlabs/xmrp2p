@@ -1,5 +1,4 @@
-import { createHash } from "node:crypto";
-
+import { sha512 } from "@noble/hashes/sha2.js";
 import { Address, Hex, Mnemonic, Secp256k1 } from "ox";
 
 const derivePrivateKeyAtPath = ({
@@ -13,14 +12,6 @@ const derivePrivateKeyAtPath = ({
         as: "Hex",
         path,
     });
-
-const sha512 = (value: Hex.Hex): Uint8Array => {
-    const bytes = Hex.toBytes(value);
-    const digest = createHash("sha512").update(bytes)
-        .digest();
-
-    return Uint8Array.from(digest);
-};
 
 const leastSignificantBytes = (value: Uint8Array, size: number): Uint8Array =>
     value.slice(Math.max(0, value.length - size));
@@ -65,7 +56,7 @@ export const deriveMoneroHotWalletSeed = ({
         path,
         rootSeed,
     });
-    const hash = sha512(privateKey);
+    const hash = sha512(Hex.toBytes(privateKey));
     const seed = Hex.fromBytes(leastSignificantBytes(hash, 32));
 
     return {
