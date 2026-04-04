@@ -1,20 +1,39 @@
 import { SegmentedControl } from "@kobalte/core/segmented-control";
 import { For } from "solid-js";
 
+import eth from "./assets/eth.svg";
+import xmr from "./assets/xmr.svg";
+
+const XMRToken = () => (
+    <span class="flex items-center gap-1">
+        <img src={xmr} alt="XMR" class="w-4 h-4" />
+        <span class="text-sm">XMR</span>
+    </span>
+);
+
+const ETHToken = () => (
+    <span class="flex items-center gap-1">
+        <img src={eth} alt="ETH" class="w-4 h-4" />
+        <span class="text-sm">ETH</span>
+    </span>
+);
+
 export const Swap = () => {
     console.log("placeholder");
 
     return (
         <div class="card p-4 space-y-2">
             <div>
-                <label for="input_amount" class="text-sm">
-                    Sell
+                <label for="input_amount" class="text-md py-1 flex justify-between items-center gap-1">
+                    <span>Sell</span>
+                    <XMRToken />
                 </label>
                 <input placeholder="0" class="input w-full" id="input_amount" />
             </div>
             <div>
-                <label for="output_amount" class="text-sm">
-                    Buy
+                <label for="output_amount" class="text-md py-1 flex justify-between items-center gap-1">
+                    <span>Buy</span>
+                    <ETHToken />
                 </label>
                 <input placeholder="0" class="input w-full" id="output_amount" />
             </div>
