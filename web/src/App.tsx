@@ -19,17 +19,41 @@ export const App = () => (
                         </label>
                         <input placeholder="0" class="input w-full" id="output_amount" />
                     </div>
-                    <button class="btn-primary w-full">
+                    <div>
+                        <label for="output_amount" class="text-sm">
+                            Slippage
+                        </label>
+                        <div>
+                            <input type="range" min="0" max="100" value="10" class="w-full" />
+                        </div>
+                    </div>
+                    <button class="btn-primary w-full" disabled>
                         Create Order
                     </button>
                 </div>
             </section>
-            <section class="grow space-y-2">
-                <h2 class="px-2">Your orders</h2>
-                <div class="card p-4">
-                    No open orders
-                </div>
-            </section>
+            <div class="space-y-2 grow">
+                <section class="grow space-y-2">
+                    <h2 class="px-2">Your orders</h2>
+                    <div class="card p-4">
+                        No open orders
+                    </div>
+                </section>
+
+                <section class="grow space-y-2">
+                    <h2 class="px-2">Order history</h2>
+                    <div class="card p-4">
+                        No open orders
+                    </div>
+                </section>
+
+                <section class="grow space-y-2">
+                    <h2 class="px-2">Open orders</h2>
+                    <div class="card p-4">
+                        No open orders
+                    </div>
+                </section>
+            </div>
         </div>
     </div>
 );

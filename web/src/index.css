@@ -24,7 +24,8 @@ p {
 }
 
 .btn-primary {
-  @apply bg-(--thorin-blue-primary) hover:bg-(--thorin-blue-dim) cursor-pointer text-(--thorin-blue-surface) px-4 py-2 rounded-lg;
+  @apply bg-(--thorin-blue-primary) hover:bg-(--thorin-blue-dim) cursor-pointer text-(--thorin-blue-surface) px-4 py-3 rounded-lg;
+  @apply disabled:bg-(--thorin-background-disabled) disabled:text-(--thorin-text-disabled) disabled:cursor-not-allowed;
 }
 
 .card {
