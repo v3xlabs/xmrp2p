@@ -3,7 +3,10 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import "../../src/Errors.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {Utils} from "./Utils.t.sol";
 import {EIP7702NoPaymentDelegate} from "./EIP7702NoPaymentDelegate.t.sol";
 
@@ -44,7 +47,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_3);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -60,12 +62,12 @@ contract MoneroSwapClaimDepositTest is Test {
         moneroswap.takeBuyOffer(1, 1_000_000_000_000, 1 ether, 11, 12, 0);
 
         // Advance time to t1 + 1
-        MoneroSwap.Offer memory offer = moneroswap.getBuyOffer(1);
+        Offer memory offer = moneroswap.getBuyOffer(1);
         vm.warp(offer.t1 + 1);
 
         // Attempt to claim deposit
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferCannotClaimDepositOfFundedOffer.selector);
+        vm.expectRevert(ErrorBuyOfferCannotClaimDepositOfFundedOffer.selector);
         moneroswap.claimDeposit(1);
     }
 
@@ -87,7 +89,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -105,12 +106,12 @@ contract MoneroSwapClaimDepositTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, 11, 12, 0);
 
         // Advance time to t1 + 1
-        MoneroSwap.Offer memory offer = moneroswap.getSellOffer(1);
+        Offer memory offer = moneroswap.getSellOffer(1);
         vm.warp(offer.t1 + 1);
 
         // Attempt to claim deposit
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorSellOfferCannotClaimDepositOfFundedOffer.selector);
+        vm.expectRevert(ErrorSellOfferCannotClaimDepositOfFundedOffer.selector);
         moneroswap.claimDeposit(1);
     }   
 
@@ -122,7 +123,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_3);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -140,7 +140,7 @@ contract MoneroSwapClaimDepositTest is Test {
 
         // Attempt to claim deposit
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferNotAfterT1OrRefunded.selector);
+        vm.expectRevert(ErrorBuyOfferNotAfterT1OrRefunded.selector);
         moneroswap.claimDeposit(1);
     }
 
@@ -152,7 +152,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_3);
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -171,7 +170,7 @@ contract MoneroSwapClaimDepositTest is Test {
 
         // Attempt to claim deposit
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorSellOfferNotAfterT1OrRefunded.selector);
+        vm.expectRevert(ErrorSellOfferNotAfterT1OrRefunded.selector);
         moneroswap.claimDeposit(1);
     }
 
@@ -195,7 +194,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_3);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -232,12 +230,12 @@ contract MoneroSwapClaimDepositTest is Test {
         moneroswap.claim(1, xmrPrivateSpendKey);
 
         // Advance to t1 + 1
-        MoneroSwap.Offer memory offer = moneroswap.getBuyOffer(1);
+        Offer memory offer = moneroswap.getBuyOffer(1);
         vm.warp(offer.t1 + 1);
                 
         // Attempt to claim deposit
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferInvalidStateForClaimDeposit.selector);
+        vm.expectRevert(ErrorBuyOfferInvalidStateForClaimDeposit.selector);
         moneroswap.claimDeposit(1);
     }
 
@@ -261,7 +259,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_3);
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -301,12 +298,12 @@ contract MoneroSwapClaimDepositTest is Test {
         moneroswap.claim(1, xmrPrivateSK);
 
         // Advance to t1 + 1
-        MoneroSwap.Offer memory offer = moneroswap.getSellOffer(1);
+        Offer memory offer = moneroswap.getSellOffer(1);
         vm.warp(offer.t1 + 1);
                 
         // Attempt to claim deposit
         vm.prank(ADDR_3);
-        vm.expectRevert(MoneroSwap.ErrorSellOfferInvalidStateForClaimDeposit.selector);
+        vm.expectRevert(ErrorSellOfferInvalidStateForClaimDeposit.selector);
         moneroswap.claimDeposit(1);
     }
 
@@ -330,7 +327,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_3);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -363,12 +359,12 @@ contract MoneroSwapClaimDepositTest is Test {
         moneroswap.ready(1);
 
         // Advance to t1 + 1
-        MoneroSwap.Offer memory offer = moneroswap.getBuyOffer(1);
+        Offer memory offer = moneroswap.getBuyOffer(1);
         vm.warp(offer.t1 + 1);
                 
         // Attempt to claim deposit
         vm.prank(ADDR_2);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferNotTaker.selector);
+        vm.expectRevert(ErrorBuyOfferNotTaker.selector);
         moneroswap.claimDeposit(1);
     }
 
@@ -392,7 +388,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_3);
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -428,12 +423,12 @@ contract MoneroSwapClaimDepositTest is Test {
         moneroswap.ready(1);
 
         // Advance to t1 + 1
-        MoneroSwap.Offer memory offer = moneroswap.getSellOffer(1);
+        Offer memory offer = moneroswap.getSellOffer(1);
         vm.warp(offer.t1 + 1);
                 
         // Attempt to claim deposit
         vm.prank(ADDR_2);
-        vm.expectRevert(MoneroSwap.ErrorSellOfferNotOwner.selector);
+        vm.expectRevert(ErrorSellOfferNotOwner.selector);
         moneroswap.claimDeposit(1);
     }
 
@@ -457,7 +452,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_3);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -490,7 +484,7 @@ contract MoneroSwapClaimDepositTest is Test {
         moneroswap.ready(1);
 
         // Advance to t1 + 1
-        MoneroSwap.Offer memory offer = moneroswap.getBuyOffer(1);
+        Offer memory offer = moneroswap.getBuyOffer(1);
         vm.warp(offer.t1 + 1);
                 
         uint256 liability = moneroswap.getLiability();
@@ -527,7 +521,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_3);
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -563,7 +556,7 @@ contract MoneroSwapClaimDepositTest is Test {
         moneroswap.ready(1);
 
         // Advance to t1 + 1
-        MoneroSwap.Offer memory offer = moneroswap.getSellOffer(1);
+        Offer memory offer = moneroswap.getSellOffer(1);
         vm.warp(offer.t1 + 1);
                 
         uint256 liability = moneroswap.getLiability();
@@ -600,7 +593,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -632,7 +624,7 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.roll(block.number + 1);
 
         // Extract deposit
-        MoneroSwap.Offer memory offer = moneroswap.getSellOffer(1);
+        Offer memory offer = moneroswap.getSellOffer(1);
         uint256 deposit = offer.deposit;
 
         // Attach a Delegation on seller
@@ -641,11 +633,11 @@ contract MoneroSwapClaimDepositTest is Test {
         // Refund the offer
         vm.prank(ADDR_2);
         vm.expectEmit(true, true, true, true);
-        emit MoneroSwap.OfferEvent(1, MoneroSwap.OfferType.SELL, MoneroSwap.OfferState.REFUNDED);        
+        emit MoneroSwap.OfferEvent(1, OfferType.SELL, OfferState.REFUNDED);        
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
 
         offer = moneroswap.getSellOffer(1);
-        assert(offer.state == MoneroSwap.OfferState.REFUNDED);
+        assert(offer.state == OfferState.REFUNDED);
 
         // Balance and deposit did not change since the latter could not be sent back
         assertEq(deposit, offer.deposit);
@@ -663,7 +655,7 @@ contract MoneroSwapClaimDepositTest is Test {
         moneroswap.claimDeposit(1);
 
         offer = moneroswap.getSellOffer(1);
-        assert(offer.state == MoneroSwap.OfferState.REFUNDED);
+        assert(offer.state == OfferState.REFUNDED);
         // deposit is now sent back
         assertEq(deposit, ADDR_2.balance);
         assertEq(0, offer.deposit);
@@ -690,7 +682,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -722,17 +713,17 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.roll(block.number + 1);
 
         // Extract deposit
-        MoneroSwap.Offer memory offer = moneroswap.getSellOffer(1);
+        Offer memory offer = moneroswap.getSellOffer(1);
         uint256 deposit = offer.deposit;
 
         // Refund the offer
         vm.prank(ADDR_2);
         vm.expectEmit(true, true, true, true);
-        emit MoneroSwap.OfferEvent(1, MoneroSwap.OfferType.SELL, MoneroSwap.OfferState.REFUNDED);        
+        emit MoneroSwap.OfferEvent(1, OfferType.SELL, OfferState.REFUNDED);        
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
 
         offer = moneroswap.getSellOffer(1);
-        assert(offer.state == MoneroSwap.OfferState.REFUNDED);
+        assert(offer.state == OfferState.REFUNDED);
 
         assertEq(0, offer.deposit);
         assertEq(addr1BalanceBefore + deposit, ADDR_1.balance);
@@ -748,7 +739,7 @@ contract MoneroSwapClaimDepositTest is Test {
         moneroswap.claimDeposit(1);
 
         offer = moneroswap.getSellOffer(1);
-        assert(offer.state == MoneroSwap.OfferState.REFUNDED);
+        assert(offer.state == OfferState.REFUNDED);
         // Balances didn't change
         assertEq(addr1BalanceBefore, ADDR_1.balance);
         assertEq(addr2BalanceBefore, ADDR_2.balance);
@@ -776,7 +767,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -804,17 +794,17 @@ contract MoneroSwapClaimDepositTest is Test {
         uint256 liabilityBefore = moneroswap.getLiability();
 
         // Extract takerDeposit
-        MoneroSwap.Offer memory offer = moneroswap.getBuyOffer(1);
+        Offer memory offer = moneroswap.getBuyOffer(1);
         uint256 takerDeposit = offer.takerDeposit;
 
         // Refund the offer
         vm.prank(ADDR_1);
         vm.expectEmit(true, true, true, true);
-        emit MoneroSwap.OfferEvent(1, MoneroSwap.OfferType.BUY, MoneroSwap.OfferState.REFUNDED);
+        emit MoneroSwap.OfferEvent(1, OfferType.BUY, OfferState.REFUNDED);
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
 
         offer = moneroswap.getBuyOffer(1);
-        assert(offer.state == MoneroSwap.OfferState.REFUNDED);
+        assert(offer.state == OfferState.REFUNDED);
 
         assertEq(0, offer.takerDeposit);
         assertEq(addr1BalanceBefore + offer.deposit, ADDR_1.balance);
@@ -830,7 +820,7 @@ contract MoneroSwapClaimDepositTest is Test {
         moneroswap.claimDeposit(1);
 
         offer = moneroswap.getBuyOffer(1);
-        assert(offer.state == MoneroSwap.OfferState.REFUNDED);
+        assert(offer.state == OfferState.REFUNDED);
         // Balance didn't change
         assertEq(addr1BalanceBefore, ADDR_1.balance);
         assertEq(addr2BalanceBefore, ADDR_2.balance);
@@ -857,7 +847,6 @@ contract MoneroSwapClaimDepositTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -885,7 +874,7 @@ contract MoneroSwapClaimDepositTest is Test {
         uint256 liabilityBefore = moneroswap.getLiability();
 
         // Extract takerDeposit
-        MoneroSwap.Offer memory offer = moneroswap.getBuyOffer(1);
+        Offer memory offer = moneroswap.getBuyOffer(1);
         uint256 takerDeposit = offer.takerDeposit;
 
         // Attach a Delegation on seller
@@ -894,11 +883,11 @@ contract MoneroSwapClaimDepositTest is Test {
         // Refund the offer
         vm.prank(ADDR_1);
         vm.expectEmit(true, true, true, true);
-        emit MoneroSwap.OfferEvent(1, MoneroSwap.OfferType.BUY, MoneroSwap.OfferState.REFUNDED);
+        emit MoneroSwap.OfferEvent(1, OfferType.BUY, OfferState.REFUNDED);
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
 
         offer = moneroswap.getBuyOffer(1);
-        assert(offer.state == MoneroSwap.OfferState.REFUNDED);
+        assert(offer.state == OfferState.REFUNDED);
 
         // Refund did not send amount to taker since its EIP7702 delegation prohibits it, so taker deposit and balance of ADDR_2 did not change
         assertEq(takerDeposit, offer.takerDeposit);
@@ -917,7 +906,7 @@ contract MoneroSwapClaimDepositTest is Test {
         moneroswap.claimDeposit(1);
 
         offer = moneroswap.getBuyOffer(1);
-        assert(offer.state == MoneroSwap.OfferState.REFUNDED);
+        assert(offer.state == OfferState.REFUNDED);
         // Balance didn't change
         assertEq(addr1BalanceBefore, ADDR_1.balance);
         assertEq(addr2BalanceBefore + takerDeposit, ADDR_2.balance);

@@ -3,7 +3,12 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
+import "../../src/Errors.sol";
+import "../../src/Errors.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
 
 import {Utils} from "./Utils.t.sol";
 
@@ -19,7 +24,7 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferUnknown.selector);
+        vm.expectRevert(ErrorBuyOfferUnknown.selector);
         moneroswap.cancelBuyOffer(1);
     }
 
@@ -31,7 +36,6 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            ADDR_2,        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -45,7 +49,7 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         // Attempt to cancel the offer from ADDR_3
         vm.deal(ADDR_3, 1 ether);
         vm.prank(ADDR_3);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferNotOwner.selector);
+        vm.expectRevert(ErrorBuyOfferNotOwner.selector);
         moneroswap.cancelBuyOffer(1);
     }
 
@@ -57,7 +61,6 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            ADDR_2,        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -84,8 +87,8 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferInvalidStateForCancel.selector,
-                MoneroSwap.OfferState.TAKEN
+                ErrorBuyOfferInvalidStateForCancel.selector,
+                OfferState.TAKEN
             )
         );
         moneroswap.cancelBuyOffer(1);
@@ -100,7 +103,6 @@ contract MoneroSwapCancelBuyOfferTest is Test {
 
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            ADDR_2,        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -120,8 +122,8 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         vm.expectEmit(true, true, true, true);
         emit MoneroSwap.OfferEvent(
             1,                 // offer id
-            MoneroSwap.OfferType.BUY,
-            MoneroSwap.OfferState.CANCELLED
+            OfferType.BUY,
+            OfferState.CANCELLED
         );
         moneroswap.cancelBuyOffer(1);
 

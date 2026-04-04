@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {Ed25519} from "../../main/solidity/Ed25519.sol";
+import {Ed25519} from "../../src/Ed25519.sol";
 
 /// Tests for the Ed25519 library
 contract Ed25519Test is Test {

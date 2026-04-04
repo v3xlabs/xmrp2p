@@ -3,7 +3,11 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
+import "../../src/Errors.sol";
+import "../../src/Errors.sol";
 
 /// Tests related to FundingRequest
 contract MoneroSwapFundFundingRequestTest is Test {
@@ -14,7 +18,7 @@ contract MoneroSwapFundFundingRequestTest is Test {
     function test_RevertWhen_FundingRequestUnknown() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
-        vm.expectRevert(MoneroSwap.ErrorFundingRequestNotFound.selector);
+        vm.expectRevert(ErrorFundingRequestNotFound.selector);
         moneroswap.fundFundingRequest(ADDR_1);
     }
 
@@ -29,7 +33,7 @@ contract MoneroSwapFundFundingRequestTest is Test {
         // Attempt to fund the FundingRequest with self
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorFundingRequestCannotSelfFund.selector);
+        vm.expectRevert(ErrorFundingRequestCannotSelfFund.selector);
         moneroswap.fundFundingRequest{value: 1 ether}(ADDR_1);
     }
 
@@ -49,7 +53,7 @@ contract MoneroSwapFundFundingRequestTest is Test {
         // Attempt to fund the FundingRequest again
         vm.deal(ADDR_2, 1 ether);
         vm.prank(ADDR_2);
-        vm.expectRevert(MoneroSwap.ErrorFundingRequestAlreadyFunded.selector);
+        vm.expectRevert(ErrorFundingRequestAlreadyFunded.selector);
         moneroswap.fundFundingRequest{value: 1 ether}(ADDR_1);
     }
 
@@ -66,7 +70,7 @@ contract MoneroSwapFundFundingRequestTest is Test {
         vm.prank(ADDR_2);
         vm.expectRevert(
             abi.encodeWithSelector(
-            MoneroSwap.ErrorFundingRequestIncorrectAmount.selector,
+            ErrorFundingRequestIncorrectAmount.selector,
             2 ether,
             1 ether
         ));

@@ -13,11 +13,6 @@ const abi = {
             internalType: "address",
         },
         {
-            name: "manager",
-            type: "address",
-            internalType: "address",
-        },
-        {
             name: "price",
             type: "uint256",
             internalType: "uint256",
@@ -71,7 +66,6 @@ export const createSellOffer = ({
     provider,
     contractAddress,
     counterparty,
-    manager,
     price,
     oracleRatio,
     oracleOffset,
@@ -83,7 +77,6 @@ export const createSellOffer = ({
     msgpubkey,
 }: ContractCall<{
     counterparty: Address;
-    manager: Address;
     price: bigint;
     oracleRatio: bigint;
     oracleOffset: bigint;
@@ -98,9 +91,8 @@ export const createSellOffer = ({
         method: "eth_call",
         params: [
             {
-                data: encodeData(createSellOfferAbi, [
+                data: encodeData(abi, [
                     counterparty,
-                    manager,
                     price,
                     oracleRatio,
                     oracleOffset,

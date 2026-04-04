@@ -3,8 +3,11 @@
 pragma solidity ^0.8.30;
 
 import {Test} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
-import {AggregatorV3Interface} from "../../main/solidity/AggregatorV3Interface.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import "../../src/Errors.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
+import {AggregatorV3Interface} from "../../src/AggregatorV3Interface.sol";
 import {DummyPriceOracle} from "./DummyPriceOracle.t.sol";
 
 contract MoneroSwapGetXMRPriceTest is Test {
@@ -14,11 +17,11 @@ contract MoneroSwapGetXMRPriceTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferNoPriceOracleDefined.selector
+                ErrorBuyOfferNoPriceOracleDefined.selector
             )
         );
         moneroswap.getXMRPrice(
-            MoneroSwap.OfferType.BUY,
+            OfferType.BUY,
             0, // price
             1, // ratio
             2, // offset
@@ -27,11 +30,11 @@ contract MoneroSwapGetXMRPriceTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferNoPriceOracleDefined.selector
+                ErrorSellOfferNoPriceOracleDefined.selector
             )
         );
         moneroswap.getXMRPrice(
-            MoneroSwap.OfferType.SELL,
+            OfferType.SELL,
             0, // price
             1, // ratio
             2, // offset
@@ -47,11 +50,11 @@ contract MoneroSwapGetXMRPriceTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferOraclePriceTooOld.selector
+                ErrorBuyOfferOraclePriceTooOld.selector
             )
         );
         moneroswap.getXMRPrice(
-            MoneroSwap.OfferType.BUY,
+            OfferType.BUY,
             0, // price
             1, // ratio
             2, // offset
@@ -60,11 +63,11 @@ contract MoneroSwapGetXMRPriceTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferOraclePriceTooOld.selector
+                ErrorSellOfferOraclePriceTooOld.selector
             )
         );
         moneroswap.getXMRPrice(
-            MoneroSwap.OfferType.SELL,
+            OfferType.SELL,
             0, // price
             1, // ratio
             2, // offset
@@ -78,13 +81,13 @@ contract MoneroSwapGetXMRPriceTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferPriceTooLow.selector,
+                ErrorBuyOfferPriceTooLow.selector,
                 2, // Offer price
                 3  // Min price
             )
         );
         moneroswap.getXMRPrice(
-            MoneroSwap.OfferType.BUY,
+            OfferType.BUY,
             2, // price
             0, // ratio
             0, // offset
@@ -97,14 +100,14 @@ contract MoneroSwapGetXMRPriceTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferPriceTooLow.selector,
+                ErrorBuyOfferPriceTooLow.selector,
                 1_000_000_000_002, // Offer price
                 1_000_000_000_003  // Min price
             )
         );
 
         moneroswap.getXMRPrice(
-            MoneroSwap.OfferType.BUY,
+            OfferType.BUY,
             5, // price - we use a non 0 value to check that it is not considered when ratio is not 0
             1_000_000_000, // ratio
             2, // offset
@@ -118,13 +121,13 @@ contract MoneroSwapGetXMRPriceTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferPriceTooHigh.selector,
+                ErrorSellOfferPriceTooHigh.selector,
                 2, // Offer price
                 1  // Max price
             )
         );
         moneroswap.getXMRPrice(
-            MoneroSwap.OfferType.SELL,
+            OfferType.SELL,
             2, // price
             0, // ratio
             0, // offset
@@ -137,14 +140,14 @@ contract MoneroSwapGetXMRPriceTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferPriceTooHigh.selector,
+                ErrorSellOfferPriceTooHigh.selector,
                 1_000_000_000_002, // Offer price
                 1_000_000_000_001  // Max price
             )
         );
 
         moneroswap.getXMRPrice(
-            MoneroSwap.OfferType.SELL,
+            OfferType.SELL,
             5, // price - we use a non 0 value to check that it is not considered when ratio is not 0
             1_000_000_000, // ratio
             2, // offset
@@ -159,7 +162,7 @@ contract MoneroSwapGetXMRPriceTest is Test {
         moneroswap.setPriceOracle(address(oracle), 100);
 
         assertEq(moneroswap.getXMRPrice(
-            MoneroSwap.OfferType.BUY,
+            OfferType.BUY,
             0, // price
             1_000_000_000, // ratio
             2, // offset
@@ -167,7 +170,7 @@ contract MoneroSwapGetXMRPriceTest is Test {
         ), 1_000_000_000_002); // 10^10 * 100 + 2 - with 10^10 being 10^(18 - 8)
 
         assertEq(moneroswap.getXMRPrice(
-            MoneroSwap.OfferType.SELL,
+            OfferType.SELL,
             0, // price
             1_000_000_000, // ratio
             2, // offset
@@ -180,12 +183,12 @@ contract MoneroSwapGetXMRPriceTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorInvalidOfferType.selector
+                ErrorInvalidOfferType.selector
             )
         );
 
         moneroswap.getXMRPrice(
-            MoneroSwap.OfferType.INVALID,
+            OfferType.INVALID,
             0, // price
             0, // ratio
             0, // offset

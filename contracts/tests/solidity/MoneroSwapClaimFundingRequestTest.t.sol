@@ -3,7 +3,9 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import "../../src/Errors.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {Utils} from "./Utils.t.sol";
 import {EIP7702NoPaymentDelegate} from "./EIP7702NoPaymentDelegate.t.sol";
 
@@ -40,7 +42,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
 
         // Attempt to claim the FundingRequest
         vm.prank(ADDR_2);
-        vm.expectRevert(MoneroSwap.ErrorFundingRequestNotInUse.selector);
+        vm.expectRevert(ErrorFundingRequestNotInUse.selector);
         moneroswap.claimFundingRequest(ADDR_1);
     }
 
@@ -58,7 +60,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
         moneroswap.fundFundingRequest{value: 1 ether}(ADDR_1);
 
         vm.prank(ADDR_3);
-        vm.expectRevert(MoneroSwap.ErrorFundingRequestClaimableOnlyByFunderOrFundee.selector);
+        vm.expectRevert(ErrorFundingRequestClaimableOnlyByFunderOrFundee.selector);
         moneroswap.claimFundingRequest(ADDR_1);
     }
 
@@ -94,7 +96,6 @@ contract MoneroSwapClaimFundingRequestTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
             address(0), // counterparty
-            ADDR_1, // manager
             amount, // fixed price
             0, // oracle ratio
             0, // oracle offset
@@ -121,12 +122,12 @@ contract MoneroSwapClaimFundingRequestTest is Test {
         vm.deal(ADDR_3, amount * 2);
         vm.prank(ADDR_3);
         moneroswap.takeSellOffer{value: amount}(1, 1_000_000_000_000, amount, evmPublicSpendKey, evmPublicViewKey, 0);
-        MoneroSwap.Offer memory offer = moneroswap.getSellOffer(1);
+        Offer memory offer = moneroswap.getSellOffer(1);
 
         // Attemtp to claim the FundingRequest. The timestamp is too early (before t0)
         vm.prank(ADDR_2);
         vm.warp(offer.t0);        
-        vm.expectRevert(MoneroSwap.ErrorFundingRequestNotClaimable.selector);
+        vm.expectRevert(ErrorFundingRequestNotClaimable.selector);
         moneroswap.claimFundingRequest(ADDR_1);
 
         // Now claim it after t0
@@ -171,7 +172,6 @@ contract MoneroSwapClaimFundingRequestTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
             address(0), // counterparty
-            ADDR_1, // manager
             amount, // fixed price
             0, // oracle ratio
             0, // oracle offset
@@ -212,7 +212,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
         assertEq(moneroswap.getLiability(), liability - amount);
 
         // Check that the funding request has now an amount set to 0
-        MoneroSwap.FundingRequest memory freq = moneroswap.getFundingRequest(ADDR_1);
+        FundingRequest memory freq = moneroswap.getFundingRequest(ADDR_1);
         assertEq(freq.amount, 0);
     }
 
@@ -248,7 +248,6 @@ contract MoneroSwapClaimFundingRequestTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
             address(0), // counterparty
-            ADDR_1, // manager
             amount, // fixed price
             0, // oracle ratio
             0, // oracle offset
@@ -308,7 +307,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
         assertEq(liability - amount - fee, moneroswap.getLiability());
 
         // Check that the funding request no longer exists
-        vm.expectRevert(MoneroSwap.ErrorFundingRequestNotFound.selector);
-        MoneroSwap.FundingRequest memory freq = moneroswap.getFundingRequest(ADDR_1);
+        vm.expectRevert(ErrorFundingRequestNotFound.selector);
+        FundingRequest memory freq = moneroswap.getFundingRequest(ADDR_1);
     }
 }

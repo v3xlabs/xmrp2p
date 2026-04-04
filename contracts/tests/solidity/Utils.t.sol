@@ -4,8 +4,11 @@ pragma solidity ^0.8.30;
 
 import {console} from "forge-std/Test.sol";
 import {VmSafe} from "forge-std/Vm.sol";
-import {Ed25519} from "../../main/solidity/Ed25519.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {Ed25519} from "../../src/Ed25519.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
+import "../../src/Errors.sol";
 
 library Utils {
 

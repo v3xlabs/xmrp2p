@@ -3,9 +3,12 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import "../../src/Errors.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {DummyPriceOracle} from "./DummyPriceOracle.t.sol";
-import {Ed25519} from "../../main/solidity/Ed25519.sol";
+import {Ed25519} from "../../src/Ed25519.sol";
 
 import {Utils} from "./Utils.t.sol";
 
@@ -43,10 +46,9 @@ contract MoneroSwapCreateSellOfferTest is Test {
 
         // We are expecting the same event as the one we are emitting just after the call to expectEmit
         vm.expectEmit(true, true, true, true);
-        emit MoneroSwap.OfferEvent(1, MoneroSwap.OfferType.SELL, MoneroSwap.OfferState.OPEN);
+        emit MoneroSwap.OfferEvent(1, OfferType.SELL, OfferState.OPEN);
         moneroswap.createSellOffer{value: evmDeposit}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -60,10 +62,9 @@ contract MoneroSwapCreateSellOfferTest is Test {
 
         // Attempt to create another offer with the same public spend key
         vm.prank(ADDR_1);       
-        vm.expectRevert(MoneroSwap.ErrorSellOfferPublicSpendKeyAlreadyUsed.selector);
+        vm.expectRevert(ErrorSellOfferPublicSpendKeyAlreadyUsed.selector);
         moneroswap.createSellOffer{value: evmDeposit}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -115,10 +116,9 @@ contract MoneroSwapCreateSellOfferTest is Test {
 
         // We are expecting the same event as the one we are emitting just after the call to expectEmit
         vm.expectEmit(true, true, true, true);
-        emit MoneroSwap.OfferEvent(1, MoneroSwap.OfferType.SELL, MoneroSwap.OfferState.OPEN);
+        emit MoneroSwap.OfferEvent(1, OfferType.SELL, OfferState.OPEN);
         moneroswap.createSellOffer{value: evmDeposit}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -146,13 +146,12 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);       
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferMaximumOfferBookSizeReached.selector,
+                ErrorSellOfferMaximumOfferBookSizeReached.selector,
                 1
             )
         );
         moneroswap.createSellOffer{value: evmDeposit}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -186,12 +185,11 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferAmountBelowMinimum.selector,
+                ErrorSellOfferAmountBelowMinimum.selector,
                 10
             )
         );
         moneroswap.createSellOffer{value: 1}(
-            address(0),
             address(0),
             1 ether,
             0,
@@ -205,12 +203,11 @@ contract MoneroSwapCreateSellOfferTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferAmountAboveMaximum.selector,
+                ErrorSellOfferAmountAboveMaximum.selector,
                 100
             )
         );
         moneroswap.createSellOffer{value: 101}(
-            address(0),
             address(0),
             1 ether,
             0,
@@ -244,11 +241,10 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferNoPriceDefined.selector
+                ErrorSellOfferNoPriceDefined.selector
             )
         );
         moneroswap.createSellOffer{value: 1}(
-            address(0),
             address(0),
             0,
             0,
@@ -282,11 +278,10 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferNoPriceOracleDefined.selector
+                ErrorSellOfferNoPriceOracleDefined.selector
             )
         );
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),
             address(0),
             0,
             100,
@@ -308,12 +303,11 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferNoPriceRatioWithFixedPrice.selector
+                ErrorSellOfferNoPriceRatioWithFixedPrice.selector
             )
         );
 
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0), 
             address(0), 
             1 ether,
             100,
@@ -334,12 +328,11 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferNoPriceOffsetWithFixedPrice.selector
+                ErrorSellOfferNoPriceOffsetWithFixedPrice.selector
             )
         );
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),
-            address(0), 
             1 ether,
             0,
             1,
@@ -363,13 +356,12 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferMandatoryMinpriceWithOraclePrice.selector
+                ErrorSellOfferMandatoryMinpriceWithOraclePrice.selector
             )
         );
 
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             0,                 // fixed price
             1,                 // oracle ratio
             0,                 // oracle offset
@@ -393,12 +385,11 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferAvailableFundingRequest.selector
+                ErrorSellOfferAvailableFundingRequest.selector
             )
         );
 
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),
             address(0),
             1 ether,
             0,
@@ -431,12 +422,11 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferAmountTooLowToCoverFundingFee.selector
+                ErrorSellOfferAmountTooLowToCoverFundingFee.selector
             )
         );
         moneroswap.createSellOffer{value: 0}(
             address(1),        // counterparty
-            address(2),        // manager
             price,                 // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -473,14 +463,13 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferAmountTooLowToCoverFundingFee.selector
+                ErrorSellOfferAmountTooLowToCoverFundingFee.selector
             )
         );
 
         // Attempt to create a sell offer with a minimum amount of XMR which is too low to cover the funding fee
         moneroswap.createSellOffer{value: 0}(
             address(1),        // counterparty
-            address(2),        // manager
             0,                 // fixed price
             1,                 // oracle ratio
             0,                 // oracle offset
@@ -495,13 +484,12 @@ contract MoneroSwapCreateSellOfferTest is Test {
         // Attempt to create a sell offer with a minimum price which is too low to cover the funding fee
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferAmountTooLowToCoverFundingFee.selector
+                ErrorSellOfferAmountTooLowToCoverFundingFee.selector
             )
         );
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
             address(1),        // counterparty
-            address(2),        // manager
             0,                 // fixed price
             1,                 // oracle ratio
             0,                 // oracle offset
@@ -526,12 +514,11 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.expectEmit(true, true, true, true);
         emit MoneroSwap.OfferEvent(
             1,                 // offer id
-            MoneroSwap.OfferType.SELL,
-            MoneroSwap.OfferState.OPEN
+            OfferType.SELL,
+            OfferState.OPEN
         );
         moneroswap.createSellOffer{value: xmrDeposit}(
             address(1),        // counterparty
-            address(2),        // manager
             3,                 // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -544,14 +531,14 @@ contract MoneroSwapCreateSellOfferTest is Test {
         );
 
         // Retrieve the offer just created
-        MoneroSwap.Offer memory offer = moneroswap.getSellOffer(1);
+        Offer memory offer = moneroswap.getSellOffer(1);
 
         // Check that the offer is the one we just created
         assertEq(offer.id, 1);        
-        assert(offer.type_ == MoneroSwap.OfferType.SELL);
-        assert(offer.state == MoneroSwap.OfferState.OPEN);
+        assert(offer.type_ == OfferType.SELL);
+        assert(offer.state == OfferState.OPEN);
         assertEq(offer.owner, ADDR_1);
-        assertEq(offer.manager, address(2));
+        assertEq(offer.manager, ADDR_1);
         assertEq(offer.maxamount, 1 ether);
         assertEq(offer.price, 3);
         assertEq(offer.oracleRatio, 0);
@@ -595,7 +582,6 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: xmrDeposit}(
             address(1),        // counterparty
-            address(2),        // manager
             0,                 // fixed price
             1,                 // oracle ratio
             2,                 // oracle offset
@@ -611,10 +597,10 @@ contract MoneroSwapCreateSellOfferTest is Test {
 
         // Check that the offer is the one we just created
         assertEq(offer.id, 2);        
-        assert(offer.type_ == MoneroSwap.OfferType.SELL);
-        assert(offer.state == MoneroSwap.OfferState.OPEN);
+        assert(offer.type_ == OfferType.SELL);
+        assert(offer.state == OfferState.OPEN);
         assertEq(offer.owner, ADDR_1);
-        assertEq(offer.manager, address(2));
+        assertEq(offer.manager, ADDR_1);
         assertEq(offer.maxamount, 1 ether);
         assertEq(offer.price, 0);
         assertEq(offer.oracleRatio, 1);
@@ -665,7 +651,6 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
             address(1),        // counterparty
-            address(2),        // manager
             price,             // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -677,14 +662,14 @@ contract MoneroSwapCreateSellOfferTest is Test {
             9                  // msg pub key
         );
 
-        MoneroSwap.Offer memory offer = moneroswap.getSellOffer(1);
+        Offer memory offer = moneroswap.getSellOffer(1);
 
         // Check that the offer is the one we just created
         assertEq(offer.id, 1);        
-        assert(offer.type_ == MoneroSwap.OfferType.SELL);
-        assert(offer.state == MoneroSwap.OfferState.OPEN);
+        assert(offer.type_ == OfferType.SELL);
+        assert(offer.state == OfferState.OPEN);
         assertEq(offer.owner, ADDR_1);
-        assertEq(offer.manager, address(2));
+        assertEq(offer.manager, ADDR_1);
         assertEq(offer.maxamount, 1 ether);
         assertEq(offer.price, price);
         assertEq(offer.oracleRatio, 0);
@@ -741,7 +726,6 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: deposit}(
             address(0),
-            address(0),
             1 ether,
             0,
             0,
@@ -753,7 +737,7 @@ contract MoneroSwapCreateSellOfferTest is Test {
             0);
 
         // Retrieve offer
-        MoneroSwap.Offer memory offer = moneroswap.getSellOffer(1);
+        Offer memory offer = moneroswap.getSellOffer(1);
 
         assertEq((deposit * RATIO_DENOMINATOR) / coverageRatio, offer.maxamount);
 
@@ -773,7 +757,6 @@ contract MoneroSwapCreateSellOfferTest is Test {
 
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
-            address(0),
             address(0),
             1 ether,
             0,
@@ -802,14 +785,13 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferNoFundingRequest.selector
+                ErrorSellOfferNoFundingRequest.selector
             )
         );
 
         // Send no value
         moneroswap.createSellOffer{value: 0}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -833,13 +815,12 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferFundingRequestNotFunded.selector
+                ErrorSellOfferFundingRequestNotFunded.selector
             )
         );
 
         moneroswap.createSellOffer{value: 0}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -868,7 +849,6 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -886,13 +866,12 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferFundingRequestAlreadyInUse.selector
+                ErrorSellOfferFundingRequestAlreadyInUse.selector
             )
         );
 
         moneroswap.createSellOffer{value: 0}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -913,7 +892,6 @@ contract MoneroSwapCreateSellOfferTest is Test {
         // Create a buy offer with keys 1/2/3
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -932,12 +910,11 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferPublicSpendKeyAlreadyUsed.selector
+                ErrorSellOfferPublicSpendKeyAlreadyUsed.selector
             )
         );
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -953,12 +930,11 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferPublicSpendKeyAlreadyUsed.selector
+                ErrorSellOfferPublicSpendKeyAlreadyUsed.selector
             )
         );
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -979,7 +955,6 @@ contract MoneroSwapCreateSellOfferTest is Test {
         // Create a buy offer with keys 1/2/3
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -995,13 +970,12 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferUsedMessageKey.selector
+                ErrorSellOfferUsedMessageKey.selector
             )
         );
 
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -1020,12 +994,11 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferUsedMessageKey.selector
+                ErrorSellOfferUsedMessageKey.selector
             )
         );
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -1041,12 +1014,11 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferUsedMessageKey.selector
+                ErrorSellOfferUsedMessageKey.selector
             )
         );
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -1069,7 +1041,6 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: xmrDeposit}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -1091,9 +1062,9 @@ contract MoneroSwapCreateSellOfferTest is Test {
         assertEq(xmrDeposit, ADDR_1.balance);
  
         // Check that the offer is cancelled
-        MoneroSwap.Offer memory offer = moneroswap.getSellOffer(1);
+        Offer memory offer = moneroswap.getSellOffer(1);
 
-        assertTrue(MoneroSwap.OfferState.CANCELLED == offer.state);
+        assertTrue(OfferState.CANCELLED == offer.state);
     }
 
     function testCancelSellOfferFunded() public {
@@ -1113,7 +1084,6 @@ contract MoneroSwapCreateSellOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -1137,8 +1107,8 @@ contract MoneroSwapCreateSellOfferTest is Test {
         assertEq(0, moneroswap.getFundingRequest(ADDR_1).usedby);
  
         // Check that the offer is cancelled
-        MoneroSwap.Offer memory offer = moneroswap.getSellOffer(1);
-        assertTrue(MoneroSwap.OfferState.CANCELLED == offer.state);
+        Offer memory offer = moneroswap.getSellOffer(1);
+        assertTrue(OfferState.CANCELLED == offer.state);
 
         // Check that the contract's liability is still the amount of the FundingRequest
         assertEq(1 ether, moneroswap.getLiability());

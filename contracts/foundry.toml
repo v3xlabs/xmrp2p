@@ -2,6 +2,7 @@
 # So the JSON contains the literal content of .sol files
 use_literal_content = true
 src = "src"
+test = "tests/solidity"
 out = "out"
 libs = ["lib"]
 # Configuration to enable deterministic deployments

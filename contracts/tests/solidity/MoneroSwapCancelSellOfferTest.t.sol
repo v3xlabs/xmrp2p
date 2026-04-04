@@ -3,7 +3,10 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import "../../src/Errors.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
 
 import {Utils} from "./Utils.t.sol";
 
@@ -21,7 +24,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
         // Attempt to cancel an unknown offer
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferUnknown.selector
+                ErrorSellOfferUnknown.selector
             )
         );
         moneroswap.cancelSellOffer(1);
@@ -35,7 +38,6 @@ contract MoneroSwapCancelSellOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -50,7 +52,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
         vm.prank(ADDR_2);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferNotCancellableByCaller.selector
+                ErrorSellOfferNotCancellableByCaller.selector
             )
         );
         moneroswap.cancelSellOffer(1);
@@ -65,7 +67,6 @@ contract MoneroSwapCancelSellOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: deposit}(
             address(0),        // counterparty
-            address(0),        // manager
             deposit,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -92,8 +93,8 @@ contract MoneroSwapCancelSellOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorSellOfferInvalidStateForCancel.selector,
-                MoneroSwap.OfferState.TAKEN
+                ErrorSellOfferInvalidStateForCancel.selector,
+                OfferState.TAKEN
             )
         );
         moneroswap.cancelSellOffer(1);
@@ -108,7 +109,6 @@ contract MoneroSwapCancelSellOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: deposit}(
             address(0),        // counterparty
-            address(0),        // manager
             deposit,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -148,7 +148,6 @@ contract MoneroSwapCancelSellOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
             address(0),        // counterparty
-            address(0),        // manager
             amount,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -169,7 +168,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
         assertEq(balance, address(ADDR_1).balance);
         // Check that the liability didn't change
         assertEq(liability, moneroswap.getLiability());
-        MoneroSwap.FundingRequest memory freq = moneroswap.getFundingRequest(ADDR_1);
+        FundingRequest memory freq = moneroswap.getFundingRequest(ADDR_1);
         assertEq(0, freq.usedby);
     }
 
@@ -192,7 +191,6 @@ contract MoneroSwapCancelSellOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
             address(0),        // counterparty
-            address(0),        // manager
             amount,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -204,13 +202,13 @@ contract MoneroSwapCancelSellOfferTest is Test {
             0                  // msg pub key            
         );
 
-        MoneroSwap.FundingRequest memory freq = moneroswap.getFundingRequest(ADDR_1);
+        FundingRequest memory freq = moneroswap.getFundingRequest(ADDR_1);
         MoneroSwap.Parameters memory params = moneroswap.getParameters();
 
         // Attempt to cancel the sell offer too early
         vm.prank(ADDR_2);
         vm.warp(freq.fundedOn + 2 * (params.T0_DELAY + params.T1_DELAY));
-        vm.expectRevert(MoneroSwap.ErrorSellOfferNotCancellableByCaller.selector);
+        vm.expectRevert(ErrorSellOfferNotCancellableByCaller.selector);
         moneroswap.cancelSellOffer(1);
 
         vm.warp(freq.fundedOn + 2 * (params.T0_DELAY + params.T1_DELAY) + 1);

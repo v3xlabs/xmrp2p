@@ -3,7 +3,9 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import "../../src/Errors.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
 
 /// Tests related to FundingRequest
 contract MoneroSwapDefundFundingRequestTest is Test {
@@ -32,7 +34,6 @@ contract MoneroSwapDefundFundingRequestTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
             address(0),
-            address(0),
             1 ether,
             0,
             0,
@@ -45,7 +46,7 @@ contract MoneroSwapDefundFundingRequestTest is Test {
         );
 
         vm.prank(ADDR_2);
-        vm.expectRevert(MoneroSwap.ErrorFundingRequestInUse.selector);
+        vm.expectRevert(ErrorFundingRequestInUse.selector);
         moneroswap.defundFundingRequest(ADDR_1);
     }
 
@@ -58,7 +59,7 @@ contract MoneroSwapDefundFundingRequestTest is Test {
         moneroswap.createFundingRequest(1 ether, 0);
 
         vm.prank(ADDR_2);
-        vm.expectRevert(MoneroSwap.ErrorFundingRequestDefundableOnlyByFunder.selector);
+        vm.expectRevert(ErrorFundingRequestDefundableOnlyByFunder.selector);
         moneroswap.defundFundingRequest(ADDR_1);
     }
 
@@ -66,7 +67,7 @@ contract MoneroSwapDefundFundingRequestTest is Test {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorFundingRequestDefundableOnlyByFunder.selector);
+        vm.expectRevert(ErrorFundingRequestDefundableOnlyByFunder.selector);
         moneroswap.defundFundingRequest(ADDR_2);
     }
 
@@ -96,7 +97,7 @@ contract MoneroSwapDefundFundingRequestTest is Test {
         // Check the funding request    
         
         
-        MoneroSwap.FundingRequest memory freq = moneroswap.getFundingRequest(ADDR_1);
+        FundingRequest memory freq = moneroswap.getFundingRequest(ADDR_1);
         assertEq(0, freq.fundedOn);
         assertEq(address(0), freq.funder);
     }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {AggregatorV3Interface} from "../../main/solidity/AggregatorV3Interface.sol";
+import {AggregatorV3Interface} from "../../src/AggregatorV3Interface.sol";
 
 contract DummyPriceOracle is AggregatorV3Interface {
 

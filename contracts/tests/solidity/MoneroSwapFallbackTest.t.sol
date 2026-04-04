@@ -3,7 +3,11 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
+import "../../src/Errors.sol";
+import "../../src/Errors.sol";
 
 import {Utils} from "./Utils.t.sol";
 
@@ -12,6 +16,6 @@ contract MoneroSwapFallbackTest is Test {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
         (bool res, bytes memory revertData) = payable(address(moneroswap)).call{value: 1 ether}("test");
         require(!res);
-        assertEq(revertData, abi.encodeWithSelector(MoneroSwap.ErrorUnableToAcceptPayment.selector));
+        assertEq(revertData, abi.encodeWithSelector(ErrorUnableToAcceptPayment.selector));
     }
 }

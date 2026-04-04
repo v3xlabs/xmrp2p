@@ -3,7 +3,11 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
+import "../../src/Errors.sol";
+import "../../src/Errors.sol";
 
 import {Utils} from "./Utils.t.sol";
 
@@ -19,7 +23,7 @@ contract MoneroSwapMessageTest is Test {
     function test_RevertIf_InvalidOffer() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
-        vm.expectRevert(MoneroSwap.ErrorInvalidOffer.selector);
+        vm.expectRevert(ErrorInvalidOffer.selector);
         moneroswap.message(0, "");
     }
 
@@ -31,7 +35,6 @@ contract MoneroSwapMessageTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0), // counterparty
-            ADDR_1, // manager
             1 ether, // fixed price
             0, // oracle ratio
             0, // oracle offset
@@ -43,7 +46,7 @@ contract MoneroSwapMessageTest is Test {
         );
 
         vm.prank(ADDR_2);
-        vm.expectRevert(MoneroSwap.ErrorInvalidOffer.selector);
+        vm.expectRevert(ErrorInvalidOffer.selector);
         moneroswap.message(1, "");
     }     
 
@@ -55,7 +58,6 @@ contract MoneroSwapMessageTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0), // counterparty
-            ADDR_1, // manager
             1 ether, // fixed price
             0, // oracle ratio
             0, // oracle offset
@@ -79,7 +81,7 @@ contract MoneroSwapMessageTest is Test {
         );
 
         vm.prank(ADDR_3);
-        vm.expectRevert(MoneroSwap.ErrorInvalidOffer.selector);
+        vm.expectRevert(ErrorInvalidOffer.selector);
         moneroswap.message(1, "");
     }     
 
@@ -92,7 +94,6 @@ contract MoneroSwapMessageTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0), // counterparty
-            ADDR_1, // manager
             1 ether, // fixed price
             0, // oracle ratio
             0, // oracle offset
@@ -104,7 +105,7 @@ contract MoneroSwapMessageTest is Test {
         );
 
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorMissingMessageKeys.selector);
+        vm.expectRevert(ErrorMissingMessageKeys.selector);
         moneroswap.message(1, "");
 
         // Create a buy offer with message key  
@@ -112,7 +113,6 @@ contract MoneroSwapMessageTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0), // counterparty
-            ADDR_1, // manager
             1 ether, // fixed price
             0, // oracle ratio
             0, // oracle offset
@@ -124,7 +124,7 @@ contract MoneroSwapMessageTest is Test {
         );
 
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorMissingMessageKeys.selector);
+        vm.expectRevert(ErrorMissingMessageKeys.selector);
         moneroswap.message(2, "");
 
         // Now take the offer without setting keys
@@ -140,12 +140,12 @@ contract MoneroSwapMessageTest is Test {
         );
 
         vm.prank(ADDR_2);
-        vm.expectRevert(MoneroSwap.ErrorMissingMessageKeys.selector);
+        vm.expectRevert(ErrorMissingMessageKeys.selector);
         moneroswap.message(2, "");
 
 
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorMissingMessageKeys.selector);
+        vm.expectRevert(ErrorMissingMessageKeys.selector);
         moneroswap.message(2, "");
     } 
 
@@ -157,7 +157,6 @@ contract MoneroSwapMessageTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0), // counterparty
-            ADDR_1, // manager
             1 ether, // fixed price
             0, // oracle ratio
             0, // oracle offset

@@ -3,7 +3,11 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
+import "../../src/Errors.sol";
+import "../../src/Errors.sol";
 
 import {Utils} from "./Utils.t.sol";
 
@@ -24,7 +28,7 @@ contract MoneroSwapCancelFundingRequestTest is Test {
         moneroswap.fundFundingRequest{value: 1 ether}(ADDR_1);
 
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorFundingRequestCurrentlyFunded.selector);
+        vm.expectRevert(ErrorFundingRequestCurrentlyFunded.selector);
         moneroswap.cancelFundingRequest();
     }
 
@@ -38,7 +42,7 @@ contract MoneroSwapCancelFundingRequestTest is Test {
         vm.prank(ADDR_1);
         moneroswap.cancelFundingRequest();
 
-        vm.expectRevert(MoneroSwap.ErrorFundingRequestNotFound.selector);
+        vm.expectRevert(ErrorFundingRequestNotFound.selector);
         moneroswap.getFundingRequest(ADDR_1);
 
         assertEq(0, moneroswap.listFundingRequests(0, 1).length);

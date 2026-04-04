@@ -3,7 +3,10 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import "../../src/Errors.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {DummyPriceOracle} from "./DummyPriceOracle.t.sol";
 
 import {Utils} from "./Utils.t.sol";
@@ -24,11 +27,10 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
 
         // Attempt to update an non existent buy offer
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferUnknown.selector);
+        vm.expectRevert(ErrorBuyOfferUnknown.selector);
         moneroswap.updateBuyOffer(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // max amount
             1 ether,           // price
             0,                 // oracle ratio
@@ -47,7 +49,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);        
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            ADDR_2,            // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -61,11 +62,10 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         // Attempt to update the offer from ADDR_3
         vm.deal(ADDR_3, 1 ether);
         vm.prank(ADDR_3);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferInvalidCallerForUpdate.selector);
+        vm.expectRevert(ErrorBuyOfferInvalidCallerForUpdate.selector);
         moneroswap.updateBuyOffer(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // max amount
             1 ether,           // price
             0,                 // oracle ratio
@@ -86,7 +86,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);        
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -113,14 +112,13 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferInvalidStateForUpdate.selector,
-                MoneroSwap.OfferState.TAKEN
+                ErrorBuyOfferInvalidStateForUpdate.selector,
+                OfferState.TAKEN
             )
         );
         moneroswap.updateBuyOffer(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // max amount
             1 ether,           // price
             0,                 // oracle ratio
@@ -154,7 +152,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);        
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -173,14 +170,13 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferAmountBelowMinimum.selector,
+                ErrorBuyOfferAmountBelowMinimum.selector,
                 1 ether
             )
         );
         moneroswap.updateBuyOffer(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             0.5 ether,           // max amount
             1 ether,           // price
             0,                 // oracle ratio
@@ -208,14 +204,13 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferAmountAboveMaximum.selector,
+                ErrorBuyOfferAmountAboveMaximum.selector,
                 0.5 ether
             )
         );
         moneroswap.updateBuyOffer(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             0.75 ether,           // max amount
             1 ether,           // price
             0,                 // oracle ratio
@@ -234,14 +229,13 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferAmountAboveMaximum.selector,
+                ErrorBuyOfferAmountAboveMaximum.selector,
                 0.5 ether
             )
         );
         moneroswap.updateBuyOffer{value: 1 ether}(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // max amount
             1 ether,           // price
             0,                 // oracle ratio
@@ -271,66 +265,13 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferAmountBelowMinimum.selector,
+                ErrorBuyOfferAmountBelowMinimum.selector,
                 3 ether
             )
         );
         moneroswap.updateBuyOffer{value: 1 ether}(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
-            1 ether,           // max amount
-            1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
-            1_000_000_000_000, // min XMR
-            1 ether,           // max price
-            0                  // msg pub key
-        );
-    }
-
-    function test_RevertWhen_NotOwnerToChangeManager() public {
-        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
-
-        vm.prank(msg.sender);
-        moneroswap.setParameters(
-            1, // FundingRequestMaxBalance,
-            0, // FundingRequestMinFeeRatio
-            1, // MaximumBuyOfferBookSize,
-            1 ether, // MinimumBuyOffer,
-            2 ether, // MaximumBuyOffer,
-            1, // MaximumSellOfferBookSize,
-            1, // MinimumSellOffer,
-            10 ether, // MaximumSellOffer,
-            1_000_000_000, // SellOfferCoverageRatio,
-            86400, // T0Delay,
-            86400 // T1Delay
-        );
-
-        // Create a buy offer
-        vm.deal(ADDR_1, 1 ether);
-        vm.prank(ADDR_1);        
-        moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            ADDR_2,            // manager
-            1 ether,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
-            1_000_000_000_000, // min XMR
-            1 ether,           // max price
-            KEY_BASE + 9,      // public spend key
-            KEY_BASE + 10,     // public view key
-            0                  // msg pub key
-        );        
-
-        // Attempt to change the manager from ADDR_2 (the current manager)
-        vm.deal(ADDR_2, 1 ether);
-        vm.prank(ADDR_2);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferNotOwner.selector);
-        moneroswap.updateBuyOffer(
-            1,                 // offer id
-            address(0),        // counterparty
-            ADDR_3,            // manager
             1 ether,           // max amount
             1 ether,           // price
             0,                 // oracle ratio
@@ -349,7 +290,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);        
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1,                 // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -363,11 +303,10 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         // Attempt to update the offer with no price and no oracle
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferNoPriceOracleDefined.selector);
+        vm.expectRevert(ErrorBuyOfferNoPriceOracleDefined.selector);
         moneroswap.updateBuyOffer(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // max amount
             0,                 // price
             1,                 // oracle ratio
@@ -386,7 +325,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);        
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1,                 // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -400,11 +338,10 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         // Attempt to update the offer with a price and oracle params
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferNoPriceRatioWithFixedPrice.selector);
+        vm.expectRevert(ErrorBuyOfferNoPriceRatioWithFixedPrice.selector);
         moneroswap.updateBuyOffer(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // max amount
             1 ether,           // price
             1,                 // oracle ratio
@@ -416,11 +353,10 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
 
                 vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferNoPriceOffsetWithFixedPrice.selector);
+        vm.expectRevert(ErrorBuyOfferNoPriceOffsetWithFixedPrice.selector);
         moneroswap.updateBuyOffer(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // max amount
             1 ether,           // price
             0,                 // oracle ratio
@@ -439,7 +375,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);        
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1,                 // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -456,11 +391,10 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.setPriceOracle(address(oracle), 100);
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferMandatoryMaxpriceWithOraclePrice.selector);
+        vm.expectRevert(ErrorBuyOfferMandatoryMaxpriceWithOraclePrice.selector);
         moneroswap.updateBuyOffer(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // max amount
             0,                 // price
             1,                 // oracle ratio
@@ -479,7 +413,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);        
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
-            address(0),        // manager
             1,                 // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -496,11 +429,10 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.setPriceOracle(address(oracle), 100);
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        vm.expectRevert(MoneroSwap.ErrorBuyOfferNoValueAllowedWhenReducingMaxamount.selector);
+        vm.expectRevert(ErrorBuyOfferNoValueAllowedWhenReducingMaxamount.selector);
         moneroswap.updateBuyOffer{value: 1 wei}(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             0.5 ether,           // max amount
             0,                 // price
             1,                 // oracle ratio
@@ -520,7 +452,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         uint256 evmDeposit = 2 ether;
         moneroswap.createBuyOffer{value: evmDeposit}(
             address(0),        // counterparty
-            address(0),        // manager
             1,                 // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -535,14 +466,13 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferUsedMessageKey.selector
+                ErrorBuyOfferUsedMessageKey.selector
             )
         );
 
         moneroswap.updateBuyOffer{value: 0}(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             evmDeposit,        // max amount
             1,                 // price
             0,                 // oracle ratio
@@ -556,14 +486,13 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferUsedMessageKey.selector
+                ErrorBuyOfferUsedMessageKey.selector
             )
         );
 
         moneroswap.updateBuyOffer{value: 0}(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             evmDeposit,        // max amount
             1,                 // price
             0,                 // oracle ratio
@@ -581,7 +510,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: evmDeposit}(
             address(1),        // counterparty
-            ADDR_2,            // manager
             1,                 // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -596,14 +524,13 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferUsedMessageKey.selector
+                ErrorBuyOfferUsedMessageKey.selector
             )
         );
 
         moneroswap.updateBuyOffer{value: 0}(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             evmDeposit,        // max amount
             1,                 // price
             0,                 // oracle ratio
@@ -620,7 +547,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.updateBuyOffer{value: 0}(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             evmDeposit,        // max amount
             1,                 // price
             0,                 // oracle ratio
@@ -637,7 +563,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.updateBuyOffer{value: 0}(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             evmDeposit,        // max amount
             1,                 // price
             0,                 // oracle ratio
@@ -654,14 +579,13 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.prank(ADDR_1);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorBuyOfferUsedMessageKey.selector
+                ErrorBuyOfferUsedMessageKey.selector
             )
         );
 
         moneroswap.updateBuyOffer{value: 0}(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             evmDeposit,        // max amount
             1,                 // price
             0,                 // oracle ratio
@@ -681,7 +605,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         uint256 evmDeposit = 2 ether;
         moneroswap.createBuyOffer{value: evmDeposit}(
             address(1),        // counterparty
-            ADDR_2,            // manager
             1,                 // fixed price
             0,                 // oracle ratio
             0,                 // oracle offset
@@ -692,13 +615,13 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             9                  // msg pub key
         );
 
-        MoneroSwap.Offer memory offer = moneroswap.getBuyOffer(1);
+        Offer memory offer = moneroswap.getBuyOffer(1);
 
         assertEq(offer.id, 1);        
-        assert(offer.type_ == MoneroSwap.OfferType.BUY);
-        assert(offer.state == MoneroSwap.OfferState.OPEN);
+        assert(offer.type_ == OfferType.BUY);
+        assert(offer.state == OfferState.OPEN);
         assertEq(offer.owner, ADDR_1);
-        assertEq(offer.manager, ADDR_2);
+        assertEq(offer.manager, ADDR_1);
         assertEq(offer.maxamount, evmDeposit);
         assertEq(offer.price, 1);
         assertEq(offer.oracleRatio, 0);
@@ -736,13 +659,12 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         vm.expectEmit(true, true, true, true);
         emit MoneroSwap.OfferEvent(
             1,                 // offer id
-            MoneroSwap.OfferType.BUY,
-            MoneroSwap.OfferState.OPEN
+            OfferType.BUY,
+            OfferState.OPEN
         );
         moneroswap.updateBuyOffer{value: 0}(
             1,                 // offer id
             address(4),        // counterparty
-            address(5),        // manager
             1 ether,           // max amount
             2,                 // price
             0,                 // oracle ratio
@@ -754,7 +676,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         
         offer = moneroswap.getBuyOffer(1);
         assertEq(address(4), offer.counterparty);
-        assertEq(address(5), offer.manager);
+        assertEq(ADDR_1, offer.manager);
         assertEq(offer.price, 2);
         assertEq(offer.maxamount, 1 ether);
         assertEq(offer.maxprice, 2);
@@ -778,7 +700,6 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.updateBuyOffer{value: 1 ether}(
             1,                 // offer id
             address(0),        // counterparty
-            address(0),        // manager
             1 ether,           // max amount
             0,                 // price
             1,                 // oracle ratio
@@ -790,8 +711,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
 
         offer = moneroswap.getBuyOffer(1);
         assertEq(address(0), offer.counterparty);
-        // Setting the manager to the address 0 doesn't change it. Use the sender's address to remove the manager
-        assertEq(address(5), offer.manager);
+        assertEq(ADDR_1, offer.manager);
         assertEq(offer.price, 0);
         assertEq(offer.oracleRatio, 1);
         assertEq(offer.oracleOffset, 2);

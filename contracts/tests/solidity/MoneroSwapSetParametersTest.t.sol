@@ -3,7 +3,11 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
+import {OfferType, OfferState} from "../../src/Enums.sol";
+import "../../src/Errors.sol";
+import "../../src/Errors.sol";
 
 import {Utils} from "./Utils.t.sol";
 
@@ -16,7 +20,7 @@ contract MoneroSwapSetParametersTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorDelayTooShort.selector,
+                ErrorDelayTooShort.selector,
                 delay,
                 Utils.MINIMUM_DELAY
             )
@@ -38,7 +42,7 @@ contract MoneroSwapSetParametersTest is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                MoneroSwap.ErrorDelayTooShort.selector,
+                ErrorDelayTooShort.selector,
                 delay,
                 Utils.MINIMUM_DELAY
             )

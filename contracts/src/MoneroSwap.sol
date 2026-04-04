@@ -240,7 +240,6 @@ contract MoneroSwap {
     /// Create a new buy offer
     ///
     /// @param counterparty The address of a designated counterparty for the offer. Set to 0 to allow offer to be taken by any address.
-    /// @param manager An additional address which can manage, i.e. change parameters, of the offer. The manager cannot update the manager's address.
     /// @param price The (fixed) price of the offer. If this value is not 0, the price will be used as-is. If this value is 0, the price will be determined by the oracle.
     /// @param oracleRatio The oracle ratio of the offer. This is only used if the price is 0. It is a percentage of the oracle price (expressed in parts of RATIO_DENOMINATOR).
     /// @param oracleOffset The oracle offset of the offer. This is only used when using the oracle price, it is an offset to apply to the oracle price multiplied by oracleRatio. This can be used to set an offer price 1 xDAI above the oracle price for example.
@@ -252,7 +251,6 @@ contract MoneroSwap {
     ///
     function createBuyOffer(
         address counterparty,
-        address manager,
         uint256 price,
         uint256 oracleRatio,
         int256 oracleOffset,
@@ -350,8 +348,7 @@ contract MoneroSwap {
         offer.lastupdate = block.timestamp;
         offer.owner = msg.sender;
         offer.counterparty = counterparty;
-        // If the manager was not explicitely set, set it to the owner.
-        offer.manager = address(0) == manager ? msg.sender : manager;
+        offer.manager = msg.sender;
         offer.maxamount = msg.value;
         offer.deposit = msg.value;
         offer.price = price;
@@ -381,11 +378,9 @@ contract MoneroSwap {
         emit OfferEvent(offer.id, offer.type_, offer.state);
     }
 
-    /// Update an existing buy offer. The owner and the manager (if defined) can update the offer.
-    /// Only the owner can modify the manager.
+    /// Update an existing buy offer. Only the owner can update the offer.
     /// @param id the id of the offer to update
     /// @param counterparty address of explicit counterparty. Use 0x0 to allow any account to take the offer
-    /// @param manager address of a manager acount able to modify offer parameters
     /// @param maxamount maximum amount to spend for buying Monero. This is used to reduce the maximum amount, in which case part of the deposit will be sent back
     /// @param price fixed price at which the buyer is willing to buy Monero (in wei per Monero). If 0, the price will be determined by the oracle
     /// @param oracleRatio the oracle ratio of the offer. This is only used if the price is 0. It is a percentage of the oracle price (expressed in parts of RATIO_DENOMINATOR)
@@ -396,7 +391,6 @@ contract MoneroSwap {
     function updateBuyOffer(
         uint256 id,
         address counterparty,
-        address manager,
         uint256 maxamount,
         uint256 price,
         uint256 oracleRatio,
@@ -410,7 +404,7 @@ contract MoneroSwap {
         require(OfferType.BUY == offer.type_, ErrorBuyOfferUnknown());
 
         require(
-            msg.sender == offer.owner || msg.sender == offer.manager,
+            msg.sender == offer.owner,
             ErrorBuyOfferInvalidCallerForUpdate()
         );
 
@@ -452,12 +446,6 @@ contract MoneroSwap {
             if (!success) {
                 revert ErrorBuyOfferUnableToSendAmountDelta();
             }
-        }
-
-        // Only the owner can change the manager
-        if (address(0) != manager) {
-            require(msg.sender == offer.owner, ErrorBuyOfferNotOwner());
-            offer.manager = manager;
         }
 
         if (0 != minxmr) {
@@ -799,7 +787,6 @@ contract MoneroSwap {
 
     /// Create a sell offer.
     /// @param counterparty address of an explicit counterparty. Use 0x0 to allow any account to take the offer
-    /// @param manager address of an account allowed to update the offer
     /// @param price fixed price, in wei per XMR. Use 0 if you want to use dynamic pricing
     /// @param oracleRatio when using dynamic pricing, this is a ratio to apply to the price returned by the oracle. actual ratio if this value divided by RATIO_DENOMINATOR
     /// @param oracleOffset when using dynamic pricing, apply this offset to the price computed using oracleRatio. Offset is expressed in wei.
@@ -811,7 +798,6 @@ contract MoneroSwap {
     /// @param msgpubkey The public key to use for exchanging messages with the taker of the offer
     function createSellOffer(
         address counterparty,
-        address manager,
         uint256 price,
         uint256 oracleRatio,
         int256 oracleOffset,
@@ -960,7 +946,7 @@ contract MoneroSwap {
         offer.owner = msg.sender;
         offer.counterparty = counterparty;
         offer.lastupdate = block.timestamp;
-        offer.manager = manager;
+        offer.manager = msg.sender;
         offer.maxamount = amount;
         offer.price = price;
         offer.oracleRatio = oracleRatio;
@@ -987,7 +973,6 @@ contract MoneroSwap {
     /// Update a sell offer
     /// @param id id of the offer to update
     /// @param counterparty address of an explicit counterparty, or 0x0 to allow any account to take the offer
-    /// @param manager address of an account allowed to update the offer
     /// @param price Fixed price at which the XMR will be sold
     /// @param oracleRatio Price ratio vs oracle price, in parts of RATIO_DENOMINATOR
     /// @param oracleOffset Price offset vs oracle price, in wei
@@ -998,7 +983,6 @@ contract MoneroSwap {
     function updateSellOffer(
         uint256 id,
         address counterparty,
-        address manager,
         uint256 price,
         uint256 oracleRatio,
         int256 oracleOffset,
@@ -1017,7 +1001,7 @@ contract MoneroSwap {
         );
 
         require(
-            msg.sender == offer.owner || msg.sender == offer.manager,
+            msg.sender == offer.owner,
             ErrorSellOfferInvalidCallerForUpdate()
         );
 
@@ -1042,12 +1026,6 @@ contract MoneroSwap {
             );
 
             liability += msg.value;
-        }
-
-        // Only the owner can change the manager
-        if (address(0) != manager) {
-            require(msg.sender == offer.owner, ErrorSellOfferNotOwner());
-            offer.manager = manager;
         }
 
         if (0 != minprice) {

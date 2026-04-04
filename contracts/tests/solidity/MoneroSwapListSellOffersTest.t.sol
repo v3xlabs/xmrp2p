@@ -3,7 +3,8 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../main/solidity/MoneroSwap.sol";
+import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {Offer, FundingRequest} from "../../src/Structs.sol";
 
 import {Utils} from "./Utils.t.sol";
 
@@ -24,7 +25,6 @@ contract MoneroSwapListSellOffersTest is Test {
             vm.prank(ADDR_1);
             moneroswap.createSellOffer{value: 1 ether}(
                 address(0),        // counterparty
-                address(0),            // manager
                 i + 1,             // fixed price
                 0,                 // oracle ratio
                 0,                 // oracle offset
@@ -39,7 +39,7 @@ contract MoneroSwapListSellOffersTest is Test {
 
         // List sell offers by chunks of 2 with a step of 3
         for (uint256 i = 0; i < N + 4; i += 3) {
-            MoneroSwap.Offer[] memory offers = moneroswap.listSellOffers(i, 2);
+            Offer[] memory offers = moneroswap.listSellOffers(i, 2);
            
             if (offers.length >= 1) {
                 assertEq(offers[0].price, i + 1);
