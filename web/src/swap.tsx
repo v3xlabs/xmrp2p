@@ -43,7 +43,7 @@ export const Swap = () => {
                         Slippage
                     </SegmentedControl.Label>
                     <div class="w-fit border border-(--thorin-border) rounded-md relative overflow-hidden" role="presentation">
-                        <SegmentedControl.Indicator class="absolute bottom-0 h-1 bg-(--thorin-blue-primary) transition-all" />
+                        <SegmentedControl.Indicator class="absolute bottom-0 h-1 bg-(--thorin-blue-primary) transition-all not-last:-ml-px" />
                         <div class="inline-flex flex-row divide-x divide-(--thorin-border)" role="presentation">
                             <For each={["3%", "5%", "10%"]}>
                                 {slippage => (
