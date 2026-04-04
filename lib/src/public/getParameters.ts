@@ -58,11 +58,6 @@ const abi = {
                     internalType: "uint256",
                 },
                 {
-                    name: "XMREVMMaxage",
-                    type: "uint256",
-                    internalType: "uint256",
-                },
-                {
                     name: "T0_DELAY",
                     type: "uint256",
                     internalType: "uint256",
@@ -71,16 +66,6 @@ const abi = {
                     name: "T1_DELAY",
                     type: "uint256",
                     internalType: "uint256",
-                },
-                {
-                    name: "XMREVM",
-                    type: "address",
-                    internalType: "address",
-                },
-                {
-                    name: "XMREVMDecimals",
-                    type: "uint8",
-                    internalType: "uint8",
                 },
             ],
         },

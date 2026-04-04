@@ -37,10 +37,7 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,             // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000,            // min XMR
-            1 ether,          // max price
             KEY_BASE++,
             KEY_BASE++,
             KEY_BASE++                  // msg pub key
@@ -62,10 +59,7 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,             // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000,            // min XMR
-            1 ether,          // max price
             KEY_BASE++,
             KEY_BASE++,
             KEY_BASE++                  // msg pub key
@@ -104,10 +98,7 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,             // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000,            // min XMR
-            1 ether,          // max price
             KEY_BASE++,
             KEY_BASE++,
             KEY_BASE++                  // msg pub key

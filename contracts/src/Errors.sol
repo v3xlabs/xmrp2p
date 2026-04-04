@@ -31,20 +31,8 @@ error ErrorBuyOfferAmountAboveMaximum(uint256 maximum);
 /// @param state the current state of the offer
 error ErrorBuyOfferInvalidStateForUpdate(OfferState state);
 
-/// This error is raised when a BuyOffer is created or updated with a price ratio while a fixed price was also specified
-error ErrorBuyOfferNoPriceRatioWithFixedPrice();
-
-/// This error is raised when a BuyOffer is created or updated with a price offset while a fixed price was also specified
-error ErrorBuyOfferNoPriceOffsetWithFixedPrice();
-
-/// Error raised when attempting to create or update a BuyOffer using a price oracle when no price oracle is configured
-error ErrorBuyOfferNoPriceOracleDefined();
-
 /// Error raised when attempting to reference a non existent BuyOffer.
 error ErrorBuyOfferUnknown();
-
-/// Error raised when attempting to create or update a BuyOffer with no fixed price and with an oracleRatio value of 0.
-error ErrorBuyOfferInvalidOraclePriceRatio();
 
 /// Error raised when attempting to update a BuyOffer from an address which is neither the owner nor the optionally configured manager
 error ErrorBuyOfferInvalidCallerForUpdate();
@@ -61,16 +49,10 @@ error ErrorBuyOfferUnableToSendAmountDelta();
 /// is not reused.
 error ErrorBuyOfferPublicSpendKeyAlreadyUsed();
 
-/// Error raised when the price specified in a take call is below the lower acceptable price
-/// @param price the price in the take call
-/// @param minprice the lower acceptable price
+/// Error raised when the price specified in a take call is below the offer's fixed price
+/// @param price the offer's fixed price
+/// @param minprice the lower acceptable price specified by the taker
 error ErrorBuyOfferPriceTooLow(uint256 price, uint256 minprice);
-
-/// Error raised when the dynamic price is negative price during a buy offer price estimation
-error ErrorBuyOfferNegativeDynamicPrice();
-
-/// Error raised when the price returned by the price feed oracle is too old with respect to the contract's XMREVMMaxage parameter
-error ErrorBuyOfferOraclePriceTooOld();
 
 /// Error raised when the amount of XMR specified in a take call is below the minimum amount the buy offer owner is willing to buy
 /// @param amount the amount of XMR specified in the take call
@@ -146,9 +128,6 @@ error ErrorBuyOfferPriceTooHigh(uint256 price, uint256 maxprice);
 
 /// Error raised when attempting to reduce an offer's maxamount value while transfering value in the tx
 error ErrorBuyOfferNoValueAllowedWhenReducingMaxamount();
-
-/// Error raised when creating or updating a buy offer with a dynamic price without providing a maxprice value
-error ErrorBuyOfferMandatoryMaxpriceWithOraclePrice();
 
 /// This error occurs when attempting to create a buy offer when the offer book is already at the configured limit
 /// @param size the configured offer book maximum size
@@ -259,18 +238,6 @@ error ErrorSellOfferAmountBelowMinimum(uint256 minimum);
 /// @param maximum the current configured maxmimum sell offer amount
 error ErrorSellOfferAmountAboveMaximum(uint256 maximum);
 
-/// Error raised when a price ratio was specified jointly with a fixed price during creation or update of a sell offer
-error ErrorSellOfferNoPriceRatioWithFixedPrice();
-
-/// Error raised when a price offset was specified jointly with a fixed price during creation or update of a sell offer
-error ErrorSellOfferNoPriceOffsetWithFixedPrice();
-
-/// Error raised when a dynamic price was specified during creation or update of a sell offer but not price feed oracle is defined
-error ErrorSellOfferNoPriceOracleDefined();
-
-/// Error raised when no fixed price was specified and the price ratio was 0
-error ErrorSellOfferInvalidOraclePriceRatio();
-
 /// Error raised when the account attempting to update a sell offer is neither its owner nor its manager
 error ErrorSellOfferInvalidCallerForUpdate();
 
@@ -294,7 +261,7 @@ error ErrorSellOfferImmutableDeposit();
 /// Error raised when the specified offer id is not a sell offer
 error ErrorSellOfferUnknown();
 
-/// Error raised when creating or updating a sell offer without specifying a fixed or dynamic price (price is 0 and ratio is 0)
+/// Error raised when creating or updating a sell offer without specifying a price
 error ErrorSellOfferNoPriceDefined();
 
 /// Error raised when the amount resulting from taking a sell offer is not sufficient to cover the fees promised
@@ -306,16 +273,10 @@ error ErrorSellOfferAmountTooLowToCoverFundingFee();
 /// This is a check to ensure private spend keys are not reused across offers as this could lead to stolen funds.
 error ErrorSellOfferPublicSpendKeyAlreadyUsed();
 
-/// Error raised when the price specified when the price resulting from taking a sell offer is above the specified maximum
+/// Error raised when the price resulting from taking a sell offer is above the taker's specified maximum
 /// @param price the resulting price
-/// @param maxprice the upper price limit which was specified
+/// @param maxprice the upper price limit which was specified by the taker
 error ErrorSellOfferPriceTooHigh(uint256 price, uint256 maxprice);
-
-/// Error raised when the dynamic price is negative price during a sell offer price estimation
-error ErrorSellOfferNegativeDynamicPrice();
-
-/// Error raised when the price reported by the price feed oracle is older than the configured limit (MREVMMaxage)
-error ErrorSellOfferOraclePriceTooOld();
 
 /// Error raised when the resulting amount of XMR being sold is below the minimum specified by the buyer
 /// @param amount resulting amount of XMR being sold
@@ -394,9 +355,6 @@ error ErrorSellOfferAlreadyRefunded();
 
 /// Error raised when taking an offer with a deposit above the required one and when the delta couldn't be sent back to the taker
 error ErrorSellOfferUnableToSendAmountDelta();
-
-/// Raised when creating or updateing a sell offer using a price oracle with no minprice specified
-error ErrorSellOfferMandatoryMinpriceWithOraclePrice();
 
 /// Error raised when the account taking the offer is not the specified counterparty
 error ErrorSellOfferInvalidCounterparty();

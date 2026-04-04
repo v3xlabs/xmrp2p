@@ -10,10 +10,7 @@ const abi = {
         { name: "id", type: "uint256", internalType: "uint256" },
         { name: "counterparty", type: "address", internalType: "address" },
         { name: "price", type: "uint256", internalType: "uint256" },
-        { name: "oracleRatio", type: "uint256", internalType: "uint256" },
-        { name: "oracleOffset", type: "int256", internalType: "int256" },
         { name: "minxmr", type: "uint256", internalType: "uint256" },
-        { name: "minprice", type: "uint256", internalType: "uint256" },
         { name: "maxxmr", type: "uint256", internalType: "uint256" },
         { name: "msgpubkey", type: "uint256", internalType: "uint256" },
     ],
@@ -26,20 +23,14 @@ export const updateSellOfferParameters = ({
     id,
     counterparty,
     price,
-    oracleRatio,
-    oracleOffset,
     minxmr,
-    minprice,
     maxxmr,
     msgpubkey,
 }: ContractWriteParameters<{
     id: bigint;
     counterparty: Address;
     price: bigint;
-    oracleRatio: bigint;
-    oracleOffset: bigint;
     minxmr: bigint;
-    minprice: bigint;
     maxxmr: bigint;
     msgpubkey: bigint;
 }>) => ({
@@ -47,10 +38,7 @@ export const updateSellOfferParameters = ({
         id,
         counterparty,
         price,
-        oracleRatio,
-        oracleOffset,
         minxmr,
-        minprice,
         maxxmr,
         msgpubkey,
     ]),

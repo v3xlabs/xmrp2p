@@ -11,10 +11,7 @@ const abi = {
         { name: "counterparty", type: "address", internalType: "address" },
         { name: "maxamount", type: "uint256", internalType: "uint256" },
         { name: "price", type: "uint256", internalType: "uint256" },
-        { name: "oracleRatio", type: "uint256", internalType: "uint256" },
-        { name: "oracleOffset", type: "int256", internalType: "int256" },
         { name: "minxmr", type: "uint256", internalType: "uint256" },
-        { name: "maxprice", type: "uint256", internalType: "uint256" },
         { name: "msgpubkey", type: "uint256", internalType: "uint256" },
     ],
     outputs: [],
@@ -27,20 +24,14 @@ export const updateBuyOfferParameters = ({
     counterparty,
     maxamount,
     price,
-    oracleRatio,
-    oracleOffset,
     minxmr,
-    maxprice,
     msgpubkey,
 }: ContractWriteParameters<{
     id: bigint;
     counterparty: Address;
     maxamount: bigint;
     price: bigint;
-    oracleRatio: bigint;
-    oracleOffset: bigint;
     minxmr: bigint;
-    maxprice: bigint;
     msgpubkey: bigint;
 }>) => ({
     data: encodeData(abi, [
@@ -48,10 +39,7 @@ export const updateBuyOfferParameters = ({
         counterparty,
         maxamount,
         price,
-        oracleRatio,
-        oracleOffset,
         minxmr,
-        maxprice,
         msgpubkey,
     ]),
     to: contractAddress,

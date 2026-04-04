@@ -28,10 +28,7 @@ contract MoneroSwapReadyTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             KEY_BASE + 1,                 // public spend key
             KEY_BASE + 2,                 // public view key
             0                  // msg pub key
@@ -57,10 +54,7 @@ contract MoneroSwapReadyTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             KEY_BASE + 3,                 // public spend key
             KEY_BASE + 4,                 // public view key
             0                  // msg pub key
@@ -93,10 +87,7 @@ contract MoneroSwapReadyTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             KEY_BASE + 7,                 // public spend key
             KEY_BASE + 8,                 // public view key
             0                  // msg pub key
@@ -133,10 +124,7 @@ contract MoneroSwapReadyTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             KEY_BASE + 11,                 // public spend key
             KEY_BASE + 12,                 // public view key
             0                  // msg pub key
@@ -170,12 +158,8 @@ contract MoneroSwapReadyTest is Test {
         assert(offerBeforeReady.manager == offerAfterReady.manager);
         assert(offerBeforeReady.maxamount == offerAfterReady.maxamount);
         assert(offerBeforeReady.price == offerAfterReady.price);
-        assert(offerBeforeReady.oracleRatio == offerAfterReady.oracleRatio);
-        assert(offerBeforeReady.oracleOffset == offerAfterReady.oracleOffset);
         assert(offerBeforeReady.minxmr == offerAfterReady.minxmr);
-        assert(offerBeforeReady.maxprice == offerAfterReady.maxprice);
         assert(offerBeforeReady.maxxmr == offerAfterReady.maxxmr);
-        assert(offerBeforeReady.minprice == offerAfterReady.minprice);
         assert(offerBeforeReady.counterparty == offerAfterReady.counterparty);
         assert(offerBeforeReady.evmPublicSpendKey == offerAfterReady.evmPublicSpendKey);
         assert(offerBeforeReady.evmPublicViewKey == offerAfterReady.evmPublicViewKey);
@@ -203,10 +187,7 @@ contract MoneroSwapReadyTest is Test {
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // min price
             1_000_000_000_000, // maxxmr
             KEY_BASE + 15,                 // public spend key
             KEY_BASE + 16,                 // public view key
@@ -233,10 +214,7 @@ contract MoneroSwapReadyTest is Test {
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // min price
             1_000_000_000_000, // maxxmr
             KEY_BASE + 17,                 // public spend key
             KEY_BASE + 18,                 // public view key
@@ -270,10 +248,7 @@ contract MoneroSwapReadyTest is Test {
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // min price
             1_000_000_000_000, // maxxmr
             KEY_BASE + 21,                 // public spend key
             KEY_BASE + 22,                 // public view key
@@ -311,10 +286,7 @@ contract MoneroSwapReadyTest is Test {
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // min price
             1_000_000_000_000, // maxxmr
             KEY_BASE + 25,                 // public spend key
             KEY_BASE + 26,                 // public view key
@@ -349,12 +321,8 @@ contract MoneroSwapReadyTest is Test {
         assert(offerBeforeReady.manager == offerAfterReady.manager);
         assert(offerBeforeReady.maxamount == offerAfterReady.maxamount);
         assert(offerBeforeReady.price == offerAfterReady.price);
-        assert(offerBeforeReady.oracleRatio == offerAfterReady.oracleRatio);
-        assert(offerBeforeReady.oracleOffset == offerAfterReady.oracleOffset);
         assert(offerBeforeReady.minxmr == offerAfterReady.minxmr);
-        assert(offerBeforeReady.maxprice == offerAfterReady.maxprice);
         assert(offerBeforeReady.maxxmr == offerAfterReady.maxxmr);
-        assert(offerBeforeReady.minprice == offerAfterReady.minprice);
         assert(offerBeforeReady.counterparty == offerAfterReady.counterparty);
         assert(offerBeforeReady.evmPublicSpendKey == offerAfterReady.evmPublicSpendKey);
         assert(offerBeforeReady.evmPublicViewKey == offerAfterReady.evmPublicViewKey);

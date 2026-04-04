@@ -26,10 +26,7 @@ contract MoneroSwapListSellOffersTest is Test {
             moneroswap.createSellOffer{value: 1 ether}(
                 address(0),        // counterparty
                 i + 1,             // fixed price
-                0,                 // oracle ratio
-                0,                 // oracle offset
-                0,            // min XMR
-                0,          // max price
+                0,                 // min XMR
                 1_000_000_000_000, // max XMR
                 KEY_BASE + (i * 2),
                 KEY_BASE + (i * 2) + 1,

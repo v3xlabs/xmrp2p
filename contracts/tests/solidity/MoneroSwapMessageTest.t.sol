@@ -36,10 +36,7 @@ contract MoneroSwapMessageTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0), // counterparty
             1 ether, // fixed price
-            0, // oracle ratio
-            0, // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether, // max price
             KEY_BASE++, // public spend key
             KEY_BASE++, // public view key
             KEY_BASE++ // msg pub key
@@ -59,10 +56,7 @@ contract MoneroSwapMessageTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0), // counterparty
             1 ether, // fixed price
-            0, // oracle ratio
-            0, // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether, // max price
             KEY_BASE++, // public spend key
             KEY_BASE++, // public view key
             KEY_BASE++ // msg pub key
@@ -95,10 +89,7 @@ contract MoneroSwapMessageTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0), // counterparty
             1 ether, // fixed price
-            0, // oracle ratio
-            0, // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether, // max price
             KEY_BASE++, // public spend key
             KEY_BASE++, // public view key
             0 // msg pub key
@@ -114,10 +105,7 @@ contract MoneroSwapMessageTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0), // counterparty
             1 ether, // fixed price
-            0, // oracle ratio
-            0, // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether, // max price
             KEY_BASE++, // public spend key
             KEY_BASE++, // public view key
             0 // msg pub key
@@ -158,10 +146,7 @@ contract MoneroSwapMessageTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0), // counterparty
             1 ether, // fixed price
-            0, // oracle ratio
-            0, // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether, // max price
             KEY_BASE++, // public spend key
             KEY_BASE++, // public view key
             KEY_BASE++ // msg pub key

@@ -37,9 +37,6 @@ contract MoneroSwapDefundFundingRequestTest is Test {
             1 ether,
             0,
             0,
-            0,
-            0,
-            0,
             KEY_BASE + 1,
             KEY_BASE + 2,
             0

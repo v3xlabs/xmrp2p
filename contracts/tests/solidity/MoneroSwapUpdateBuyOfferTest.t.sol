@@ -7,7 +7,6 @@ import {MoneroSwap} from "../../src/MoneroSwap.sol";
 import "../../src/Errors.sol";
 import {OfferType, OfferState} from "../../src/Enums.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
-import {DummyPriceOracle} from "./DummyPriceOracle.t.sol";
 
 import {Utils} from "./Utils.t.sol";
 
@@ -33,10 +32,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             address(0),        // counterparty
             1 ether,           // max amount
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             0                  // msg pub key
         );
     }
@@ -50,10 +46,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             KEY_BASE + 1,      // public spend key
             KEY_BASE + 2,      // public view key
             0                  // msg pub key
@@ -68,10 +61,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             address(0),        // counterparty
             1 ether,           // max amount
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             0                  // msg pub key
         );
     }
@@ -87,10 +77,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             KEY_BASE + 3,      // public spend key
             KEY_BASE + 4,      // public view key
             0                  // msg pub key
@@ -121,10 +108,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             address(0),        // counterparty
             1 ether,           // max amount
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             0                  // msg pub key
         );        
     }
@@ -153,10 +137,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             KEY_BASE + 7,      // public spend key
             KEY_BASE + 8,      // public view key
             0                  // msg pub key
@@ -177,12 +158,9 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.updateBuyOffer(
             1,                 // offer id
             address(0),        // counterparty
-            0.5 ether,           // max amount
+            0.5 ether,         // max amount
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             0                  // msg pub key
         );
 
@@ -211,12 +189,9 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.updateBuyOffer(
             1,                 // offer id
             address(0),        // counterparty
-            0.75 ether,           // max amount
+            0.75 ether,        // max amount
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             0                  // msg pub key
         );
 
@@ -238,10 +213,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             address(0),        // counterparty
             1 ether,           // max amount
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             0                  // msg pub key
         );
 
@@ -274,133 +246,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             address(0),        // counterparty
             1 ether,           // max amount
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
-            0                  // msg pub key
-        );
-    }
-
-    function test_RevertWhen_NoPriceAndNoOracle() public {
-        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
-
-        // Create a buy offer
-        vm.deal(ADDR_1, 1 ether);
-        vm.prank(ADDR_1);        
-        moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1,                 // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
-            1_000_000_000_000, // min XMR
-            1 ether,           // max price
-            KEY_BASE + 11,     // public spend key
-            KEY_BASE + 12,     // public view key
-            0                  // msg pub key
-        );
-
-        // Attempt to update the offer with no price and no oracle
-        vm.deal(ADDR_1, 1 ether);
-        vm.prank(ADDR_1);
-        vm.expectRevert(ErrorBuyOfferNoPriceOracleDefined.selector);
-        moneroswap.updateBuyOffer(
-            1,                 // offer id
-            address(0),        // counterparty
-            1 ether,           // max amount
-            0,                 // price
-            1,                 // oracle ratio
-            0,                 // oracle offset
-            1_000_000_000_000, // min XMR
-            1 ether,           // max price
-            0                  // msg pub key
-        );
-    }
-
-    function test_RevertWhen_PriceAndOracleParams() public {
-        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
-
-        // Create a buy offer
-        vm.deal(ADDR_1, 1 ether);
-        vm.prank(ADDR_1);        
-        moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1,                 // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
-            1_000_000_000_000, // min XMR
-            1 ether,           // max price
-            KEY_BASE + 13,     // public spend key
-            KEY_BASE + 14,     // public view key
-            0                  // msg pub key
-        );
-
-        // Attempt to update the offer with a price and oracle params
-        vm.deal(ADDR_1, 1 ether);
-        vm.prank(ADDR_1);
-        vm.expectRevert(ErrorBuyOfferNoPriceRatioWithFixedPrice.selector);
-        moneroswap.updateBuyOffer(
-            1,                 // offer id
-            address(0),        // counterparty
-            1 ether,           // max amount
-            1 ether,           // price
-            1,                 // oracle ratio
-            0,                 // oracle offset
-            1_000_000_000_000, // min XMR
-            1 ether,           // max price
-            0                  // msg pub key
-        );
-
-                vm.deal(ADDR_1, 1 ether);
-        vm.prank(ADDR_1);
-        vm.expectRevert(ErrorBuyOfferNoPriceOffsetWithFixedPrice.selector);
-        moneroswap.updateBuyOffer(
-            1,                 // offer id
-            address(0),        // counterparty
-            1 ether,           // max amount
-            1 ether,           // price
-            0,                 // oracle ratio
-            1,                 // oracle offset
-            1_000_000_000_000, // min XMR
-            1 ether,           // max price
-            0                  // msg pub key
-        );
-    }
-
-    function test_RevertWhen_MissingMaxPrice() public {
-        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
-
-        // Create a buy offer
-        vm.deal(ADDR_1, 1 ether);
-        vm.prank(ADDR_1);        
-        moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1,                 // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
-            1_000_000_000_000, // min XMR
-            1 ether,           // max price
-            KEY_BASE + 15,     // public spend key
-            KEY_BASE + 16,     // public view key
-            0                  // msg pub key
-        );
-
-        // Attempt to update the offer with a missing max price when using an oracle
-        DummyPriceOracle oracle = new DummyPriceOracle(8, 100, block.timestamp);
-        vm.prank(msg.sender);
-        moneroswap.setPriceOracle(address(oracle), 100);
-        vm.deal(ADDR_1, 1 ether);
-        vm.prank(ADDR_1);
-        vm.expectRevert(ErrorBuyOfferMandatoryMaxpriceWithOraclePrice.selector);
-        moneroswap.updateBuyOffer(
-            1,                 // offer id
-            address(0),        // counterparty
-            1 ether,           // max amount
-            0,                 // price
-            1,                 // oracle ratio
-            1,                 // oracle offset
-            1_000_000_000_000, // min XMR
-            0,                 // max price
             0                  // msg pub key
         );
     }
@@ -414,31 +260,22 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.createBuyOffer{value: 1 ether}(
             address(0),        // counterparty
             1,                 // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             KEY_BASE + 17,     // public spend key
             KEY_BASE + 18,     // public view key
             0                  // msg pub key
         );
 
-        // Attempt to update the offer with a missing max price when using an oracle
-        DummyPriceOracle oracle = new DummyPriceOracle(8, 100, block.timestamp);
-        vm.prank(msg.sender);
-        moneroswap.setPriceOracle(address(oracle), 100);
+        // Attempt to update the offer with a value when reducing maxamount
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         vm.expectRevert(ErrorBuyOfferNoValueAllowedWhenReducingMaxamount.selector);
         moneroswap.updateBuyOffer{value: 1 wei}(
             1,                 // offer id
             address(0),        // counterparty
-            0.5 ether,           // max amount
-            0,                 // price
-            1,                 // oracle ratio
-            1,                 // oracle offset
+            0.5 ether,         // max amount
+            1,                 // price
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             0                  // msg pub key
         );
     }
@@ -453,10 +290,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.createBuyOffer{value: evmDeposit}(
             address(0),        // counterparty
             1,                 // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             1,                 // public spend key
             2,                 // public view key
             3                  // msg pub key
@@ -475,11 +309,8 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             address(0),        // counterparty
             evmDeposit,        // max amount
             1,                 // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_001, // min XMR
-            1 ether,           // max price
-            1                 // msg pub key
+            1                  // msg pub key
         );
 
         // Attempt to update offer with pub message key 2 (used public view key)
@@ -495,11 +326,8 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             address(0),        // counterparty
             evmDeposit,        // max amount
             1,                 // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_001, // min XMR
-            1 ether,           // max price
-            2                 // msg pub key
+            2                  // msg pub key
         );
 
         //
@@ -511,10 +339,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.createBuyOffer{value: evmDeposit}(
             address(1),        // counterparty
             1,                 // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             4,                 // public spend key
             5,                 // public view key
             6                  // msg pub key
@@ -533,10 +358,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             address(0),        // counterparty
             evmDeposit,        // max amount
             1,                 // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_001, // min XMR
-            1 ether,           // max price
             6                  // msg pub key
         ); 
 
@@ -549,10 +371,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             address(0),        // counterparty
             evmDeposit,        // max amount
             1,                 // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_001, // min XMR
-            1 ether,           // max price
             3                  // msg pub key
         );
 
@@ -565,10 +384,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             address(0),        // counterparty
             evmDeposit,        // max amount
             1,                 // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_001, // min XMR
-            1 ether,           // max price
             7                  // msg pub key
         );
 
@@ -588,10 +404,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             address(0),        // counterparty
             evmDeposit,        // max amount
             1,                 // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_001, // min XMR
-            1 ether,           // max price
             3                  // msg pub key
         );                          
     }
@@ -606,10 +419,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         moneroswap.createBuyOffer{value: evmDeposit}(
             address(1),        // counterparty
             1,                 // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // max price
             KEY_BASE + 19,     // public spend key
             KEY_BASE + 20,     // public view key
             9                  // msg pub key
@@ -624,11 +434,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         assertEq(offer.manager, ADDR_1);
         assertEq(offer.maxamount, evmDeposit);
         assertEq(offer.price, 1);
-        assertEq(offer.oracleRatio, 0);
-        assertEq(offer.oracleOffset, 0);
         assertEq(offer.minxmr, 1_000_000_000_000);
-        assertEq(offer.maxprice, 1); // Maxprice is set to the fixed price
-        assertEq(offer.minprice, 0);
         assertEq(offer.deposit, evmDeposit);
         assertEq(offer.funded, false);        
         assertEq(offer.counterparty, address(1));
@@ -667,10 +473,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
             address(4),        // counterparty
             1 ether,           // max amount
             2,                 // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_001, // min XMR
-            1 ether,           // max price
             42                 // msg pub key
         );
         
@@ -679,9 +482,7 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         assertEq(ADDR_1, offer.manager);
         assertEq(offer.price, 2);
         assertEq(offer.maxamount, 1 ether);
-        assertEq(offer.maxprice, 2);
         assertEq(offer.minxmr, 1_000_000_000_001);
-        assertEq(offer.minprice, 0);
         assertEq(offer.deposit, evmDeposit - 1 ether);
         assertEq(offer.evmPublicMsgKey, 42);
         
@@ -690,35 +491,24 @@ contract MoneroSwapUpdateBuyOfferTest is Test {
         assertEq(balanceBefore + (evmDeposit - 1 ether), ADDR_1.balance);
         assertEq(liabilityBefore - (evmDeposit - 1 ether), moneroswap.getLiability());
 
-        DummyPriceOracle oracle = new DummyPriceOracle(8, 100, block.timestamp);
-        vm.prank(msg.sender);
-        moneroswap.setPriceOracle(address(oracle), 100);
-
         liabilityBefore = moneroswap.getLiability();
-        // Now update the offer with a non 0 value and change the price to a dynamic one
+        // Now update the offer with a non 0 value
         vm.prank(ADDR_1);
         moneroswap.updateBuyOffer{value: 1 ether}(
             1,                 // offer id
             address(0),        // counterparty
             1 ether,           // max amount
-            0,                 // price
-            1,                 // oracle ratio
-            2,                 // oracle offset
+            3,                 // price
             1_000_000_000_002, // min XMR
-            100,               // max price
             0                  // msg pub key
         );
 
         offer = moneroswap.getBuyOffer(1);
         assertEq(address(0), offer.counterparty);
         assertEq(ADDR_1, offer.manager);
-        assertEq(offer.price, 0);
-        assertEq(offer.oracleRatio, 1);
-        assertEq(offer.oracleOffset, 2);
+        assertEq(offer.price, 3);
         assertEq(offer.maxamount, 2 ether);
-        assertEq(offer.maxprice, 100);
         assertEq(offer.minxmr, 1_000_000_000_002);
-        assertEq(offer.minprice, 0);
         assertEq(offer.deposit, evmDeposit);
         assertEq(offer.evmPublicMsgKey, 0);
 

@@ -7,7 +7,6 @@ import {MoneroSwap} from "../../src/MoneroSwap.sol";
 import "../../src/Errors.sol";
 import {OfferType, OfferState} from "../../src/Enums.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
-import {DummyPriceOracle} from "./DummyPriceOracle.t.sol";
 import {Ed25519} from "../../src/Ed25519.sol";
 
 import {Utils} from "./Utils.t.sol";
@@ -48,10 +47,7 @@ contract MoneroSwapTakeSellOfferTest is Test {
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // min price
             1_000_000_000_000, // maxxmr
             KEY_BASE + 3,      // public spend key
             KEY_BASE + 4,      // public view key
@@ -97,10 +93,7 @@ contract MoneroSwapTakeSellOfferTest is Test {
         moneroswap.createSellOffer{value: 1 ether}(
             ADDR_2,            // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // min price
             1_000_000_000_000, // maxxmr
             KEY_BASE + 9,      // public spend key
             KEY_BASE + 10,     // public view key
@@ -134,10 +127,7 @@ contract MoneroSwapTakeSellOfferTest is Test {
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // min price
             1_000_000_000_000, // maxxmr
             KEY_BASE + 13,     // public spend key
             KEY_BASE + 14,     // public view key
@@ -171,10 +161,7 @@ contract MoneroSwapTakeSellOfferTest is Test {
         moneroswap.createSellOffer{value: 2 ether}(
             address(0),        // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // min price
             2_000_000_000_000, // maxxmr
             KEY_BASE + 17,     // public spend key
             KEY_BASE + 18,     // public view key
@@ -211,10 +198,7 @@ contract MoneroSwapTakeSellOfferTest is Test {
         moneroswap.createSellOffer{value: 2 ether}(
             address(0),        // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // min price
             2_000_000_000_000, // maxxmr
             KEY_BASE + 21,     // public spend key
             KEY_BASE + 22,     // public view key
@@ -232,12 +216,12 @@ contract MoneroSwapTakeSellOfferTest is Test {
             )
         );
         moneroswap.takeSellOffer{value: 1 ether}(
-            1,                 // offer id
+            1,                     // offer id
             UNITS_PER_XMR * 3 / 2, // minxmr
-            1 ether,           // maxprice
-            KEY_BASE + 23,     // publicspendkey
-            KEY_BASE + 24,     // privateviewkey
-            0                  // msgpubkey
+            1 ether,               // maxprice
+            KEY_BASE + 23,         // publicspendkey
+            KEY_BASE + 24,         // privateviewkey
+            0                      // msgpubkey
         );
     }
 
@@ -250,10 +234,7 @@ contract MoneroSwapTakeSellOfferTest is Test {
         moneroswap.createSellOffer{value: 2 ether}(
             address(0),        // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // min price
             2_000_000_000_000, // maxxmr
             1,                 // public spend key
             2,                 // public view key
@@ -306,10 +287,7 @@ contract MoneroSwapTakeSellOfferTest is Test {
         moneroswap.createSellOffer{value: 2 ether}(
             address(0),        // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
-            UNITS_PER_XMR,     // min XMR
-            1 ether,           // min price
+            1_000_000_000_000, // min XMR
             UNITS_PER_XMR * 2, // maxxmr
             1,                 // public spend key
             2,                 // public view key
@@ -396,10 +374,7 @@ contract MoneroSwapTakeSellOfferTest is Test {
         moneroswap.createSellOffer{value: 2 ether}(
             address(0),        // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             UNITS_PER_XMR,     // min XMR
-            1 ether,           // min price
             UNITS_PER_XMR * 2, // maxxmr
             11,                // public spend key
             12,                // public view key
@@ -435,16 +410,13 @@ contract MoneroSwapTakeSellOfferTest is Test {
 
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
-            minxmr,            // min XMR 
-            1 ether,           // min price
-            maxxmr,            // max XMR
-            KEY_BASE + 25,     // public spend key
-            KEY_BASE + 26,     // public view key
-            0                  // msg pub key
+            address(0),    // counterparty
+            1 ether,       // fixed price
+            minxmr,        // min XMR 
+            maxxmr,        // max XMR
+            KEY_BASE + 25, // public spend key
+            KEY_BASE + 26, // public view key
+            0              // msg pub key
         );     
 
         ///
@@ -496,16 +468,13 @@ contract MoneroSwapTakeSellOfferTest is Test {
         vm.deal(ADDR_1, maxamount * 2);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: maxamount}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
-            minxmr,            // min XMR 
-            1 ether,           // min price
-            maxxmr,            // max XMR
-            KEY_BASE + 29,     // public spend key
-            KEY_BASE + 30,     // public view key
-            3                  // msg pub key
+            address(0),    // counterparty
+            1 ether,       // fixed price
+            minxmr,        // min XMR 
+            maxxmr,        // max XMR
+            KEY_BASE + 29, // public spend key
+            KEY_BASE + 30, // public view key
+            3              // msg pub key
         );     
 
         ///
@@ -525,7 +494,7 @@ contract MoneroSwapTakeSellOfferTest is Test {
             1 ether,           // maxprice
             KEY_BASE + 31,     // publicspendkey
             KEY_BASE + 32,     // privateviewkey
-            6                 // msgpubkey
+            6                  // msgpubkey
         );
 
         // Read the offer just created
@@ -548,10 +517,7 @@ contract MoneroSwapTakeSellOfferTest is Test {
         moneroswap.createSellOffer{value: 2 ether}(
             address(0),        // counterparty
             1 ether,           // price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // min price
             2_000_000_000_000, // maxxmr
             KEY_BASE + 33,     // public spend key
             KEY_BASE + 34,     // public view key

@@ -39,10 +39,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
         moneroswap.createSellOffer{value: 1 ether}(
             address(0),        // counterparty
             1 ether,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            1 ether,           // min price
             1,                 // max XMR
             KEY_BASE + 1,      // public spend key
             KEY_BASE + 2,      // public view key
@@ -68,10 +65,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
         moneroswap.createSellOffer{value: deposit}(
             address(0),        // counterparty
             deposit,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            deposit,           // min price
             1_000_000_000_000, // max XMR
             KEY_BASE + 3,      // public spend key
             KEY_BASE + 4,      // public view key
@@ -110,10 +104,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
         moneroswap.createSellOffer{value: deposit}(
             address(0),        // counterparty
             deposit,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            deposit,           // min price
             1_000_000_000_000, // max XMR
             KEY_BASE + 7,      // public spend key
             KEY_BASE + 8,      // public view key
@@ -149,10 +140,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
         moneroswap.createSellOffer{value: 0}(
             address(0),        // counterparty
             amount,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            amount,           // min price
             1_000_000_000_000, // max XMR
             KEY_BASE + 9,      // public spend key
             KEY_BASE + 10,     // public view key
@@ -192,10 +180,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
         moneroswap.createSellOffer{value: 0}(
             address(0),        // counterparty
             amount,           // fixed price
-            0,                 // oracle ratio
-            0,                 // oracle offset
             1_000_000_000_000, // min XMR
-            amount,           // min price
             1_000_000_000_000, // max XMR
             KEY_BASE + 11,     // public spend key
             KEY_BASE + 12,     // public view key

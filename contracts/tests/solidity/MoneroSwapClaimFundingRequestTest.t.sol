@@ -97,10 +97,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
         moneroswap.createSellOffer{value: 0}(
             address(0), // counterparty
             amount, // fixed price
-            0, // oracle ratio
-            0, // oracle offset
             1_000_000_000_000, // min XMR
-            amount, // max price
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
             xmrPrivateViewKey, // private view key
@@ -173,10 +170,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
         moneroswap.createSellOffer{value: 0}(
             address(0), // counterparty
             amount, // fixed price
-            0, // oracle ratio
-            0, // oracle offset
             1_000_000_000_000, // min XMR
-            amount, // max price
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
             xmrPrivateViewKey, // private view key
@@ -249,10 +243,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
         moneroswap.createSellOffer{value: 0}(
             address(0), // counterparty
             amount, // fixed price
-            0, // oracle ratio
-            0, // oracle offset
             1_000_000_000_000, // min XMR
-            amount, // max price
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
             xmrPrivateViewKey, // private view key

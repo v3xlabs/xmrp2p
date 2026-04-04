@@ -20,7 +20,6 @@
 
 pragma solidity ^0.8.34;
 
-import {AggregatorV3Interface} from "./AggregatorV3Interface.sol";
 import {Ed25519} from "./Ed25519.sol";
 import "./Errors.sol";
 import "./Enums.sol";
@@ -49,7 +48,7 @@ contract MoneroSwap {
     uint256 constant MINIMUM_DELAY = 24 * 3_600; // twenty-four hours
 
     /// Contract Parameters.
-    /// Those parameters may be set by the constructor or via the setParameters / setPriceOracle / setSavingsXDAIParameters functions
+    /// Those parameters may be set by the constructor or via the setParameters / setSavingsXDAIParameters functions
     struct Parameters {
         /// Maximum balance for requesting funding. Any account with a balance over this limit will not be able to create a funding request.
         /// Set this to 1 to disable the possibility to create funding requests
@@ -71,8 +70,6 @@ contract MoneroSwap {
         /// The sell offer coverage ratio. A sell offer with a deposit of X cannot be taken
         /// for more than X * RATIO_DENOMINATOR / SELL_OFFER_COVERAGE_RATIO
         uint256 SELL_OFFER_COVERAGE_RATIO;
-        /// Maximum age of oracle price, in seconds.
-        uint256 XMREVMMaxage;
         //
         // The atomic swap protocol relies on two milestones t0 and t1 which define what each party can do.
         //
@@ -90,15 +87,6 @@ contract MoneroSwap {
         uint256 T0_DELAY;
         /// Delay (in s) between t0 and t1
         uint256 T1_DELAY;
-        //
-        // Oracle parameters
-        //
-
-        /// Oracle contract for determining the XMR price in EVM base unit (xDAI, POL, ETH, ...)
-        /// This contract must implement ChainLink's AggregatorV3Interface
-        address XMREVM;
-        /// Oracle decimals. Number of decimals used for expressing the price of XMR in the native EVM curreny
-        uint8 XMREVMDecimals;
     }
 
     //
@@ -240,11 +228,8 @@ contract MoneroSwap {
     /// Create a new buy offer
     ///
     /// @param counterparty The address of a designated counterparty for the offer. Set to 0 to allow offer to be taken by any address.
-    /// @param price The (fixed) price of the offer. If this value is not 0, the price will be used as-is. If this value is 0, the price will be determined by the oracle.
-    /// @param oracleRatio The oracle ratio of the offer. This is only used if the price is 0. It is a percentage of the oracle price (expressed in parts of RATIO_DENOMINATOR).
-    /// @param oracleOffset The oracle offset of the offer. This is only used when using the oracle price, it is an offset to apply to the oracle price multiplied by oracleRatio. This can be used to set an offer price 1 xDAI above the oracle price for example.
+    /// @param price The (fixed) price of the offer, in wei per XMR.
     /// @param minxmr The minimum amount of XMR the offer is willing to buy. The offer cannot be taken if it would lead to less than this minimum. Value is expressed in piconeros
-    /// @param maxprice The maximum price the offer is willing to pay. Value is expressed in wei per XMR.
     /// @param publicspendkey The Monero public spend key.
     /// @param publicviewkey The Monero public view key.
     /// @param msgpubkey The messaging public key. This key is used to derive an encryption key to encrypt messages between the owner and its counterparty.
@@ -252,10 +237,7 @@ contract MoneroSwap {
     function createBuyOffer(
         address counterparty,
         uint256 price,
-        uint256 oracleRatio,
-        int256 oracleOffset,
         uint256 minxmr,
-        uint256 maxprice,
         uint256 publicspendkey,
         uint256 publicviewkey,
         uint256 msgpubkey
@@ -310,35 +292,11 @@ contract MoneroSwap {
             ErrorBuyOfferAmountAboveMaximum(PARAMETERS.MAXIMUM_BUY_OFFER)
         );
 
-        // Offer must either have a fixed price or a dynamic one with a non 0 ratio
-        require(0 != price || 0 != oracleRatio, ErrorBuyOfferNoPriceDefined());
+        // Price must be specified (no oracle fallback)
+        require(0 != price, ErrorBuyOfferNoPriceDefined());
 
-        //
-        // When no oracle is defined, price cannot be 0
-        //
-
-        if (address(0) == address(PARAMETERS.XMREVM)) {
-            require(0 != price, ErrorBuyOfferNoPriceOracleDefined());
-        }
-
-        if (0 != price) {
-            require(
-                0 == oracleRatio,
-                ErrorBuyOfferNoPriceRatioWithFixedPrice()
-            );
-            require(
-                0 == oracleOffset,
-                ErrorBuyOfferNoPriceOffsetWithFixedPrice()
-            );
-            // Force maxprice to the fixed price
-            maxprice = price;
-        } else {
-            // Require that maxprice be set
-            require(
-                0 != maxprice,
-                ErrorBuyOfferMandatoryMaxpriceWithOraclePrice()
-            );
-        }
+        // Price must be specified (no oracle fallback)
+        require(0 != price, ErrorBuyOfferNoPriceDefined());
 
         Offer memory offer;
 
@@ -352,10 +310,7 @@ contract MoneroSwap {
         offer.maxamount = msg.value;
         offer.deposit = msg.value;
         offer.price = price;
-        offer.oracleRatio = oracleRatio;
-        offer.oracleOffset = oracleOffset;
         offer.minxmr = minxmr;
-        offer.maxprice = maxprice;
         offer.evmPublicSpendKey = publicspendkey;
         offer.evmPublicViewKey = publicviewkey;
         offer.evmPublicMsgKey = msgpubkey;
@@ -382,21 +337,15 @@ contract MoneroSwap {
     /// @param id the id of the offer to update
     /// @param counterparty address of explicit counterparty. Use 0x0 to allow any account to take the offer
     /// @param maxamount maximum amount to spend for buying Monero. This is used to reduce the maximum amount, in which case part of the deposit will be sent back
-    /// @param price fixed price at which the buyer is willing to buy Monero (in wei per Monero). If 0, the price will be determined by the oracle
-    /// @param oracleRatio the oracle ratio of the offer. This is only used if the price is 0. It is a percentage of the oracle price (expressed in parts of RATIO_DENOMINATOR)
-    /// @param oracleOffset the oracle offset of the offer. This is only used when using the oracle price, it is an offset to apply to the oracle price multiplied by oracleRatio. This can be used to set an offer price 1 xDAI above the oracle price for example
+    /// @param price fixed price at which the buyer is willing to buy Monero (in wei per Monero)
     /// @param minxmr the minimum amount of XMR the buyer is willing to buy. The offer cannot be taken if it would lead to less than this minimum. Value is expressed in piconeros
-    /// @param maxprice the maximum price the buyer is willing to pay. Value is expressed in wei per XMR. When using fixed pricing, maxprice is forced to the price.
     /// @param msgpubkey The messaging public key. This key is used to derive an encryption key to encrypt messages between the owner and its counterparty
     function updateBuyOffer(
         uint256 id,
         address counterparty,
         uint256 maxamount,
         uint256 price,
-        uint256 oracleRatio,
-        int256 oracleOffset,
         uint256 minxmr,
-        uint256 maxprice,
         uint256 msgpubkey
     ) public payable nonReentrant {
         Offer storage offer = buyOffers[id];
@@ -452,39 +401,8 @@ contract MoneroSwap {
             offer.minxmr = minxmr;
         }
 
-        if (0 != maxprice) {
-            offer.maxprice = maxprice;
-        }
-
-        if (0 != price || 0 != oracleRatio) {
-            //
-            // When no oracle is defined, price cannot be 0
-            //
-            if (address(0) == address(PARAMETERS.XMREVM)) {
-                require(0 != price, ErrorBuyOfferNoPriceOracleDefined());
-            }
-
-            if (0 != price) {
-                require(
-                    0 == oracleRatio,
-                    ErrorBuyOfferNoPriceRatioWithFixedPrice()
-                );
-                require(
-                    0 == oracleOffset,
-                    ErrorBuyOfferNoPriceOffsetWithFixedPrice()
-                );
-                // price is fixed, force maxprice to the same value
-                offer.maxprice = price;
-            } else {
-                require(
-                    0 != maxprice,
-                    ErrorBuyOfferMandatoryMaxpriceWithOraclePrice()
-                );
-            }
-
+        if (0 != price) {
             offer.price = price;
-            offer.oracleRatio = oracleRatio;
-            offer.oracleOffset = oracleOffset;
         }
 
         //
@@ -632,22 +550,12 @@ contract MoneroSwap {
 
         require(0 == msgpubkey || !usedMsgKey, ErrorBuyOfferUsedMessageKey());
 
-        // Compute the buy offer current price (by querying the oracle if need be)
-        // Price is in wei per XMR
-        // The minprice limit will be checked in getXMRPrice
-        uint256 price = getXMRPrice(
-            offer.type_,
-            offer.price,
-            offer.oracleRatio,
-            offer.oracleOffset,
-            minprice
-        );
-
-        // Price computed from the oracle may be above the maximum for the offer
+        // Verify the offer's fixed price meets the taker's minimum
         require(
-            price <= offer.maxprice,
-            ErrorBuyOfferPriceTooHigh(price, offer.maxprice)
+            offer.price >= minprice,
+            ErrorBuyOfferPriceTooLow(offer.price, minprice)
         );
+        uint256 price = offer.price;
 
         // Compute the maximum transaction amount (in wei) given the deposit/funding and the coverage ratio
         amount =
@@ -787,11 +695,8 @@ contract MoneroSwap {
 
     /// Create a sell offer.
     /// @param counterparty address of an explicit counterparty. Use 0x0 to allow any account to take the offer
-    /// @param price fixed price, in wei per XMR. Use 0 if you want to use dynamic pricing
-    /// @param oracleRatio when using dynamic pricing, this is a ratio to apply to the price returned by the oracle. actual ratio if this value divided by RATIO_DENOMINATOR
-    /// @param oracleOffset when using dynamic pricing, apply this offset to the price computed using oracleRatio. Offset is expressed in wei.
+    /// @param price fixed price, in wei per XMR
     /// @param minxmr minimum amount of XMR (in piconeros) the seller is willing to sell
-    /// @param minprice minimum price, in wei per XMR, the seller is asking. When using a fixed price, minprice is forced to price.
     /// @param maxxmr maximum amount of XMR (in piconeros) the seller can provide.
     /// @param publicspendkey Monero public spend key
     /// @param privateviewkey Monero private view key
@@ -799,10 +704,7 @@ contract MoneroSwap {
     function createSellOffer(
         address counterparty,
         uint256 price,
-        uint256 oracleRatio,
-        int256 oracleOffset,
         uint256 minxmr,
-        uint256 minprice,
         uint256 maxxmr,
         uint256 publicspendkey,
         uint256 privateviewkey,
@@ -902,40 +804,13 @@ contract MoneroSwap {
             ErrorSellOfferAmountAboveMaximum(PARAMETERS.MAXIMUM_SELL_OFFER)
         );
 
-        // Offer must either have a fixed price or a dynamic one with a non 0 ratio
-        require(0 != price || 0 != oracleRatio, ErrorSellOfferNoPriceDefined());
-
-        //
-        // When no oracle is defined, price cannot be 0
-        //
-
-        if (address(0) == address(PARAMETERS.XMREVM)) {
-            require(0 != price, ErrorSellOfferNoPriceOracleDefined());
-        }
-
-        if (0 != price) {
-            require(
-                0 == oracleRatio,
-                ErrorSellOfferNoPriceRatioWithFixedPrice()
-            );
-            require(
-                0 == oracleOffset,
-                ErrorSellOfferNoPriceOffsetWithFixedPrice()
-            );
-            // When using a fixed price, force minprice to that value
-            minprice = price;
-        } else {
-            require(0 != oracleRatio, ErrorSellOfferInvalidOraclePriceRatio());
-            require(
-                0 != minprice,
-                ErrorSellOfferMandatoryMinpriceWithOraclePrice()
-            );
-        }
+        // Price must be specified
+        require(0 != price, ErrorSellOfferNoPriceDefined());
 
         // If the offer is funded by a FundingRequest ensure that the minimum settlement amount covers the fee
         if (offer.funded) {
             require(
-                (minprice * minxmr) / UNITS_PER_XMR >= freq.fee,
+                (price * minxmr) / UNITS_PER_XMR >= freq.fee,
                 ErrorSellOfferAmountTooLowToCoverFundingFee()
             );
         }
@@ -949,10 +824,7 @@ contract MoneroSwap {
         offer.manager = msg.sender;
         offer.maxamount = amount;
         offer.price = price;
-        offer.oracleRatio = oracleRatio;
-        offer.oracleOffset = oracleOffset;
         offer.minxmr = minxmr;
-        offer.minprice = minprice;
         offer.maxxmr = maxxmr;
         offer.xmrPublicSpendKey = publicspendkey;
         offer.xmrPrivateViewKey = privateviewkey;
@@ -974,20 +846,14 @@ contract MoneroSwap {
     /// @param id id of the offer to update
     /// @param counterparty address of an explicit counterparty, or 0x0 to allow any account to take the offer
     /// @param price Fixed price at which the XMR will be sold
-    /// @param oracleRatio Price ratio vs oracle price, in parts of RATIO_DENOMINATOR
-    /// @param oracleOffset Price offset vs oracle price, in wei
     /// @param minxmr Minimum amount of XMR (in piconeros) the owner is willing to sell
-    /// @param minprice Minimum price in wei per XMR the owner is willing to get per XMR. This will be set to price if price is not 0. This must be non 0 when using a price oracle.
     /// @param maxxmr Maximum amount of XMR (in piconeros) the owner is willing to sell
     /// @param msgpubkey Public key for exchanging messages (using ECDH to compute the encryption key) between the two parties
     function updateSellOffer(
         uint256 id,
         address counterparty,
         uint256 price,
-        uint256 oracleRatio,
-        int256 oracleOffset,
         uint256 minxmr,
-        uint256 minprice,
         uint256 maxxmr,
         uint256 msgpubkey
     ) public payable {
@@ -1028,52 +894,12 @@ contract MoneroSwap {
             liability += msg.value;
         }
 
-        if (0 != minprice) {
-            offer.minprice = minprice;
-        }
-
-        if (0 != price || 0 != oracleRatio) {
-            //
-            // When no oracle is defined, price cannot be 0
-            //
-            if (address(0) == address(PARAMETERS.XMREVM)) {
-                require(0 != price, ErrorSellOfferNoPriceOracleDefined());
-            }
-
-            if (0 != price) {
-                require(
-                    0 == oracleRatio,
-                    ErrorSellOfferNoPriceRatioWithFixedPrice()
-                );
-                require(
-                    0 == oracleOffset,
-                    ErrorSellOfferNoPriceOffsetWithFixedPrice()
-                );
-                // If using a fixed price, force minprice to the same value
-                offer.minprice = price;
-            } else {
-                // This should never happen, but just in case we check the requirement
-                require(
-                    0 != offer.minprice,
-                    ErrorSellOfferMandatoryMinpriceWithOraclePrice()
-                );
-            }
-
+        if (0 != price) {
             offer.price = price;
-            offer.oracleRatio = oracleRatio;
-            offer.oracleOffset = oracleOffset;
         }
 
         if (0 != minxmr) {
             offer.minxmr = minxmr;
-        }
-
-        // If the offer is funded by a FundingRequest ensure that the minimum settlement amount covers the fee
-        if (offer.funded) {
-            require(
-                (offer.minprice * offer.minxmr) / UNITS_PER_XMR >= freq.fee,
-                ErrorSellOfferAmountTooLowToCoverFundingFee()
-            );
         }
 
         if (0 != maxxmr) {
@@ -1126,7 +952,7 @@ contract MoneroSwap {
         uint256 publicviewkey,
         uint256 msgpubkey
     ) public payable nonReentrant {
-        // Ensure the buy offer exists and is not yet taken
+        // Ensure the sell offer exists and is not yet taken
         Offer storage offer = sellOffers[id];
 
         require(OfferType.SELL == offer.type_, ErrorSellOfferUnknown());
@@ -1154,15 +980,12 @@ contract MoneroSwap {
 
         require(0 == msgpubkey || !usedMsgKey, ErrorSellOfferUsedMessageKey());
 
-        // Compute the buy offer current price (by querying the oracle if need be)
-        // Price is in wei per XMR
-        uint256 price = getXMRPrice(
-            offer.type_,
-            offer.price,
-            offer.oracleRatio,
-            offer.oracleOffset,
-            maxprice
+        // Verify the offer's fixed price meets the taker's maximum
+        require(
+            offer.price <= maxprice,
+            ErrorSellOfferPriceTooHigh(offer.price, maxprice)
         );
+        uint256 price = offer.price;
 
         // Compute the amount of picoxmr the taker can buy (limited by the offer's maxamount)
         uint256 picoxmr = ((
@@ -2035,126 +1858,6 @@ contract MoneroSwap {
     ///
     function getLiability() public view returns (uint256) {
         return liability;
-    }
-
-    /// Retrieve the price for an offer, computing oracle based pricing and checking valid ranges
-    /// @param offerType The type of offer for which to compute price
-    /// @param offerPrice The fixed price set for the offer
-    /// @param offerOracleRatio The oracle ratio used for the offer
-    /// @param offerOracleOffset The oracle price offset used for the offer
-    /// @param price The price specified by the taker (minprice when taking a Buy Offer, maxprice when taking a Sell Offer)
-    function getXMRPrice(
-        OfferType offerType,
-        uint256 offerPrice,
-        uint256 offerOracleRatio,
-        int256 offerOracleOffset,
-        uint256 price
-    ) public view returns (uint256) {
-        if (OfferType.BUY == offerType) {
-            if (0 != offerOracleRatio || 0 != offerOracleOffset) {
-                require(
-                    address(0) != PARAMETERS.XMREVM,
-                    ErrorBuyOfferNoPriceOracleDefined()
-                );
-
-                (
-                    ,
-                    /* uint80 roundId */ int256 answer,
-                    ,
-                    /* uint256 startedAt */ uint256 updatedAt /* uint80 answeredInRound */,
-
-                ) = AggregatorV3Interface(PARAMETERS.XMREVM).latestRoundData();
-
-                //
-                // Check oracle price validity
-                //
-
-                require(
-                    block.timestamp - updatedAt <= PARAMETERS.XMREVMMaxage,
-                    ErrorBuyOfferOraclePriceTooOld()
-                );
-
-                int256 dynamicPrice = ((answer *
-                    int256(10 ** (EVM_DECIMALS - PARAMETERS.XMREVMDecimals)) *
-                    int256(offerOracleRatio)) / int256(RATIO_DENOMINATOR)) +
-                    offerOracleOffset;
-                require(dynamicPrice > 0, ErrorBuyOfferNegativeDynamicPrice());
-
-                uint256 oraclePrice = uint256(dynamicPrice);
-
-                require(
-                    oraclePrice >= price,
-                    ErrorBuyOfferPriceTooLow(oraclePrice, price)
-                );
-
-                return oraclePrice;
-            } else {
-                require(
-                    offerPrice >= price,
-                    ErrorBuyOfferPriceTooLow(offerPrice, price)
-                );
-                return offerPrice;
-            }
-        } else if (OfferType.SELL == offerType) {
-            if (0 != offerOracleRatio || 0 != offerOracleOffset) {
-                require(
-                    address(0) != PARAMETERS.XMREVM,
-                    ErrorSellOfferNoPriceOracleDefined()
-                );
-
-                (
-                    ,
-                    /* uint80 roundId */ int256 answer,
-                    ,
-                    /* uint256 startedAt */ uint256 updatedAt /* uint80 answeredInRound */,
-
-                ) = AggregatorV3Interface(PARAMETERS.XMREVM).latestRoundData();
-
-                //
-                // Check oracle price validity
-                //
-                require(
-                    block.timestamp - updatedAt <= PARAMETERS.XMREVMMaxage,
-                    ErrorSellOfferOraclePriceTooOld()
-                );
-
-                int256 dynamicPrice = ((answer *
-                    int256(10 ** (EVM_DECIMALS - PARAMETERS.XMREVMDecimals)) *
-                    int256(offerOracleRatio)) / int256(RATIO_DENOMINATOR)) +
-                    offerOracleOffset;
-                require(dynamicPrice > 0, ErrorSellOfferNegativeDynamicPrice());
-
-                uint256 oraclePrice = uint256(dynamicPrice);
-
-                require(
-                    oraclePrice <= price,
-                    ErrorSellOfferPriceTooHigh(oraclePrice, price)
-                );
-
-                return oraclePrice;
-            } else {
-                require(
-                    offerPrice <= price,
-                    ErrorSellOfferPriceTooHigh(offerPrice, price)
-                );
-                return offerPrice;
-            }
-        } else {
-            revert ErrorInvalidOfferType();
-        }
-    }
-
-    /// Set the price oracle.
-    /// @param oracle Address of oracle contract (instance of AggregatorV3Interface). Use 0 to disable oracle.
-    /// @param maxage Maximum age of the price data, in s
-    function setPriceOracle(address oracle, uint256 maxage) public {
-        require(msg.sender == owner, ErrorNotOwner());
-        PARAMETERS.XMREVM = oracle;
-        if (address(0) != oracle) {
-            PARAMETERS.XMREVMDecimals = AggregatorV3Interface(PARAMETERS.XMREVM)
-                .decimals();
-            PARAMETERS.XMREVMMaxage = maxage;
-        }
     }
 
     /// Function which checks if a key has already been used and would not be accepted

@@ -27,11 +27,16 @@ const counterparty = fromPublicKey(
 );
 
 const xmrPriceInEth = Value.fromEther("0.1");
+const minXmr = Value.fromEther("0.01"); // 0.01 XMR in piconeros
 
 const buyOfferParams = createBuyOfferParameters({
   counterparty,
   contractAddress: MONERO_SWAP_ADDRESS,
   price: xmrPriceInEth,
+  minxmr: minXmr,
+  publicspendkey: 12345678901234567890123456789012345678901234567890123456789012345n,
+  publicviewkey: 98765432109876543210987654321098765432109876543210987654321098765n,
+  msgpubkey: 11111111111111111111111111111111111111111111111111111111111111111n,
 });
 
 const hash = await sendTransaction({
@@ -39,5 +44,6 @@ const hash = await sendTransaction({
   privateKey: offerCreatorPk,
   provider,
   chainId: 31_337,
+  value: Value.fromEther("1"),
   ...buyOfferParams,
 });

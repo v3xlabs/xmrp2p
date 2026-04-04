@@ -22,20 +22,12 @@ struct Offer {
     /// Maximum trade amount (in wei). This is set from the value transfered during the call to create{Buy,Sell}Offer
     /// and updated by calls to update{Buy,Sell}Offer
     uint256 maxamount;
-    /// Fixed price of the offer, in wei per XMR. If this is 0, then reliance on the oracle is assumed and an oracle MUST be defined.
+    /// Fixed price of the offer, in wei per XMR
     uint256 price;
-    /// Price ratio vs oracle price, in parts of RATIO_DENOMINATOR
-    uint256 oracleRatio;
-    /// Price offset vs oracle price, in wei. This is so one can set a price to be the oracle price minus 1000 gwei for example.
-    int256 oracleOffset;
     /// Minimum amount of XMR the owner is willing to buy (Buy offers)
     uint256 minxmr;
     /// Maximum amount of XMR the owner is willing to sell (Sell offers)
     uint256 maxxmr;
-    /// Maximum price in wei per XMR the owner is willing to pay (for Buy offers)
-    uint256 maxprice;
-    /// Minimum price in wei per XMR the owner is willing to get for its XMR (for Sell offers)
-    uint256 minprice;
     /// Deposit related to the offer
     uint256 deposit;
     /// Timestamp when the offer was created or last updated (so users can asses of its freshness)
