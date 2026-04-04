@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax */
+import { openlv } from "@openlv/connector";
 import { QueryClient } from "@tanstack/solid-query";
 import { createConfig, http } from "@wagmi/solid";
 import { localhost, mainnet, sepolia } from "@wagmi/solid/chains";
@@ -22,4 +23,7 @@ export const config = createConfig({
         [sepolia.id]: http(),
         [localhost.id]: http("http://127.0.0.1:8545"),
     },
+    connectors: [
+        openlv(),
+    ],
 });

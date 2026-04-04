@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@kobalte/core": "^0.13.11",
+    "@openlv/connector": "0.0.1-beta.12",
     "@tanstack/solid-query": "^5.96.2",
     "@tanstack/solid-table": "^8.21.3",
     "@wagmi/solid": "^0.0.5",
