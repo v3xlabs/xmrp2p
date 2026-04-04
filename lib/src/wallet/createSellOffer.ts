@@ -1,7 +1,7 @@
 import { encodeData } from "ox/AbiFunction";
 import { Address } from "ox/Address";
 
-import type { ContractCall } from "../types";
+import type { ContractWriteParameters } from "../types";
 
 const abi = {
     type: "function",
@@ -62,8 +62,7 @@ const abi = {
     stateMutability: "payable",
 } as const;
 
-export const createSellOffer = ({
-    provider,
+export const createSellOfferParameters = ({
     contractAddress,
     counterparty,
     price,
@@ -75,7 +74,7 @@ export const createSellOffer = ({
     publicspendkey,
     privateviewkey,
     msgpubkey,
-}: ContractCall<{
+}: ContractWriteParameters<{
     counterparty: Address;
     price: bigint;
     oracleRatio: bigint;
@@ -86,24 +85,18 @@ export const createSellOffer = ({
     publicspendkey: bigint;
     privateviewkey: bigint;
     msgpubkey: bigint;
-}>) =>
-    provider.request({
-        method: "eth_call",
-        params: [
-            {
-                data: encodeData(abi, [
-                    counterparty,
-                    price,
-                    oracleRatio,
-                    oracleOffset,
-                    minxmr,
-                    minprice,
-                    maxxmr,
-                    publicspendkey,
-                    privateviewkey,
-                    msgpubkey,
-                ]),
-                to: contractAddress,
-            },
-        ],
-    });
+}>) => ({
+    data: encodeData(abi, [
+        counterparty,
+        price,
+        oracleRatio,
+        oracleOffset,
+        minxmr,
+        minprice,
+        maxxmr,
+        publicspendkey,
+        privateviewkey,
+        msgpubkey,
+    ]),
+    to: contractAddress,
+});
