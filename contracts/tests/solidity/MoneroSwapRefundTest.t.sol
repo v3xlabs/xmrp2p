@@ -60,8 +60,7 @@ contract MoneroSwapRefundTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -72,8 +71,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
         vm.prank(ADDR_1);
         moneroswap.ready(1);
@@ -120,8 +118,7 @@ contract MoneroSwapRefundTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -132,8 +129,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
         vm.prank(ADDR_1);
         moneroswap.ready(1);
@@ -176,8 +172,7 @@ contract MoneroSwapRefundTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -188,8 +183,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         Offer memory offer = moneroswap.getBuyOffer(1);
@@ -225,8 +219,7 @@ contract MoneroSwapRefundTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -237,8 +230,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         // Ready the offer
@@ -278,8 +270,7 @@ contract MoneroSwapRefundTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -290,8 +281,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         Offer memory offer = moneroswap.getBuyOffer(1);
@@ -327,8 +317,7 @@ contract MoneroSwapRefundTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -339,8 +328,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         Offer memory offer = moneroswap.getBuyOffer(1);
@@ -376,8 +364,7 @@ contract MoneroSwapRefundTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -388,8 +375,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         // Attempt to refund the offer with an invalid private view key
@@ -422,8 +408,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -434,8 +419,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         // Advance the block number as we cannot call take and refund in the same block
@@ -479,8 +463,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -491,8 +474,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         // Ready the offer
@@ -538,8 +520,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -550,8 +531,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         // Advance block number since we cannot call take and refund within the same block
@@ -594,8 +574,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -606,8 +585,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         // Ready the offer
@@ -651,8 +629,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -663,8 +640,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         // Advance block number since we cannot call take and refund in the same block
@@ -704,8 +680,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -716,8 +691,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         // Advance block number since we cannot call take and refund in the same block
@@ -753,8 +727,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -765,8 +738,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         // Advance block number since we cannot call take and revert within the same block
@@ -807,8 +779,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -819,8 +790,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         // Refund the offer
@@ -855,8 +825,7 @@ contract MoneroSwapRefundTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -867,8 +836,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         uint256 addr1BalanceBefore = ADDR_1.balance;
@@ -917,8 +885,7 @@ contract MoneroSwapRefundTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // create a FundingRequest and get it funded
@@ -937,8 +904,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
         assertEq(1, moneroswap.getFundingRequest(ADDR_2).usedby);
 
@@ -988,8 +954,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -1000,8 +965,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         uint256 addr1BalanceBefore = ADDR_1.balance;
@@ -1063,8 +1027,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         assertEq(1, moneroswap.getFundingRequest(ADDR_1).usedby);
@@ -1077,8 +1040,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         uint256 addr1BalanceBefore = ADDR_1.balance;
@@ -1126,8 +1088,7 @@ contract MoneroSwapRefundTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -1138,8 +1099,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         uint256 addr1BalanceBefore = ADDR_1.balance;
@@ -1194,8 +1154,7 @@ contract MoneroSwapRefundTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -1206,8 +1165,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         uint256 addr1BalanceBefore = ADDR_1.balance;
@@ -1250,8 +1208,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -1262,8 +1219,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         uint256 addr1BalanceBefore = ADDR_1.balance;
@@ -1322,8 +1278,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -1334,8 +1289,7 @@ contract MoneroSwapRefundTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         uint256 addr1BalanceBefore = ADDR_1.balance;

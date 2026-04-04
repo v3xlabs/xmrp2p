@@ -42,8 +42,6 @@ const abi = {
                 { name: "finalxmr", type: "uint256", internalType: "uint256" },
                 { name: "t0", type: "uint256", internalType: "uint256" },
                 { name: "t1", type: "uint256", internalType: "uint256" },
-                { name: "xmrPublicMsgKey", type: "uint256", internalType: "uint256" },
-                { name: "evmPublicMsgKey", type: "uint256", internalType: "uint256" },
             ],
         },
     ],

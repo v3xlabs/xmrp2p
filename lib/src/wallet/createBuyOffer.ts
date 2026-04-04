@@ -32,11 +32,6 @@ const abi = {
             type: "uint256",
             internalType: "uint256",
         },
-        {
-            name: "msgpubkey",
-            type: "uint256",
-            internalType: "uint256",
-        },
     ],
     outputs: [],
     stateMutability: "payable",
@@ -49,14 +44,12 @@ export const createBuyOfferParameters = ({
     minxmr,
     publicspendkey,
     publicviewkey,
-    msgpubkey,
 }: ContractWriteParameters<{
     counterparty: Address;
     price: bigint;
     minxmr: bigint;
     publicspendkey: bigint;
     publicviewkey: bigint;
-    msgpubkey: bigint;
 }>) => ({
     data: encodeData(abi, [
         counterparty,
@@ -64,7 +57,6 @@ export const createBuyOfferParameters = ({
         minxmr,
         publicspendkey,
         publicviewkey,
-        msgpubkey,
     ]),
     to: contractAddress,
 });

@@ -50,13 +50,12 @@ contract MoneroSwapClaimDepositTest is Test {
             1 ether,             // fixed price
             1_000_000_000_000,            // min XMR
             KEY_BASE + 1,
-            KEY_BASE + 2,
-            0                  // msg pub key        
+            KEY_BASE + 2
         );
 
         // Take the offer
         vm.prank(ADDR_1);
-        moneroswap.takeBuyOffer(1, 1_000_000_000_000, 1 ether, 11, 12, 0);
+        moneroswap.takeBuyOffer(1, 1_000_000_000_000, 1 ether, 11, 12);
 
         // Advance time to t1 + 1
         Offer memory offer = moneroswap.getBuyOffer(1);
@@ -90,14 +89,13 @@ contract MoneroSwapClaimDepositTest is Test {
             1_000_000_000_000,            // min XMR
             1_000_000_000_000, // max XMR
             KEY_BASE + 3,
-            KEY_BASE + 4,
-            0                  // msg pub key        
+            KEY_BASE + 4
         );
 
         // Take the offer
         vm.deal(ADDR_3, 1 ether);
         vm.prank(ADDR_3);
-        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, 11, 12, 0);
+        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, 11, 12);
 
         // Advance time to t1 + 1
         Offer memory offer = moneroswap.getSellOffer(1);
@@ -120,14 +118,13 @@ contract MoneroSwapClaimDepositTest is Test {
             1 ether,             // fixed price
             1_000_000_000_000,            // min XMR
             KEY_BASE + 5,
-            KEY_BASE + 6,
-            0                  // msg pub key        
+            KEY_BASE + 6
         );
 
         // Take the offer
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        moneroswap.takeBuyOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, 11, 12, 0);
+        moneroswap.takeBuyOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, 11, 12);
 
         // Attempt to claim deposit
         vm.prank(ADDR_1);
@@ -147,14 +144,13 @@ contract MoneroSwapClaimDepositTest is Test {
             1_000_000_000_000,            // min XMR
             1_000_000_000_000, // max XMR
             KEY_BASE + 7,
-            KEY_BASE + 8,
-            0                  // msg pub key        
+            KEY_BASE + 8
         );
 
         // Take the offer
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, 11, 12, 0);
+        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, 11, 12);
 
         // Attempt to claim deposit
         vm.prank(ADDR_1);
@@ -185,8 +181,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1 ether,             // fixed price
             1_000_000_000_000,            // min XMR
             evmPublicSpendKey,
-            evmPublicViewKey,
-            0                  // msg pub key        
+            evmPublicViewKey
         );
 
         // Generate keys
@@ -204,7 +199,7 @@ contract MoneroSwapClaimDepositTest is Test {
         // Take the offer
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        moneroswap.takeBuyOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, xmrPublicSpendKey, xmrPrivateViewKey, 0);
+        moneroswap.takeBuyOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, xmrPublicSpendKey, xmrPrivateViewKey);
 
         // Ready the offer
         vm.prank(ADDR_3);
@@ -248,8 +243,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1_000_000_000_000,            // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey,
-            xmrPrivateViewKey,
-            0                  // msg pub key        
+            xmrPrivateViewKey
         );
 
         uint256 xmrPrivateSK = xmrPrivateSpendKey;
@@ -269,7 +263,7 @@ contract MoneroSwapClaimDepositTest is Test {
         // Take the offer
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, evmPublicSpendKey, evmPublicViewKey, 0);
+        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, evmPublicSpendKey, evmPublicViewKey);
 
         // Ready the offer
         vm.prank(ADDR_1);
@@ -312,8 +306,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1 ether,             // fixed price
             1_000_000_000_000,            // min XMR
             evmPublicSpendKey,
-            evmPublicViewKey,
-            0                  // msg pub key        
+            evmPublicViewKey
         );
 
         // Generate keys
@@ -331,7 +324,7 @@ contract MoneroSwapClaimDepositTest is Test {
         // Take the offer
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        moneroswap.takeBuyOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, xmrPublicSpendKey, xmrPrivateViewKey, 0);
+        moneroswap.takeBuyOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, xmrPublicSpendKey, xmrPrivateViewKey);
 
         // Ready the offer
         vm.prank(ADDR_3);
@@ -371,8 +364,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1_000_000_000_000,            // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey,
-            xmrPrivateViewKey,
-            0                  // msg pub key        
+            xmrPrivateViewKey
         );
 
         uint256 xmrPrivateSK = xmrPrivateSpendKey;
@@ -392,7 +384,7 @@ contract MoneroSwapClaimDepositTest is Test {
         // Take the offer
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, evmPublicSpendKey, evmPublicViewKey, 0);
+        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, evmPublicSpendKey, evmPublicViewKey);
 
         // Ready the offer
         vm.prank(ADDR_1);
@@ -431,8 +423,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1 ether,             // fixed price
             1_000_000_000_000,            // min XMR
             evmPublicSpendKey,
-            evmPublicViewKey,
-            0                  // msg pub key        
+            evmPublicViewKey
         );
 
         // Generate keys
@@ -450,7 +441,7 @@ contract MoneroSwapClaimDepositTest is Test {
         // Take the offer
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        moneroswap.takeBuyOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, xmrPublicSpendKey, xmrPrivateViewKey, 0);
+        moneroswap.takeBuyOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, xmrPublicSpendKey, xmrPrivateViewKey);
 
         // Ready the offer
         vm.prank(ADDR_3);
@@ -498,8 +489,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1_000_000_000_000,            // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey,
-            xmrPrivateViewKey,
-            0                  // msg pub key        
+            xmrPrivateViewKey
         );
 
         uint256 xmrPrivateSK = xmrPrivateSpendKey;
@@ -519,7 +509,7 @@ contract MoneroSwapClaimDepositTest is Test {
         // Take the offer
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, evmPublicSpendKey, evmPublicViewKey, 0);
+        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, evmPublicSpendKey, evmPublicViewKey);
 
         // Ready the offer
         vm.prank(ADDR_1);
@@ -567,8 +557,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -579,8 +568,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         uint256 addr1BalanceBefore = ADDR_1.balance;
@@ -653,8 +641,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey,  // private view key
-            0                 // msg pub key
+            xmrPrivateViewKey  // private view key
         );
 
         // Take the offer
@@ -665,8 +652,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // publicViewKey
-            0                  // msgpubkey
+            evmPublicViewKey // publicViewKey
         );
 
         uint256 addr1BalanceBefore = ADDR_1.balance;
@@ -734,8 +720,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -746,8 +731,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         uint256 addr1BalanceBefore = ADDR_1.balance;
@@ -811,8 +795,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey,  // public view key
-            0                 // msg pub key
+            evmPublicViewKey  // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -823,8 +806,7 @@ contract MoneroSwapClaimDepositTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         uint256 addr1BalanceBefore = ADDR_1.balance;

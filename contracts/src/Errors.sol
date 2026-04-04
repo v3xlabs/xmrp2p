@@ -121,11 +121,6 @@ error ErrorBuyOfferAvailableFundingRequest();
 /// Error raised when deposit could not be sent back to the caller during a cancel or refund call
 error ErrorBuyOfferUnableToRefund();
 
-/// Error raised when taking a buy offer would lead to a price over the maximum specified for the offer
-/// @param price the price at which the offer would be taken
-/// @param maxprice the maximum price specified in the offer
-error ErrorBuyOfferPriceTooHigh(uint256 price, uint256 maxprice);
-
 /// Error raised when attempting to reduce an offer's maxamount value while transfering value in the tx
 error ErrorBuyOfferNoValueAllowedWhenReducingMaxamount();
 
@@ -148,9 +143,6 @@ error ErrorBuyOfferUnableToPayBuyer();
 
 /// Error raised when attempting to call claimDeposit on a buy offer whose taker was funded
 error ErrorBuyOfferCannotClaimDepositOfFundedOffer();
-
-/// Error raised when providing a public key that has already been used as the message key of a buy offer
-error ErrorBuyOfferUsedMessageKey();
 
 /// Error raised when attempting to create a funding request for an amount which is 0
 error ErrorFundingRequestZero();
@@ -370,9 +362,6 @@ error ErrorSellOfferCannotRefundInTakenBlock();
 /// Error raised when attempting to call claimDeposit on a sell offer whose maker was funded
 error ErrorSellOfferCannotClaimDepositOfFundedOffer();
 
-/// Error raised when providing a public key that has already been used as the message key of a sell offer
-error ErrorSellOfferUsedMessageKey();
-
 /// Generic error raised when an offer is invalid (either non existent, or not associated with caller)
 error ErrorInvalidOffer();
 
@@ -387,9 +376,6 @@ error ErrorUnableToClaimDeposit();
 
 /// Error raised when the payment of the funder was unsuccessful during a call to claim
 error ErrorUnableToRepayFunder();
-
-/// Error raised when attempting to send a message associated with an offer which is missing some message keys
-error ErrorMissingMessageKeys();
 
 /// Error raised when attempting to perform an operation which is only available to the contract's owner from an account which is not that owner
 error ErrorNotOwner();

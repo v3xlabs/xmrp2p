@@ -39,8 +39,7 @@ contract MoneroSwapClaimTest is Test {
             1 ether, // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE++, // public spend key
-            KEY_BASE++, // public view key
-            KEY_BASE++ // msg pub key
+            KEY_BASE++ // public view key
         );
 
         // Check when offer is in state OPEN
@@ -60,8 +59,7 @@ contract MoneroSwapClaimTest is Test {
             1 ether, // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE++, // public spend key
-            KEY_BASE++, // public view key
-            KEY_BASE++ // msg pub key
+            KEY_BASE++ // public view key
         );
 
         // Take and ready the offer
@@ -70,9 +68,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000,
             1 ether,
             KEY_BASE++,
-            KEY_BASE++,
-            1
-        );
+            KEY_BASE++);
         moneroswap.ready(1);
         Offer memory offer = moneroswap.getBuyOffer(1);
         vm.warp(offer.t1 + 1);
@@ -92,8 +88,7 @@ contract MoneroSwapClaimTest is Test {
             1 ether, // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE++, // public spend key
-            KEY_BASE++, // public view key
-            KEY_BASE++ // msg pub key
+            KEY_BASE++ // public view key
         );
 
         // Take the offer
@@ -102,9 +97,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000,
             1 ether,
             KEY_BASE++,
-            KEY_BASE++,
-            1
-        );
+            KEY_BASE++);
         Offer memory offer = moneroswap.getBuyOffer(1);
 
         // Check at t0
@@ -131,8 +124,7 @@ contract MoneroSwapClaimTest is Test {
             1 ether, // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE++, // public spend key
-            KEY_BASE++, // public view key
-            KEY_BASE++ // msg pub key
+            KEY_BASE++ // public view key
         );
 
         // Take and ready the offer
@@ -143,9 +135,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000,
             1 ether,
             KEY_BASE++,
-            KEY_BASE++,
-            1
-        );
+            KEY_BASE++);
         moneroswap.ready(1);
 
         // Attempt to claim from the wrong account
@@ -165,8 +155,7 @@ contract MoneroSwapClaimTest is Test {
             1 ether, // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE++, // public spend key
-            KEY_BASE++, // public view key
-            KEY_BASE++ // msg pub key
+            KEY_BASE++ // public view key
         );
 
         // Take and ready the offer
@@ -175,9 +164,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000,
             1 ether,
             KEY_BASE++,
-            KEY_BASE++,
-            1
-        );
+            KEY_BASE++);
         moneroswap.ready(1);
 
         vm.expectRevert(abi.encodeWithSelector(
@@ -196,8 +183,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             KEY_BASE++, // public spend key
-            KEY_BASE++, // private view key
-            KEY_BASE++ // msg pub key
+            KEY_BASE++ // private view key
         );
 
         vm.expectRevert(abi.encodeWithSelector(
@@ -217,8 +203,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             KEY_BASE++, // public spend key
-            KEY_BASE++, // private view key
-            KEY_BASE++ // msg pub key
+            KEY_BASE++ // private view key
         );
 
         // Take and ready the offer
@@ -227,9 +212,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000,
             1 ether,
             KEY_BASE++,
-            KEY_BASE++,
-            1
-        );
+            KEY_BASE++);
         moneroswap.ready(1);
 
         vm.warp(moneroswap.getSellOffer(1).t1 + 1);
@@ -249,8 +232,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             KEY_BASE++, // public spend key
-            KEY_BASE++, // private view key
-            KEY_BASE++ // msg pub key
+            KEY_BASE++ // private view key
         );
 
         // Take and ready the offer
@@ -259,9 +241,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000,
             1 ether,
             KEY_BASE++,
-            KEY_BASE++,
-            1
-        );
+            KEY_BASE++);
         moneroswap.ready(1);
 
         vm.prank(ADDR_2);
@@ -281,8 +261,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             KEY_BASE++, // public spend key
-            KEY_BASE++, // private view key
-            KEY_BASE++ // msg pub key
+            KEY_BASE++ // private view key
         );
 
         // Take and ready the offer
@@ -291,9 +270,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000,
             1 ether,
             KEY_BASE++,
-            KEY_BASE++,
-            1
-        );
+            KEY_BASE++);
 
         vm.warp(moneroswap.getSellOffer(1).t1 + 1);
         vm.expectRevert(abi.encodeWithSelector(
@@ -318,8 +295,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             KEY_BASE++, // public spend key
-            KEY_BASE++, // private view key
-            KEY_BASE++ // msg pub key
+            KEY_BASE++ // private view key
         );
 
         // Take and ready the offer
@@ -328,9 +304,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000,
             1 ether,
             KEY_BASE++,
-            KEY_BASE++,
-            1
-        );
+            KEY_BASE++);
         moneroswap.ready(1);
 
         vm.expectRevert(abi.encodeWithSelector(
@@ -370,8 +344,7 @@ contract MoneroSwapClaimTest is Test {
             1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey, // public view key
-            0 // msg pub key
+            evmPublicViewKey // public view key
         );
 
         // Take and ready the offer
@@ -382,8 +355,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         assertEq(2 ether, moneroswap.getLiability());
@@ -423,8 +395,7 @@ contract MoneroSwapClaimTest is Test {
             1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey, // public view key
-            0 // msg pub key
+            evmPublicViewKey // public view key
         );
 
         // Check that deposit is 2 ether
@@ -451,8 +422,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         // Check that the delta between actual swap amount and the deposit was returned to the buyer
@@ -506,8 +476,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey, // private view key
-            0 // msg pub key
+            xmrPrivateViewKey // private view key
         );
 
         // Take and ready the offer
@@ -518,8 +487,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // privateviewkey
-            0                  // msgpubkey
+            evmPublicViewKey // privateviewkey
         );
 
         assertEq(2 ether, moneroswap.getLiability());
@@ -569,8 +537,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey, // private view key
-            0 // msg pub key
+            xmrPrivateViewKey // private view key
         );
 
         // Liability has not changed since the sell offer is funded
@@ -584,8 +551,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // privateviewkey
-            0                  // msgpubkey
+            evmPublicViewKey // privateviewkey
         );
 
         // Liability is 2 ether, 1 from the funding of the FundingRequest,
@@ -631,8 +597,7 @@ contract MoneroSwapClaimTest is Test {
             1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey, // public view key
-            0 // msg pub key
+            evmPublicViewKey // public view key
         );
 
         // Take and ready the offer
@@ -643,8 +608,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         assertEq(2 ether, moneroswap.getLiability());
@@ -685,8 +649,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey, // private view key
-            0 // msg pub key
+            xmrPrivateViewKey // private view key
         );
 
         // Take and ready the offer
@@ -697,8 +660,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // privateviewkey
-            0                  // msgpubkey
+            evmPublicViewKey // privateviewkey
         );
 
         assertEq(2 ether, moneroswap.getLiability());
@@ -739,8 +701,7 @@ contract MoneroSwapClaimTest is Test {
             1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey, // public view key
-            0 // msg pub key
+            evmPublicViewKey // public view key
         );
 
         // Check that deposit is 2 ether
@@ -767,8 +728,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             xmrPublicSpendKey, // publicspendkey
-            xmrPrivateViewKey, // privateviewkey
-            0                  // msgpubkey
+            xmrPrivateViewKey // privateviewkey
         );
 
         // Check that the delta between actual swap amount and the deposit was returned to the buyer
@@ -839,8 +799,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey, // private view key
-            0 // msg pub key
+            xmrPrivateViewKey // private view key
         );
 
         // Liability has not changed since the sell offer is funded
@@ -854,8 +813,7 @@ contract MoneroSwapClaimTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             evmPublicSpendKey, // publicspendkey
-            evmPublicViewKey, // privateviewkey
-            0                  // msgpubkey
+            evmPublicViewKey // privateviewkey
         );
 
         // Liability is 2 ether, 1 from the funding of the FundingRequest,

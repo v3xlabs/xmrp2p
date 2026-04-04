@@ -49,8 +49,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey,
-            evmPublicViewKey,
-            0                  // msg pub key
+            evmPublicViewKey
         );
 
         // Attempt to create another offer with the same public spend key
@@ -61,8 +60,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey,
-            evmPublicViewKey,
-            0                  // msg pub key
+            evmPublicViewKey
         );
     }
 
@@ -111,8 +109,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey,
-            evmPublicViewKey,
-            0                  // msg pub key
+            evmPublicViewKey
         );
 
         // Attempt to create another offer
@@ -140,8 +137,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey + 1,
-            evmPublicViewKey + 1,
-            0                  // msg pub key
+            evmPublicViewKey + 1
         );
     }
 
@@ -176,9 +172,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             1 ether,
             1_000_000_000_000,
             KEY_BASE + 1,
-            KEY_BASE + 2,
-            0
-        );
+            KEY_BASE + 2);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -191,9 +185,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             1 ether,
             1_000_000_000_000,
             KEY_BASE + 3,
-            KEY_BASE + 4,
-            0
-        );
+            KEY_BASE + 4);
     }
 
     function test_RevertWhen_NoPriceDefined() public {
@@ -225,9 +217,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             0,
             1_000_000_000_000,
             KEY_BASE + 5,
-            KEY_BASE + 6,
-            0
-        );
+            KEY_BASE + 6);
     }
 
     function test_RevertWhen_ActiveFundingRequest() public {
@@ -248,9 +238,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             1 ether,
             1_000_000_000_000,
             KEY_BASE++,
-            KEY_BASE++,
-            KEY_BASE++
-        );
+            KEY_BASE++);
     }
 
     function test_RevertWhen_UsedPublicSpendKey() public {
@@ -268,8 +256,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             1,                 // public spend key
-            2,                 // public view key
-            3                  // msg pub key
+            2                 // public view key
         );
 
         // Check key 1, should be used
@@ -289,8 +276,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             2,                 // public spend key
-            4,                 // public view key
-            5                  // msg pub key
+            4                 // public view key
         );
 
         // Attempt to create another offer with pub spend key 3 (used public message key)
@@ -305,76 +291,9 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             3,                 // public spend key
-            6,                 // public view key
-            7                  // msg pub key
+            6                 // public view key
         );        
     }
-
-    function test_RevertWhen_UsedPublicMessageKey() public {
-        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
-
-        vm.deal(ADDR_1, 10 ether);
-        vm.prank(ADDR_1);
-        // Create a buy offer with keys 1/2/3
-        moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
-            1_000_000_000_000, // min XMR
-            1,                 // public spend key
-            2,                 // public view key
-            3                  // msg pub key
-        );
-
-        // Attempt to create another offer with pub message key 1 (used public spend key)
-        vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferUsedMessageKey.selector
-            )
-        );
-
-        moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
-            1_000_000_000_000, // min XMR
-            4,                 // public spend key
-            5,                 // public view key
-            1                  // msg pub key
-        );
-
-        // Attempt to create another offer with pub message key 2 (used public spend key)
-        vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferUsedMessageKey.selector
-            )
-        );
-        moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
-            1_000_000_000_000, // min XMR
-            6,                 // public spend key
-            7,                 // public view key
-            2                  // msg pub key
-        ); 
-
-        // Attempt to create another offer with pub message key 3 (used public message key)
-        vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferUsedMessageKey.selector
-            )
-        );
-        moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
-            1_000_000_000_000, // min XMR
-            8,                 // public spend key
-            9,                 // public view key
-            3                  // msg pub key
-        );                       
-    }
-    
     function testCreateBuyOffer() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
@@ -394,8 +313,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             3,                 // fixed price
             4,                 // min XMR
             KEY_BASE++,        // public spend key
-            KEY_BASE++,        // public view key
-            KEY_BASE++         // msg pub key
+            KEY_BASE++        // public view key
         );
 
         // Retrieve the offer just created
@@ -420,11 +338,9 @@ contract MoneroSwapCreateBuyOfferTest is Test {
         assertEq(offer.evmPrivateViewKey, 0);
         assertEq(offer.evmPublicSpendKey, KEY_BASE - 3);
         assertEq(offer.evmPublicViewKey, KEY_BASE - 2);
-        assertEq(offer.evmPublicMsgKey, KEY_BASE - 1);
         assertEq(offer.xmrPublicSpendKey, 0);
         assertEq(offer.xmrPrivateViewKey, 0);
         assertEq(offer.xmrPrivateSpendKey, 0);
-        assertEq(offer.xmrPublicMsgKey, 0);
         assertEq(offer.finalprice, 0);
         assertEq(offer.takerDeposit, 0);
         assertEq(offer.finalxmr, 0);

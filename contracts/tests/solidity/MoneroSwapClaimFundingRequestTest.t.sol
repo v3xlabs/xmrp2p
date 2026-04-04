@@ -100,8 +100,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey, // private view key
-            0 // msg pub key
+            xmrPrivateViewKey // private view key
         );
 
         // Take sell offer
@@ -118,7 +117,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
 
         vm.deal(ADDR_3, amount * 2);
         vm.prank(ADDR_3);
-        moneroswap.takeSellOffer{value: amount}(1, 1_000_000_000_000, amount, evmPublicSpendKey, evmPublicViewKey, 0);
+        moneroswap.takeSellOffer{value: amount}(1, 1_000_000_000_000, amount, evmPublicSpendKey, evmPublicViewKey);
         Offer memory offer = moneroswap.getSellOffer(1);
 
         // Attemtp to claim the FundingRequest. The timestamp is too early (before t0)
@@ -173,8 +172,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey, // private view key
-            0 // msg pub key
+            xmrPrivateViewKey // private view key
         );
 
         // Take sell offer
@@ -191,7 +189,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
 
         vm.deal(ADDR_3, amount * 2);
         vm.prank(ADDR_3);
-        moneroswap.takeSellOffer{value: amount}(1, 1_000_000_000_000, amount, evmPublicSpendKey, evmPublicViewKey, 0);
+        moneroswap.takeSellOffer{value: amount}(1, 1_000_000_000_000, amount, evmPublicSpendKey, evmPublicViewKey);
 
         // Ready the offer
         vm.prank(ADDR_3);
@@ -246,8 +244,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey, // private view key
-            0 // msg pub key
+            xmrPrivateViewKey // private view key
         );
 
         uint256 xmrPrivateSpendKey1 = xmrPrivateSpendKey;
@@ -266,7 +263,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
 
         vm.deal(ADDR_3, amount * 2);
         vm.prank(ADDR_3);
-        moneroswap.takeSellOffer{value: amount}(1, 1_000_000_000_000, amount, evmPublicSpendKey, evmPublicViewKey, 0);
+        moneroswap.takeSellOffer{value: amount}(1, 1_000_000_000_000, amount, evmPublicSpendKey, evmPublicViewKey);
 
         // Ready the offer
         vm.prank(ADDR_3);

@@ -34,8 +34,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             address(0),        // counterparty
             1 ether,           // price
             1_000_000_000_000, // min XMR
-            1 ether,           // max XMR
-            0                  // msg pub key
+            1 ether           // max XMR
         );
     }
 
@@ -52,8 +51,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             1_000_000_000_000, // min XMR
             1 ether,           // max XMR
             KEY_BASE + 1,
-            KEY_BASE + 2,
-            0                  // msg pub key
+            KEY_BASE + 2
         );
 
         // Attempt to update the offer from ADDR_3
@@ -65,8 +63,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             address(0),        // counterparty
             1 ether,           // price
             1_000_000_000_000, // min XMR
-            2_000_000_000_000, // max XMR
-            0                  // msg pub key
+            2_000_000_000_000 // max XMR
         );
     }
 
@@ -83,8 +80,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             KEY_BASE + 3,
-            KEY_BASE + 4,
-            0                  // msg pub key
+            KEY_BASE + 4
         );
 
         vm.deal(ADDR_1, 2 ether);
@@ -95,8 +91,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             1_000_000_000_000, // minxmr
             1 ether,           // maxprice
             KEY_BASE + 5,      // public spend key
-            KEY_BASE + 6,      // public view key
-            3                  // msg pub key
+            KEY_BASE + 6      // public view key
         );
 
         // Attempt to update the offer from ADDR_3
@@ -113,8 +108,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             address(0),        // counterparty
             1 ether,           // price
             1_000_000_000_000, // min XMR
-            2_000_000_000_000, // max XMR
-            0                  // msg pub key
+            2_000_000_000_000 // max XMR
         );
     }
 
@@ -141,8 +135,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             minxmr,            // min XMR
             6,                 // max XMR
             KEY_BASE + 7,      // public spend key
-            KEY_BASE + 8,      // public view key
-            9                  // msg pub key
+            KEY_BASE + 8      // public view key
         );
 
         // Attempt to update the deposit
@@ -156,8 +149,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             address(0),        // counterparty
             1 ether,           // price
             4,                 // min XMR
-            6,                 // max XMR
-            7                  // msg pub key            
+            6                 // max XMR
         );
     }  
 
@@ -174,8 +166,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             1_000_000_000_000, // min XMR
             1,                 // max XMR
             KEY_BASE + 11,
-            KEY_BASE + 12,
-            0                  // msg pub key
+            KEY_BASE + 12
         );
 
         // Change valid range
@@ -208,8 +199,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             address(0),        // counterparty
             1 ether,           // price
             1_000_000_000_000, // min XMR
-            0,                 // max XMR
-            0                  // msg pub key
+            0                 // max XMR
         );
 
         // Attempt to update the max amount to a value below the new minimum
@@ -226,8 +216,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             address(0),        // counterparty
             1 ether,           // price
             1_000_000_000_000, // min XMR
-            0,                 // max XMR
-            0                  // msg pub key
+            0                 // max XMR
         );
     }
 
@@ -254,8 +243,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             minxmr,            // min XMR
             6,                 // max XMR
             KEY_BASE + 15,     // public spend key
-            KEY_BASE + 16,     // public view key
-            9                  // msg pub key
+            KEY_BASE + 16     // public view key
         );
 
         // Now attempt to update the sell offer with a minimum price which is too low for the funding fee
@@ -270,136 +258,9 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             address(1),        // counterparty
             price,             // fixed price
             minxmr - 1,        // min XMR
-            6,                 // max XMR
-            7                  // msg pub key
+            6                 // max XMR
         );
     }
-
-    function test_RevertWhen_UsedPublicMessageKey() public {
-        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
-
-        // Create a sell offer
-        uint256 xmrDeposit = 1 ether;
-        vm.deal(ADDR_1, 3 * xmrDeposit);
-        vm.prank(ADDR_1);        
-        moneroswap.createSellOffer{value: xmrDeposit}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
-            1_000_000_000_000, // min XMR
-            1_000_000_000_001, // max XMR
-            1,                 // PublicSpendKey
-            2,                 // PrivateViewKey
-            3                  // PublicMsgKey
-        );
-
-        // Update the offer, reusing the public spend key as the message key
-        vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorSellOfferUsedMessageKey.selector
-            )
-        );        
-        moneroswap.updateSellOffer{value: 0}(
-            1,                 // offer id
-            address(0),        // counterparty
-            1 ether,           // price
-            0,                 // min XMR - unchanged
-            0,                 // maxxmr - unchanged
-            1                  // msg pub key
-        );
-
-        (uint256 x,uint256 y) = Ed25519.scalarMultBase(2);
-        uint256 pubViewKey = Ed25519.changeEndianness(Ed25519.compressPoint(x,y));
-
-        // Update the offer, reusing the public view key as the message key
-        vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorSellOfferUsedMessageKey.selector
-            )
-        );        
-        moneroswap.updateSellOffer{value: 0}(
-            1,                 // offer id
-            address(0),        // counterparty
-            1 ether,           // price
-            0,                 // min XMR - unchanged
-            0,                 // maxxmr - unchanged
-            pubViewKey         // msg pub key
-        ); 
-
-        //
-        // Create another sell offer with message key 6, so we can attempt to reuse it
-        //
-        vm.prank(ADDR_1);        
-        moneroswap.createSellOffer{value: xmrDeposit}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
-            1_000_000_000_000, // min XMR
-            1_000_000_000_001, // max XMR
-            4,                 // PublicSpendKey
-            5,                 // PrivateViewKey
-            6                  // PublicMsgKey
-        );
-
-        // Update the offer, reusing the public message key 6 as the message key
-        vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorSellOfferUsedMessageKey.selector
-            )
-        );        
-        moneroswap.updateSellOffer{value: 0}(
-            1,                 // offer id
-            address(0),        // counterparty
-            1 ether,           // price
-            0,                 // min XMR - unchanged
-            0,                 // maxxmr - unchanged
-            6                  // msg pub key
-        ); 
-
-        //
-        // Reusing the same message key is fine
-        //
-        vm.prank(ADDR_1);
-        moneroswap.updateSellOffer{value: 0}(
-            1,                 // offer id
-            address(0),        // counterparty
-            1 ether,           // price
-            0,                 // min XMR - unchanged
-            0,                 // maxxmr - unchanged
-            3                  // msg pub key
-        );
-
-        //
-        // Update with a new key
-        //
-        vm.prank(ADDR_1);
-        moneroswap.updateSellOffer{value: 0}(
-            1,                 // offer id
-            address(0),        // counterparty
-            1 ether,           // price
-            0,                 // min XMR - unchanged
-            0,                 // maxxmr - unchanged
-            7                  // msg pub key
-        );
-
-        // Attempt to reuse the original key, this will fail
-        vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorSellOfferUsedMessageKey.selector
-            )
-        );        
-        moneroswap.updateSellOffer{value: 0}(
-            1,                 // offer id
-            address(0),        // counterparty
-            1 ether,           // price
-            0,                 // min XMR - unchanged
-            0,                 // maxxmr - unchanged
-            3                  // msg pub key
-        );         
-    }
-
     function testUpdateSellOffer() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
@@ -415,9 +276,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_001, // max XMR
             KEY_BASE + 21,     // PublicSpendKey
-            KEY_BASE + 22,     // PrivateViewKey
-            7                  // PublicMsgKey
-        );
+            KEY_BASE + 22);
 
         assertEq(moneroswap.getLiability(), libability + xmrDeposit);
 
@@ -440,12 +299,10 @@ contract MoneroSwapUpdateSellOfferTest is Test {
         assertEq(offer.blockTaken, 0);
         assertEq(offer.evmPublicSpendKey, 0);
         assertEq(offer.evmPublicViewKey, 0);
-        assertEq(offer.evmPublicMsgKey, 0);
         assertEq(offer.evmPrivateSpendKey, 0);
         assertEq(offer.evmPrivateViewKey, 0);
         assertEq(offer.xmrPublicSpendKey, KEY_BASE + 21);
-        assertEq(offer.xmrPrivateViewKey, KEY_BASE + 22);        
-        assertEq(offer.xmrPublicMsgKey, 7);
+        assertEq(offer.xmrPrivateViewKey, KEY_BASE + 22);
         assertEq(offer.xmrPrivateSpendKey, 0);
         assertEq(offer.finalprice, 0);
         assertEq(offer.takerDeposit, 0);
@@ -463,8 +320,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             address(3),        // counterparty
             2 ether,           // price
             0,                 // min XMR - unchanged
-            0,                 // maxxmr - unchanged
-            8                  // msg pub key
+            0                 // maxxmr - unchanged
         );
 
         // Retrieve the offer just updated
@@ -485,8 +341,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
         assertEq(offer.counterparty, address(3));
 
         assertEq(offer.xmrPublicSpendKey, KEY_BASE + 21);
-        assertEq(offer.xmrPrivateViewKey, KEY_BASE + 22);        
-        assertEq(offer.xmrPublicMsgKey, 8);
+        assertEq(offer.xmrPrivateViewKey, KEY_BASE + 22);
         assertEq(offer.xmrPrivateSpendKey, 0);  
     }
 
@@ -520,8 +375,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             1_000_000_000_000,
             1,
             KEY_BASE + 23,
-            KEY_BASE + 24,
-            0);
+            KEY_BASE + 24);
 
         // Retrieve offer
         Offer memory offer = moneroswap.getSellOffer(1);
@@ -545,8 +399,7 @@ contract MoneroSwapUpdateSellOfferTest is Test {
             address(0),        // counterparty
             1 ether,           // price
             1_000_000_000_005, // min XMR
-            2_000_000_000_006, // max XMR
-            0                  // msg pub key
+            2_000_000_000_006 // max XMR
         );
 
         // Retrieve offer

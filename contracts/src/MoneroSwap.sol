@@ -161,16 +161,6 @@ contract MoneroSwap {
     // Events
     //
 
-    /// Event emitted whenever a message is exchanged between parties of an offer. The message is
-    /// encrypted with a key derived from an ECDH key agreement done with the message keys of each party.
-    event MessageEvent(
-        /// Id of offer. This is indexed so we can easily query the messages related to an offer.
-        uint256 indexed offerid,
-        /// Content, i.e. encrypted message with a key derived from the ECDH
-        /// based on the public message keys of the owner and its counterparty.
-        bytes message
-    );
-
     /// Event emitted when a new offer is created or when an offer changes state, the event contains the offer id and the offer type
     /// and current offer state.
     event OfferEvent(
@@ -232,15 +222,13 @@ contract MoneroSwap {
     /// @param minxmr The minimum amount of XMR the offer is willing to buy. The offer cannot be taken if it would lead to less than this minimum. Value is expressed in piconeros
     /// @param publicspendkey The Monero public spend key.
     /// @param publicviewkey The Monero public view key.
-    /// @param msgpubkey The messaging public key. This key is used to derive an encryption key to encrypt messages between the owner and its counterparty.
     ///
     function createBuyOffer(
         address counterparty,
         uint256 price,
         uint256 minxmr,
         uint256 publicspendkey,
-        uint256 publicviewkey,
-        uint256 msgpubkey
+        uint256 publicviewkey
     ) public payable {
         //
         // Check if maximum number of active offers is reached
@@ -253,22 +241,16 @@ contract MoneroSwap {
         );
 
         //
-        // Check if the Monero public spend key has been used. First add the public view/message keys.
+        // Check if the Monero public spend key has been used. First add the public view key.
         //
 
         usedPublicKeys[publicviewkey] = true;
-        bool usedMsgKey = usedPublicKeys[msgpubkey];
-        usedPublicKeys[msgpubkey] = true;
 
         require(
             !usedPublicKeys[publicspendkey],
             ErrorBuyOfferPublicSpendKeyAlreadyUsed()
         );
         usedPublicKeys[publicspendkey] = true;
-
-        // The message key must not have been previously used. Note that if the message key is
-        // equal to the public spend key, the error above will have been raised.
-        require(0 == msgpubkey || !usedMsgKey, ErrorBuyOfferUsedMessageKey());
 
         //
         // EOA with a current FundingRequest cannot create BuyOffers
@@ -295,9 +277,6 @@ contract MoneroSwap {
         // Price must be specified (no oracle fallback)
         require(0 != price, ErrorBuyOfferNoPriceDefined());
 
-        // Price must be specified (no oracle fallback)
-        require(0 != price, ErrorBuyOfferNoPriceDefined());
-
         Offer memory offer;
 
         offer.type_ = OfferType.BUY;
@@ -313,7 +292,6 @@ contract MoneroSwap {
         offer.minxmr = minxmr;
         offer.evmPublicSpendKey = publicspendkey;
         offer.evmPublicViewKey = publicviewkey;
-        offer.evmPublicMsgKey = msgpubkey;
 
         buyOffers[offer.id] = offer;
         buyOfferIds.push(offer.id);
@@ -339,14 +317,12 @@ contract MoneroSwap {
     /// @param maxamount maximum amount to spend for buying Monero. This is used to reduce the maximum amount, in which case part of the deposit will be sent back
     /// @param price fixed price at which the buyer is willing to buy Monero (in wei per Monero)
     /// @param minxmr the minimum amount of XMR the buyer is willing to buy. The offer cannot be taken if it would lead to less than this minimum. Value is expressed in piconeros
-    /// @param msgpubkey The messaging public key. This key is used to derive an encryption key to encrypt messages between the owner and its counterparty
     function updateBuyOffer(
         uint256 id,
         address counterparty,
         uint256 maxamount,
         uint256 price,
-        uint256 minxmr,
-        uint256 msgpubkey
+        uint256 minxmr
     ) public payable nonReentrant {
         Offer storage offer = buyOffers[id];
 
@@ -407,9 +383,6 @@ contract MoneroSwap {
 
         //
         // If value was sent with the call, update maxamount and deposit
-        // This is kind of weird as the final maxamount could become greater than the
-        // maxamount passed as parameter, so maybe we should prohibit msg.value > 0 when
-        // maxamount is not 0 in the parameters? => nope, if maxamount is 0 is voids the offer currently.
         //
 
         if (msg.value > 0) {
@@ -429,15 +402,6 @@ contract MoneroSwap {
             liability += msg.value;
         }
 
-        bool usedMsgKey = usedPublicKeys[msgpubkey];
-        usedPublicKeys[msgpubkey] = true;
-
-        require(
-            0 == msgpubkey || offer.evmPublicMsgKey == msgpubkey || !usedMsgKey,
-            ErrorBuyOfferUsedMessageKey()
-        );
-
-        offer.evmPublicMsgKey = msgpubkey;
         offer.counterparty = counterparty;
 
         offer.lastupdate = block.timestamp;
@@ -465,15 +429,13 @@ contract MoneroSwap {
     /// @param minprice Minimum price (in wei) of 1 XMR
     /// @param publicspendkey Monero Public spend key
     /// @param privateviewkey Monero Private view key
-    /// @param msgpubkey The public key to use for exchanging messages with the maker
     ///
     function takeBuyOffer(
         uint256 id,
         uint256 maxxmr,
         uint256 minprice,
         uint256 publicspendkey,
-        uint256 privateviewkey,
-        uint256 msgpubkey
+        uint256 privateviewkey
     ) public payable nonReentrant {
         // Ensure the buy offer exists and is not yet taken
         Offer storage offer = buyOffers[id];
@@ -538,8 +500,6 @@ contract MoneroSwap {
             Ed25519.compressPoint(x, y)
         );
         usedPublicKeys[publicviewkey] = true;
-        bool usedMsgKey = usedPublicKeys[msgpubkey];
-        usedPublicKeys[msgpubkey] = true;
 
         // Ensure the provided public key has not yet been used
         require(
@@ -547,8 +507,6 @@ contract MoneroSwap {
             ErrorBuyOfferPublicSpendKeyAlreadyUsed()
         );
         usedPublicKeys[publicspendkey] = true;
-
-        require(0 == msgpubkey || !usedMsgKey, ErrorBuyOfferUsedMessageKey());
 
         // Verify the offer's fixed price meets the taker's minimum
         require(
@@ -591,7 +549,6 @@ contract MoneroSwap {
         offer.blockTaken = block.number;
         offer.xmrPublicSpendKey = publicspendkey;
         offer.xmrPrivateViewKey = privateviewkey;
-        offer.xmrPublicMsgKey = msgpubkey;
         offer.finalprice = price;
         offer.finalxmr = picoxmramount;
         offer.state = OfferState.TAKEN;
@@ -700,15 +657,13 @@ contract MoneroSwap {
     /// @param maxxmr maximum amount of XMR (in piconeros) the seller can provide.
     /// @param publicspendkey Monero public spend key
     /// @param privateviewkey Monero private view key
-    /// @param msgpubkey The public key to use for exchanging messages with the taker of the offer
     function createSellOffer(
         address counterparty,
         uint256 price,
         uint256 minxmr,
         uint256 maxxmr,
         uint256 publicspendkey,
-        uint256 privateviewkey,
-        uint256 msgpubkey
+        uint256 privateviewkey
     ) public payable {
         //
         // Check if maximum number of active offers is reached
@@ -721,7 +676,7 @@ contract MoneroSwap {
         );
 
         //
-        // Check if the pubkey has been used. Add the public view and message keys
+        // Check if the pubkey has been used. Add the public view key
         //
 
         (uint256 x, uint256 y) = Ed25519.scalarMultBase(privateviewkey);
@@ -729,15 +684,11 @@ contract MoneroSwap {
             Ed25519.compressPoint(x, y)
         );
         usedPublicKeys[publicviewkey] = true;
-        bool usedMsgKey = usedPublicKeys[msgpubkey];
-        usedPublicKeys[msgpubkey] = true;
         require(
             !usedPublicKeys[publicspendkey],
             ErrorSellOfferPublicSpendKeyAlreadyUsed()
         );
         usedPublicKeys[publicspendkey] = true;
-
-        require(0 == msgpubkey || !usedMsgKey, ErrorSellOfferUsedMessageKey());
 
         //
         // If no amount was sent, check if there is a funded FundingRequest for the sender
@@ -828,7 +779,6 @@ contract MoneroSwap {
         offer.maxxmr = maxxmr;
         offer.xmrPublicSpendKey = publicspendkey;
         offer.xmrPrivateViewKey = privateviewkey;
-        offer.xmrPublicMsgKey = msgpubkey;
 
         sellOffers[offer.id] = offer;
         sellOfferIds.push(offer.id);
@@ -848,14 +798,12 @@ contract MoneroSwap {
     /// @param price Fixed price at which the XMR will be sold
     /// @param minxmr Minimum amount of XMR (in piconeros) the owner is willing to sell
     /// @param maxxmr Maximum amount of XMR (in piconeros) the owner is willing to sell
-    /// @param msgpubkey Public key for exchanging messages (using ECDH to compute the encryption key) between the two parties
     function updateSellOffer(
         uint256 id,
         address counterparty,
         uint256 price,
         uint256 minxmr,
-        uint256 maxxmr,
-        uint256 msgpubkey
+        uint256 maxxmr
     ) public payable {
         Offer storage offer = sellOffers[id];
 
@@ -906,15 +854,6 @@ contract MoneroSwap {
             offer.maxxmr = maxxmr;
         }
 
-        bool usedMsgKey = usedPublicKeys[msgpubkey];
-        usedPublicKeys[msgpubkey] = true;
-
-        require(
-            0 == msgpubkey || offer.xmrPublicMsgKey == msgpubkey || !usedMsgKey,
-            ErrorSellOfferUsedMessageKey()
-        );
-
-        offer.xmrPublicMsgKey = msgpubkey;
         offer.counterparty = counterparty;
 
         offer.lastupdate = block.timestamp;
@@ -943,14 +882,12 @@ contract MoneroSwap {
     /// @param maxprice The maximum price per XMR (in wei) that the taker is willing to pay
     /// @param publicspendkey Monero public spend key generated by the taker
     /// @param publicviewkey Monero public view key generated by the taker
-    /// @param msgpubkey Public key for exchanging messages (using ECDH to compute the encryption key) between the two parties of the offer
     function takeSellOffer(
         uint256 id,
         uint256 minxmr,
         uint256 maxprice,
         uint256 publicspendkey,
-        uint256 publicviewkey,
-        uint256 msgpubkey
+        uint256 publicviewkey
     ) public payable nonReentrant {
         // Ensure the sell offer exists and is not yet taken
         Offer storage offer = sellOffers[id];
@@ -970,15 +907,11 @@ contract MoneroSwap {
 
         // Ensure the provided public key has not yet been used
         usedPublicKeys[publicviewkey] = true;
-        bool usedMsgKey = usedPublicKeys[msgpubkey];
-        usedPublicKeys[msgpubkey] = true;
         require(
             !usedPublicKeys[publicspendkey],
             ErrorSellOfferPublicSpendKeyAlreadyUsed()
         );
         usedPublicKeys[publicspendkey] = true;
-
-        require(0 == msgpubkey || !usedMsgKey, ErrorSellOfferUsedMessageKey());
 
         // Verify the offer's fixed price meets the taker's maximum
         require(
@@ -1039,7 +972,6 @@ contract MoneroSwap {
 
         offer.evmPublicSpendKey = publicspendkey;
         offer.evmPublicViewKey = publicviewkey;
-        offer.evmPublicMsgKey = msgpubkey;
         offer.finalprice = price;
         offer.finalxmr = picoxmr;
         offer.state = OfferState.TAKEN;
@@ -1908,36 +1840,5 @@ contract MoneroSwap {
 
         PARAMETERS.T0_DELAY = T0Delay;
         PARAMETERS.T1_DELAY = T1Delay;
-    }
-
-    /// Send a message to the other party of the offer
-    /// @param offerid id of the offer
-    /// @param content encrypted data (encryption is performed offchain by either the CLI or GUI client)
-    function message(uint256 offerid, bytes calldata content) public {
-        // Check that the offer exist and that the sender is either
-        // the creator or the counterparty
-
-        Offer storage offer = buyOffers[offerid];
-
-        if (OfferType.INVALID == offer.type_) {
-            offer = sellOffers[offerid];
-        }
-
-        require(OfferType.INVALID != offer.type_, ErrorInvalidOffer());
-
-        // check that msg.sender is either owner or counterparty of the selected offer
-        require(
-            msg.sender == offer.owner || msg.sender == offer.counterparty,
-            ErrorInvalidOffer()
-        );
-
-        // Check that the PublicMsgKey is not 0, otherwise no message can be sent
-        require(
-            0 != offer.evmPublicMsgKey && 0 != offer.xmrPublicMsgKey,
-            ErrorMissingMessageKeys()
-        );
-
-        // Emit the message event
-        emit MessageEvent(offer.id, content);
     }
 }

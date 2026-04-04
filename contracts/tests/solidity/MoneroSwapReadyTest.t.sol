@@ -30,8 +30,7 @@ contract MoneroSwapReadyTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE + 1,                 // public spend key
-            KEY_BASE + 2,                 // public view key
-            0                  // msg pub key
+            KEY_BASE + 2                 // public view key
         );
 
         // Attempt to ready the offer
@@ -56,8 +55,7 @@ contract MoneroSwapReadyTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE + 3,                 // public spend key
-            KEY_BASE + 4,                 // public view key
-            0                  // msg pub key
+            KEY_BASE + 4                 // public view key
         );
 
         // Take the offer
@@ -68,8 +66,7 @@ contract MoneroSwapReadyTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1 ether,           // minprice
             KEY_BASE + 5,                 // publicspendkey
-            KEY_BASE + 6,                 // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 6                 // privateviewkey
         );
 
         // Attempt to ready the offer
@@ -89,8 +86,7 @@ contract MoneroSwapReadyTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE + 7,                 // public spend key
-            KEY_BASE + 8,                 // public view key
-            0                  // msg pub key
+            KEY_BASE + 8                 // public view key
         );
 
         // Take the offer
@@ -101,8 +97,7 @@ contract MoneroSwapReadyTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1 ether,           // minprice
             KEY_BASE + 9,                 // publicspendkey
-            KEY_BASE + 10,                 // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 10                 // privateviewkey
         );
 
         Offer memory offer = moneroswap.getBuyOffer(1);
@@ -126,8 +121,7 @@ contract MoneroSwapReadyTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE + 11,                 // public spend key
-            KEY_BASE + 12,                 // public view key
-            0                  // msg pub key
+            KEY_BASE + 12                 // public view key
         );
 
         // Take the offer
@@ -138,8 +132,7 @@ contract MoneroSwapReadyTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1 ether,           // minprice
             KEY_BASE + 13,                 // publicspendkey
-            KEY_BASE + 14,                 // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 14                 // privateviewkey
         );
 
         Offer memory offerBeforeReady = moneroswap.getBuyOffer(1);
@@ -163,9 +156,7 @@ contract MoneroSwapReadyTest is Test {
         assert(offerBeforeReady.counterparty == offerAfterReady.counterparty);
         assert(offerBeforeReady.evmPublicSpendKey == offerAfterReady.evmPublicSpendKey);
         assert(offerBeforeReady.evmPublicViewKey == offerAfterReady.evmPublicViewKey);
-        assert(offerBeforeReady.evmPublicMsgKey == offerAfterReady.evmPublicMsgKey);
         assert(offerBeforeReady.xmrPublicSpendKey == offerAfterReady.xmrPublicSpendKey);
-        assert(offerBeforeReady.xmrPublicMsgKey == offerAfterReady.xmrPublicMsgKey);
         assert(offerBeforeReady.evmPrivateSpendKey == offerAfterReady.evmPrivateSpendKey);
         assert(offerBeforeReady.evmPrivateViewKey == offerAfterReady.evmPrivateViewKey);
         assert(offerBeforeReady.xmrPrivateSpendKey == offerAfterReady.xmrPrivateSpendKey);
@@ -190,8 +181,7 @@ contract MoneroSwapReadyTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // maxxmr
             KEY_BASE + 15,                 // public spend key
-            KEY_BASE + 16,                 // public view key
-            0                  // msg pub key
+            KEY_BASE + 16                 // public view key
         );
 
         // Attempt to ready the offer
@@ -217,8 +207,7 @@ contract MoneroSwapReadyTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // maxxmr
             KEY_BASE + 17,                 // public spend key
-            KEY_BASE + 18,                 // public view key
-            0                  // msg pub key
+            KEY_BASE + 18                 // public view key
         );
 
         // Take the offer
@@ -229,8 +218,7 @@ contract MoneroSwapReadyTest is Test {
             UNITS_PER_XMR,     // minxmr
             1 ether,           // maxprice
             KEY_BASE + 19,                 // publicspendkey
-            KEY_BASE + 20,                 // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 20                 // privateviewkey
         );
 
         // Attempt to ready the offer
@@ -251,8 +239,7 @@ contract MoneroSwapReadyTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // maxxmr
             KEY_BASE + 21,                 // public spend key
-            KEY_BASE + 22,                 // public view key
-            0                  // msg pub key
+            KEY_BASE + 22                 // public view key
         );
 
         // Take the offer
@@ -263,8 +250,7 @@ contract MoneroSwapReadyTest is Test {
             UNITS_PER_XMR,     // minxmr
             1 ether,           // maxprice
             KEY_BASE + 23,                 // publicspendkey
-            KEY_BASE + 24,                 // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 24                 // privateviewkey
         );
 
         Offer memory offer = moneroswap.getSellOffer(1);
@@ -289,8 +275,7 @@ contract MoneroSwapReadyTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // maxxmr
             KEY_BASE + 25,                 // public spend key
-            KEY_BASE + 26,                 // public view key
-            0                  // msg pub key
+            KEY_BASE + 26                 // public view key
         );
 
         // Take the offer
@@ -301,8 +286,7 @@ contract MoneroSwapReadyTest is Test {
             UNITS_PER_XMR,     // minxmr
             1 ether,           // maxprice
             KEY_BASE + 27,                 // publicspendkey
-            KEY_BASE + 28,                 // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 28                 // privateviewkey
         );
 
         Offer memory offerBeforeReady = moneroswap.getSellOffer(1);
@@ -326,9 +310,7 @@ contract MoneroSwapReadyTest is Test {
         assert(offerBeforeReady.counterparty == offerAfterReady.counterparty);
         assert(offerBeforeReady.evmPublicSpendKey == offerAfterReady.evmPublicSpendKey);
         assert(offerBeforeReady.evmPublicViewKey == offerAfterReady.evmPublicViewKey);
-        assert(offerBeforeReady.evmPublicMsgKey == offerAfterReady.evmPublicMsgKey);
         assert(offerBeforeReady.xmrPublicSpendKey == offerAfterReady.xmrPublicSpendKey);
-        assert(offerBeforeReady.xmrPublicMsgKey == offerAfterReady.xmrPublicMsgKey);
         assert(offerBeforeReady.evmPrivateSpendKey == offerAfterReady.evmPrivateSpendKey);
         assert(offerBeforeReady.evmPrivateViewKey == offerAfterReady.evmPrivateViewKey);
         assert(offerBeforeReady.xmrPrivateSpendKey == offerAfterReady.xmrPrivateSpendKey);

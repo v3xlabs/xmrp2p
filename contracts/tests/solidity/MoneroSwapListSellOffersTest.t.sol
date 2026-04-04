@@ -29,8 +29,7 @@ contract MoneroSwapListSellOffersTest is Test {
                 0,                 // min XMR
                 1_000_000_000_000, // max XMR
                 KEY_BASE + (i * 2),
-                KEY_BASE + (i * 2) + 1,
-                0                  // msg pub key
+                KEY_BASE + (i * 2) + 1
             );
         }
 

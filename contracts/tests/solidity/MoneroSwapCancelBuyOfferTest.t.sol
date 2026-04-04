@@ -39,8 +39,7 @@ contract MoneroSwapCancelBuyOfferTest is Test {
             1 ether,             // fixed price
             1_000_000_000_000,            // min XMR
             KEY_BASE++,
-            KEY_BASE++,
-            KEY_BASE++                  // msg pub key
+            KEY_BASE++
         );
 
         // Attempt to cancel the offer from ADDR_3
@@ -61,8 +60,7 @@ contract MoneroSwapCancelBuyOfferTest is Test {
             1 ether,             // fixed price
             1_000_000_000_000,            // min XMR
             KEY_BASE++,
-            KEY_BASE++,
-            KEY_BASE++                  // msg pub key
+            KEY_BASE++
         );
 
         // Take the offer
@@ -73,8 +71,7 @@ contract MoneroSwapCancelBuyOfferTest is Test {
             1_000_000_000_000, // maxxmr
             1 ether,           // minprice
             KEY_BASE++,      // publicspendkey
-            KEY_BASE++,      // privateviewkey
-            KEY_BASE++                  // msgpubkey
+            KEY_BASE++      // privateviewkey
         );
 
         // Attempt to cancel the offer
@@ -100,8 +97,7 @@ contract MoneroSwapCancelBuyOfferTest is Test {
             1 ether,             // fixed price
             1_000_000_000_000,            // min XMR
             KEY_BASE++,
-            KEY_BASE++,
-            KEY_BASE++                  // msg pub key
+            KEY_BASE++
         );
 
         uint256 liability = moneroswap.getLiability();

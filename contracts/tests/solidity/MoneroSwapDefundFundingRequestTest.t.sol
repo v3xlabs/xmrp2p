@@ -38,9 +38,7 @@ contract MoneroSwapDefundFundingRequestTest is Test {
             0,
             0,
             KEY_BASE + 1,
-            KEY_BASE + 2,
-            0
-        );
+            KEY_BASE + 2);
 
         vm.prank(ADDR_2);
         vm.expectRevert(ErrorFundingRequestInUse.selector);

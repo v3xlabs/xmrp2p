@@ -32,8 +32,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1,                 // minprice
             KEY_BASE + 1,      // publicspendkey
-            KEY_BASE + 2,      // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 2      // privateviewkey
         );
     }
 
@@ -48,8 +47,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE + 3,      // public spend key
-            KEY_BASE + 4,      // public view key
-            0                  // msg pub key
+            KEY_BASE + 4      // public view key
         );
 
         // Take the offer so it is no longer takeable
@@ -60,8 +58,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1,                 // minprice
             KEY_BASE + 5,      // publicspendkey
-            KEY_BASE + 6,      // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 6      // privateviewkey
         );
 
         // Attempt to retake the offer
@@ -77,8 +74,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1,                 // minprice
             KEY_BASE + 7,      // publicspendkey
-            KEY_BASE + 8,      // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 8      // privateviewkey
         );
     }
 
@@ -93,8 +89,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE + 9,      // public spend key
-            KEY_BASE + 10,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 10     // public view key
         );
 
         // Attempt to take the offer without a value and without a funding request
@@ -109,8 +104,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1,                 // minprice
             KEY_BASE + 11,     // publicspendkey
-            KEY_BASE + 12,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 12     // privateviewkey
         );
     }
 
@@ -125,8 +119,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE + 13,     // public spend key
-            KEY_BASE + 14,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 14     // public view key
         );
 
         // Create a funding request
@@ -148,8 +141,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1,                 // minprice
             KEY_BASE + 15,     // publicspendkey
-            KEY_BASE + 16,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 16     // privateviewkey
         );
     }
 
@@ -164,8 +156,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE + 17,     // public spend key
-            KEY_BASE + 18,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 18     // public view key
         );
 
         // Create a funding request
@@ -187,8 +178,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1,                 // minprice
             KEY_BASE + 19,     // publicspendkey
-            KEY_BASE + 20,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 20     // privateviewkey
         );
 
         // Create another buy offer
@@ -199,8 +189,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE + 21,     // public spend key
-            KEY_BASE + 22,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 22     // public view key
         );
 
         // Attempt to take the offer, as the funding request is already used with will fail
@@ -215,8 +204,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1,                 // minprice
             KEY_BASE + 23,     // publicspendkey
-            KEY_BASE + 24,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 24     // privateviewkey
         );
     } 
 
@@ -232,8 +220,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             KEY_BASE + 25,     // public spend key
-            KEY_BASE + 26,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 26     // public view key
         );
 
         // Create a funding request - It doesn't have to be funded
@@ -256,8 +243,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1,                 // minprice
             KEY_BASE + 27,     // publicspendkey
-            KEY_BASE + 28,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 28     // privateviewkey
         );
     }
 
@@ -272,8 +258,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             UNITS_PER_XMR,     // min XMR
             KEY_BASE + 29,     // public spend key
-            KEY_BASE + 30,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 30     // public view key
         );
 
         // Attempt to take the offer with a value too low
@@ -291,8 +276,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR - 1, // maxxmr
             1,                 // minprice
             KEY_BASE + 31,     // publicspendkey
-            KEY_BASE + 32,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 32     // privateviewkey
         );
     }
 
@@ -307,8 +291,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             UNITS_PER_XMR,     // min XMR
             KEY_BASE + 33,     // public spend key
-            KEY_BASE + 34,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 34     // public view key
         );
 
         // Attempt to take the offer with a value too low
@@ -324,8 +307,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1,                 // minprice
             KEY_BASE + 33,     // publicspendkey
-            KEY_BASE + 34,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 34     // privateviewkey
         );
     }
 
@@ -341,8 +323,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             UNITS_PER_XMR,     // min XMR
             KEY_BASE + 37,     // public spend key
-            KEY_BASE + 38,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 38     // public view key
         );
 
         // Attempt to take the offer with a price too high
@@ -360,8 +341,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             2 ether,           // minprice
             KEY_BASE + 39,     // publicspendkey
-            KEY_BASE + 40,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 40     // privateviewkey
         );
     }
 
@@ -377,8 +357,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             UNITS_PER_XMR,     // min XMR
             KEY_BASE + 45,     // public spend key
-            KEY_BASE + 46,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 46     // public view key
         );
 
         // Attempt to take the offer with a deposit which will only provide 0.5 XMR at the offer price
@@ -396,8 +375,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1 ether,           // minprice
             KEY_BASE + 47,     // publicspendkey
-            KEY_BASE + 48,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 48     // privateviewkey
         );
     }
 
@@ -412,8 +390,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             UNITS_PER_XMR,     // min XMR
             KEY_BASE + 49,     // public spend key
-            KEY_BASE + 50,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 50     // public view key
         );
 
         // Create a funding request with a fee above the buy offer amount
@@ -443,8 +420,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1 ether,           // minprice
             KEY_BASE + 51,     // publicspendkey
-            KEY_BASE + 52,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 52     // privateviewkey
         );
     }
 
@@ -459,8 +435,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             UNITS_PER_XMR,     // min XMR
             KEY_BASE + 53,     // public spend key
-            KEY_BASE + 54,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 54     // public view key
         );
 
         // Attempt to take the offer from an EOA which is not the specified counterparty
@@ -476,8 +451,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1 ether,           // minprice
             KEY_BASE + 55,     // publicspendkey
-            KEY_BASE + 56,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 56     // privateviewkey
         );
     }
 
@@ -492,8 +466,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             1_000_000_000_000, // min XMR
             1,                 // public spend key
-            2,                 // public view key
-            3                  // msg pub key
+            2                 // public view key
         );
 
         // Attempt to take offer with pub spend key 2 (used public view key)
@@ -508,8 +481,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1 ether,           // minprice
             2,                 // publicspendkey
-            4,                 // privateviewkey
-            5                  // msgpubkey
+            4                 // privateviewkey
         );
 
         // Attempt to create another offer with pub spend key 3 (used public message key)
@@ -524,107 +496,9 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1 ether,           // minprice
             3,                 // publicspendkey
-            6,                 // privateviewkey
-            7                  // msgpubkey
+            6                 // privateviewkey
         );
     }
-
-    function test_RevertWhen_UsedPublicMessageKey() public {
-        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
-
-        vm.deal(ADDR_1, 10 ether);
-        vm.prank(ADDR_1);
-        // Create a buy offer with keys 1/2/3
-        moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
-            1_000_000_000_000, // min XMR
-            1,                 // public spend key
-            2,                 // public view key
-            3                  // msg pub key
-        );
-
-        // Attempt to create another offer with pub message key 1 (used public spend key)
-        vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferUsedMessageKey.selector
-            )
-        );
-
-        moneroswap.takeBuyOffer{value: 1 ether}(
-            1,                 // offer id
-            UNITS_PER_XMR,     // maxxmr
-            1 ether,           // minprice
-            4,                 // publicspendkey
-            5,                 // privateviewkey
-            1                  // msgpubkey
-        );
-
-        // Attempt to create another offer with pub message key 2 (used public view key)
-        vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferUsedMessageKey.selector
-            )
-        );
-        moneroswap.takeBuyOffer{value: 1 ether}(
-            1,                 // offer id
-            UNITS_PER_XMR,     // maxxmr
-            1 ether,           // minprice
-            6,                 // publicspendkey
-            7,                 // privateviewkey
-            2                  // msgpubkey
-        );
-
-        // Attempt to create another offer with pub message key 3 (used public message key)
-        vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferUsedMessageKey.selector
-            )
-        );
-        moneroswap.takeBuyOffer{value: 1 ether}(
-            1,                 // offer id
-            UNITS_PER_XMR,     // maxxmr
-            1 ether,           // minprice
-            8,                 // publicspendkey
-            9,                 // privateviewkey
-            3                  // msgpubkey
-        );
-
-        //
-        // Now take the offer with a new message key
-        //
-        moneroswap.takeBuyOffer{value: 1 ether}(
-            1,                 // offer id
-            UNITS_PER_XMR,     // maxxmr
-            1 ether,           // minprice
-            8,                 // publicspendkey
-            9,                 // privateviewkey
-            10                 // msgpubkey
-        );
-
-        //
-        // Now check that that new key is correctly tracked by attempting to create a new offer using it
-        //        
-        vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferUsedMessageKey.selector
-            )
-        );        
-        // Create a buy offer with keys 1/2/3
-        moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
-            1_000_000_000_000, // min XMR
-            11,                // public spend key
-            12,                // public view key
-            10                 // msg pub key
-        );                                 
-    }
-
     function testTakeBuyOffer() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
@@ -636,8 +510,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             UNITS_PER_XMR,     // min XMR
             KEY_BASE + 57,     // public spend key
-            KEY_BASE + 58,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 58     // public view key
         );
 
         uint256 liability = moneroswap.getLiability();
@@ -658,8 +531,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1 ether,           // minprice
             KEY_BASE + 59,     // publicspendkey
-            KEY_BASE + 60,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 60     // privateviewkey
         );
 
         assertEq(moneroswap.getLiability(), 1 ether + xmrDeposit);
@@ -675,7 +547,6 @@ contract MoneroSwapTakeBuyOfferTest is Test {
         assertEq(offer.takerDeposit, xmrDeposit);
         assertEq(offer.xmrPublicSpendKey, KEY_BASE + 59);
         assertEq(offer.xmrPrivateViewKey, KEY_BASE + 60);
-        assertEq(offer.xmrPublicMsgKey, 0);
         assertEq(offer.finalprice, 1 ether);
         assertEq(offer.finalxmr, UNITS_PER_XMR);
         assertEq(offer.t0, block.timestamp + PARAMETERS.T0_DELAY);
@@ -695,8 +566,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             1 ether,           // fixed price
             UNITS_PER_XMR,     // min XMR
             KEY_BASE + 61,     // public spend key
-            KEY_BASE + 62,     // public view key
-            0                  // msg pub key
+            KEY_BASE + 62     // public view key
         );
 
         uint256 liability = moneroswap.getLiability();
@@ -732,8 +602,7 @@ contract MoneroSwapTakeBuyOfferTest is Test {
             UNITS_PER_XMR,     // maxxmr
             1 ether,           // minprice
             KEY_BASE + 63,     // publicspendkey
-            KEY_BASE + 64,     // privateviewkey
-            0                  // msgpubkey
+            KEY_BASE + 64     // privateviewkey
         );
 
         assertEq(moneroswap.getLiability(), 1 ether + xmrDeposit);
@@ -749,7 +618,6 @@ contract MoneroSwapTakeBuyOfferTest is Test {
         assertEq(offer.takerDeposit, 0);
         assertEq(offer.xmrPublicSpendKey, KEY_BASE + 63);
         assertEq(offer.xmrPrivateViewKey, KEY_BASE + 64);
-        assertEq(offer.xmrPublicMsgKey, 0);
         assertEq(offer.finalprice, 1 ether);
         assertEq(offer.finalxmr, UNITS_PER_XMR);
         assertEq(offer.t0, block.timestamp + PARAMETERS.T0_DELAY);

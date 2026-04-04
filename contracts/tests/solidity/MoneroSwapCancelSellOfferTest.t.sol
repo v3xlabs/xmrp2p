@@ -42,8 +42,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
             1_000_000_000_000, // min XMR
             1,                 // max XMR
             KEY_BASE + 1,      // public spend key
-            KEY_BASE + 2,      // public view key
-            0                  // msg pub key            
+            KEY_BASE + 2      // public view key
         );
 
         vm.prank(ADDR_2);
@@ -68,8 +67,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             KEY_BASE + 3,      // public spend key
-            KEY_BASE + 4,      // public view key
-            0                  // msg pub key            
+            KEY_BASE + 4      // public view key
         );
 
         // Take the sell offer so it is no longer in state OPEN
@@ -80,8 +78,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
             1_000_000_000_000, // min XMR
             deposit,           // max price
             KEY_BASE + 5,      // public spend key
-            KEY_BASE + 6,      // public view key
-            0                  // msg pub key            
+            KEY_BASE + 6      // public view key
         );
 
         vm.prank(ADDR_1);
@@ -107,8 +104,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             KEY_BASE + 7,      // public spend key
-            KEY_BASE + 8,      // public view key
-            0                  // msg pub key            
+            KEY_BASE + 8      // public view key
         );
 
         uint256 balance = address(ADDR_1).balance;
@@ -143,8 +139,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             KEY_BASE + 9,      // public spend key
-            KEY_BASE + 10,     // public view key
-            0                  // msg pub key            
+            KEY_BASE + 10     // public view key
         );
 
         uint256 balance = address(ADDR_1).balance;
@@ -183,8 +178,7 @@ contract MoneroSwapCancelSellOfferTest is Test {
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             KEY_BASE + 11,     // public spend key
-            KEY_BASE + 12,     // public view key
-            0                  // msg pub key            
+            KEY_BASE + 12     // public view key
         );
 
         FundingRequest memory freq = moneroswap.getFundingRequest(ADDR_1);

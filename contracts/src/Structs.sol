@@ -61,9 +61,6 @@ struct Offer {
     uint256 t0;
     /// Timestamp after which 'claim' can be called, after, taken offer can be refunded
     uint256 t1;
-    /// Public keys for exchanging messages (using ECDH to compute the encryption key) between the two parties
-    uint256 xmrPublicMsgKey;
-    uint256 evmPublicMsgKey;
 }
 
 /// The FundingRequest structure describes funding requested by a Monero seller.

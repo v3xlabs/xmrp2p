@@ -1,10 +1,12 @@
-import { Provider, Value } from "ox";
+import { Ed25519, Mnemonic, Provider, Value } from "ox";
 import { fromPublicKey } from "ox/Address";
 import { fromHttp } from "ox/RpcTransport";
 import { getPublicKey } from "ox/Secp256k1";
 
 import { createBuyOfferParameters } from "../src/index.ts";
+import { deriveMoneroKeys } from "../src/monero/keys.ts";
 import { sendTransaction } from "../src/tx.ts";
+import { toBigInt } from "ox/Hex";
 
 const provider = Provider.from(fromHttp("http://localhost:8545"));
 
@@ -29,14 +31,19 @@ const counterparty = fromPublicKey(
 const xmrPriceInEth = Value.fromEther("0.1");
 const minXmr = Value.fromEther("0.01"); // 0.01 XMR in piconeros
 
+const mnemonic = Mnemonic.random(Mnemonic.english);
+
+const { publicViewKey, publicSpendKey } = deriveMoneroKeys({
+  rootSeed: mnemonic,
+});
+
 const buyOfferParams = createBuyOfferParameters({
   counterparty,
   contractAddress: MONERO_SWAP_ADDRESS,
   price: xmrPriceInEth,
   minxmr: minXmr,
-  publicspendkey: 12345678901234567890123456789012345678901234567890123456789012345n,
-  publicviewkey: 98765432109876543210987654321098765432109876543210987654321098765n,
-  msgpubkey: 11111111111111111111111111111111111111111111111111111111111111111n,
+  publicspendkey: toBigInt(publicSpendKey),
+  publicviewkey: toBigInt(publicViewKey),
 });
 
 const hash = await sendTransaction({
@@ -47,3 +54,5 @@ const hash = await sendTransaction({
   value: Value.fromEther("1"),
   ...buyOfferParams,
 });
+
+console.log(hash);
