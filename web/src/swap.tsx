@@ -1,8 +1,7 @@
 import { SegmentedControl } from "@kobalte/core/segmented-control";
 import { Select } from "@kobalte/core/select";
-import { FaSolidArrowsUpDown, FaSolidCheck } from "solid-icons/fa";
+import { FaSolidCheck, FaSolidUpDown } from "solid-icons/fa";
 import { type Accessor, type Component, createSignal, For } from "solid-js";
-import { ArrowDownUp } from "lucide-solid";
 
 import eth from "./assets/eth.svg";
 import xmr from "./assets/xmr.svg";
@@ -82,7 +81,7 @@ export const Swap = () => {
             setToToken(temp);
           }}
         >
-          <ArrowDownUp class="group-hover:rotate-180 transition-all w-5 h-5" />
+          <FaSolidUpDown class="group-hover:rotate-180 transition-all w-5 h-5" />
         </button>
       </div>
 

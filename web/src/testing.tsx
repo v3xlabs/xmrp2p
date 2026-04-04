@@ -1,7 +1,8 @@
 import { createQuery } from "@tanstack/solid-query";
 import { useChainId, useClient } from "@wagmi/solid";
 import type { Provider as OxProvider } from "ox/Provider";
-import { listBuyOffers, listSellOffers } from "xmrp2p";
+import { createMemo, For, Show, Suspense } from "solid-js";
+import { listBuyOffers } from "xmrp2p";
 
 import { CONTRACT_ADDRESS } from "./config";
 
@@ -15,31 +16,60 @@ export const Testing = () => {
       console.log("fetching offers");
       const contractAddress = CONTRACT_ADDRESS[chainId()!] as `0x${string}`;
 
-      const offers = await listSellOffers({
-        provider,
-        contractAddress,
-        offset: BigInt(0),
-        count: BigInt(10),
-      });
+      // const offers = await listSellOffers({
+      //   provider,
+      //   contractAddress,
+      //   offset: BigInt(0),
+      //   count: BigInt(10),
+      // });
 
-      const offersB = await listBuyOffers({
-        provider,
-        contractAddress,
-        offset: BigInt(0),
-        count: BigInt(10),
-      });
+      console.log("yoink");
 
-      return { offers, offersB };
+      try {
+        const offers = await listBuyOffers({
+          provider,
+          contractAddress,
+          offset: BigInt(0),
+          count: BigInt(10),
+        });
+
+        console.log("SUCCESS");
+
+        return { offers };
+      }
+      catch (error) {
+        console.error(error);
+      }
+
+      return {};
     },
-    enabled: !!chainId() && !!client() && !!CONTRACT_ADDRESS[chainId()!],
+    // enabled: !!chainId() && !!client() && !!CONTRACT_ADDRESS[chainId()!],
   }));
+
+  const data = createMemo(() => x.data);
 
   return (
     <div>
       hellllooo:
       {chainId()}
       {" "}
-      {JSON.stringify(x.data, null, 2)}
+      <Suspense fallback={<div>Loading...</div>}>
+        <Show when={x.isSuccess}>
+          <For each={data()?.offers}>
+            {offer => (
+              <div>
+                {offer.owner}
+              </div>
+            )}
+          </For>
+        </Show>
+        <Show when={x.isError}>
+          {x.error?.message}
+        </Show>
+        <Show when={x.isPending}>
+          Pending...
+        </Show>
+      </Suspense>
     </div>
   );
 };

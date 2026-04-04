@@ -1,0 +1,2069 @@
+export const ABI = [
+    {
+        type: "constructor",
+        inputs: [
+            {
+                name: "ownerAddress",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        stateMutability: "payable",
+    },
+    {
+        type: "fallback",
+        stateMutability: "payable",
+    },
+    {
+        type: "receive",
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "cancelBuyOffer",
+        inputs: [
+            {
+                name: "id",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "cancelFundingRequest",
+        inputs: [],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "cancelSellOffer",
+        inputs: [
+            {
+                name: "id",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "claim",
+        inputs: [
+            {
+                name: "id",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "privateSpendKey",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "claimDeposit",
+        inputs: [
+            {
+                name: "id",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "claimFundingRequest",
+        inputs: [
+            {
+                name: "addr",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "createBuyOffer",
+        inputs: [
+            {
+                name: "counterparty",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "price",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "minxmr",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "publicspendkey",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "publicviewkey",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "createFundingRequest",
+        inputs: [
+            {
+                name: "amount",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "fee",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "createSellOffer",
+        inputs: [
+            {
+                name: "counterparty",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "price",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "minxmr",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "maxxmr",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "publicspendkey",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "privateviewkey",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "defundFundingRequest",
+        inputs: [
+            {
+                name: "addr",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "fundFundingRequest",
+        inputs: [
+            {
+                name: "requester",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [],
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "getBuyOffer",
+        inputs: [
+            {
+                name: "id",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "tuple",
+                internalType: "struct Offer",
+                components: [
+                    {
+                        name: "type_",
+                        type: "uint8",
+                        internalType: "enum OfferType",
+                    },
+                    {
+                        name: "state",
+                        type: "uint8",
+                        internalType: "enum OfferState",
+                    },
+                    {
+                        name: "funded",
+                        type: "bool",
+                        internalType: "bool",
+                    },
+                    {
+                        name: "owner",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "manager",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "counterparty",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "id",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "maxamount",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "price",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "minxmr",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "maxxmr",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "deposit",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "lastupdate",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "blockTaken",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPublicSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPrivateSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPublicViewKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPrivateViewKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "xmrPublicSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "xmrPrivateSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "xmrPrivateViewKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "index",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "finalprice",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "takerDeposit",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "finalxmr",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "t0",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "t1",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                ],
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "getFundingRequest",
+        inputs: [
+            {
+                name: "requester",
+                type: "address",
+                internalType: "address",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "tuple",
+                internalType: "struct FundingRequest",
+                components: [
+                    {
+                        name: "requester",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "amount",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "fee",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "funder",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "index",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "usedby",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "fundedOn",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                ],
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "getLiability",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "getParameters",
+        inputs: [],
+        outputs: [
+            {
+                name: "",
+                type: "tuple",
+                internalType: "struct MoneroSwap.Parameters",
+                components: [
+                    {
+                        name: "FUNDING_REQUEST_MAXBALANCE",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "FUNDING_REQUEST_MIN_FEE_RATIO",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "MINIMUM_BUY_OFFER",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "MAXIMUM_BUY_OFFER",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "MINIMUM_SELL_OFFER",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "MAXIMUM_SELL_OFFER",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "MAXIMUM_BUY_OFFER_BOOK_SIZE",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "MAXIMUM_SELL_OFFER_BOOK_SIZE",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "SELL_OFFER_COVERAGE_RATIO",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "T0_DELAY",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "T1_DELAY",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                ],
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "getSellOffer",
+        inputs: [
+            {
+                name: "id",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "tuple",
+                internalType: "struct Offer",
+                components: [
+                    {
+                        name: "type_",
+                        type: "uint8",
+                        internalType: "enum OfferType",
+                    },
+                    {
+                        name: "state",
+                        type: "uint8",
+                        internalType: "enum OfferState",
+                    },
+                    {
+                        name: "funded",
+                        type: "bool",
+                        internalType: "bool",
+                    },
+                    {
+                        name: "owner",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "manager",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "counterparty",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "id",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "maxamount",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "price",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "minxmr",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "maxxmr",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "deposit",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "lastupdate",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "blockTaken",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPublicSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPrivateSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPublicViewKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPrivateViewKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "xmrPublicSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "xmrPrivateSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "xmrPrivateViewKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "index",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "finalprice",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "takerDeposit",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "finalxmr",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "t0",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "t1",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                ],
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "isKeyUsed",
+        inputs: [
+            {
+                name: "key",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "bool",
+                internalType: "bool",
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "listBuyOffers",
+        inputs: [
+            {
+                name: "offset",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "count",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "tuple[]",
+                internalType: "struct Offer[]",
+                components: [
+                    {
+                        name: "type_",
+                        type: "uint8",
+                        internalType: "enum OfferType",
+                    },
+                    {
+                        name: "state",
+                        type: "uint8",
+                        internalType: "enum OfferState",
+                    },
+                    {
+                        name: "funded",
+                        type: "bool",
+                        internalType: "bool",
+                    },
+                    {
+                        name: "owner",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "manager",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "counterparty",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "id",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "maxamount",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "price",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "minxmr",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "maxxmr",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "deposit",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "lastupdate",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "blockTaken",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPublicSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPrivateSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPublicViewKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPrivateViewKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "xmrPublicSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "xmrPrivateSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "xmrPrivateViewKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "index",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "finalprice",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "takerDeposit",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "finalxmr",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "t0",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "t1",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                ],
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "listFundingRequests",
+        inputs: [
+            {
+                name: "offset",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "count",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "tuple[]",
+                internalType: "struct FundingRequest[]",
+                components: [
+                    {
+                        name: "requester",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "amount",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "fee",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "funder",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "index",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "usedby",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "fundedOn",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                ],
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "listSellOffers",
+        inputs: [
+            {
+                name: "offset",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "count",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [
+            {
+                name: "",
+                type: "tuple[]",
+                internalType: "struct Offer[]",
+                components: [
+                    {
+                        name: "type_",
+                        type: "uint8",
+                        internalType: "enum OfferType",
+                    },
+                    {
+                        name: "state",
+                        type: "uint8",
+                        internalType: "enum OfferState",
+                    },
+                    {
+                        name: "funded",
+                        type: "bool",
+                        internalType: "bool",
+                    },
+                    {
+                        name: "owner",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "manager",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "counterparty",
+                        type: "address",
+                        internalType: "address",
+                    },
+                    {
+                        name: "id",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "maxamount",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "price",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "minxmr",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "maxxmr",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "deposit",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "lastupdate",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "blockTaken",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPublicSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPrivateSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPublicViewKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "evmPrivateViewKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "xmrPublicSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "xmrPrivateSpendKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "xmrPrivateViewKey",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "index",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "finalprice",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "takerDeposit",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "finalxmr",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "t0",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                    {
+                        name: "t1",
+                        type: "uint256",
+                        internalType: "uint256",
+                    },
+                ],
+            },
+        ],
+        stateMutability: "view",
+    },
+    {
+        type: "function",
+        name: "ready",
+        inputs: [
+            {
+                name: "id",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "refund",
+        inputs: [
+            {
+                name: "id",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "privateSpendKey",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "privateViewKey",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "setParameters",
+        inputs: [
+            {
+                name: "FundingRequestMaxBalance",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "FundingRequestMinFeeRatio",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "MaximumBuyOfferBookSize",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "MinimumBuyOffer",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "MaximumBuyOffer",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "MaximumSellOfferBookSize",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "MinimumSellOffer",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "MaximumSellOffer",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "SellOfferCoverageRatio",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "T0Delay",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "T1Delay",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+    },
+    {
+        type: "function",
+        name: "takeBuyOffer",
+        inputs: [
+            {
+                name: "id",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "maxxmr",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "minprice",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "publicspendkey",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "privateviewkey",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "takeSellOffer",
+        inputs: [
+            {
+                name: "id",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "minxmr",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "maxprice",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "publicspendkey",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "publicviewkey",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "updateBuyOffer",
+        inputs: [
+            {
+                name: "id",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "counterparty",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "maxamount",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "price",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "minxmr",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "payable",
+    },
+    {
+        type: "function",
+        name: "updateSellOffer",
+        inputs: [
+            {
+                name: "id",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "counterparty",
+                type: "address",
+                internalType: "address",
+            },
+            {
+                name: "price",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "minxmr",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "maxxmr",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+        outputs: [],
+        stateMutability: "payable",
+    },
+    {
+        type: "event",
+        name: "FundingEvent",
+        inputs: [
+            {
+                name: "requester",
+                type: "address",
+                indexed: false,
+                internalType: "address",
+            },
+            {
+                name: "amount",
+                type: "uint256",
+                indexed: false,
+                internalType: "uint256",
+            },
+            {
+                name: "fee",
+                type: "uint256",
+                indexed: false,
+                internalType: "uint256",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "event",
+        name: "OfferEvent",
+        inputs: [
+            {
+                name: "offerid",
+                type: "uint256",
+                indexed: false,
+                internalType: "uint256",
+            },
+            {
+                name: "type_",
+                type: "uint8",
+                indexed: true,
+                internalType: "enum OfferType",
+            },
+            {
+                name: "state",
+                type: "uint8",
+                indexed: true,
+                internalType: "enum OfferState",
+            },
+        ],
+        anonymous: false,
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferAfterT0",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferAfterT1",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferAmountAboveMaximum",
+        inputs: [
+            {
+                name: "maximum",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferAmountBelowMinimum",
+        inputs: [
+            {
+                name: "minimum",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferAmountTooLowToCoverFundingFee",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferAvailableFundingRequest",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferBetweenT0AndT1",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferCannotClaimDepositOfFundedOffer",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferInvalidCallerForUpdate",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferInvalidCounterparty",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferInvalidEVMPrivateSpendKey",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferInvalidEVMPrivateViewKey",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferInvalidStateForCancel",
+        inputs: [
+            {
+                name: "state",
+                type: "uint8",
+                internalType: "enum OfferState",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferInvalidStateForClaim",
+        inputs: [
+            {
+                name: "state",
+                type: "uint8",
+                internalType: "enum OfferState",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferInvalidStateForClaimDeposit",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferInvalidStateForReady",
+        inputs: [
+            {
+                name: "state",
+                type: "uint8",
+                internalType: "enum OfferState",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferInvalidStateForRefund",
+        inputs: [
+            {
+                name: "state",
+                type: "uint8",
+                internalType: "enum OfferState",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferInvalidStateForTake",
+        inputs: [
+            {
+                name: "state",
+                type: "uint8",
+                internalType: "enum OfferState",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferInvalidStateForUpdate",
+        inputs: [
+            {
+                name: "state",
+                type: "uint8",
+                internalType: "enum OfferState",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferInvalidXMRPrivateSpendKey",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferMaximumOfferBookSizeReached",
+        inputs: [
+            {
+                name: "size",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferNoCreationWhenActiveFundingRequestExists",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferNoFundingRequestFound",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferNoPriceDefined",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferNoValueAllowedWhenReducingMaxamount",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferNotAfterT1",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferNotAfterT1OrRefunded",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferNotBetweenT0AndT1",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferNotOwner",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferNotTaker",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferPriceTooLow",
+        inputs: [
+            {
+                name: "price",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "minprice",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferPublicSpendKeyAlreadyUsed",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferUnableToPayBuyer",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferUnableToRefund",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferUnableToSendAmountDelta",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferUnknown",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorBuyOfferXMRAmountTooLow",
+        inputs: [
+            {
+                name: "amount",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "minamount",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorDelayTooShort",
+        inputs: [
+            {
+                name: "delay",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "minimum",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestAlreadyExistsForAddress",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestAlreadyFunded",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestAlreadyInUse",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestAmountBelowFee",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestBalanceTooHigh",
+        inputs: [
+            {
+                name: "balance",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "maxbalance",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestCannotSelfFund",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestClaimableOnlyByFunderOrFundee",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestCurrentlyFunded",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestDefundableOnlyByFunder",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestFeeBelowMinimumRatio",
+        inputs: [
+            {
+                name: "ratio",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestInUse",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestIncorrectAmount",
+        inputs: [
+            {
+                name: "amount",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "expected",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestNotAnEOA",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestNotClaimable",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestNotFound",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestNotFunded",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestNotInUse",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestUnableToRefund",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorFundingRequestZero",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorInvalidOffer",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorNotOwner",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorReentrancy",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferAfterT0",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferAfterT1",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferAmountAboveMaximum",
+        inputs: [
+            {
+                name: "maximum",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferAmountBelowMinimum",
+        inputs: [
+            {
+                name: "minimum",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferAmountTooLowToCoverFundingFee",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferAvailableFundingRequest",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferBetweenT0AndT1",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferCannotClaimDepositOfFundedOffer",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferCannotRefundInTakenBlock",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferFundingRequestAlreadyInUse",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferFundingRequestNotFunded",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferImmutableDeposit",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferInvalidCallerForUpdate",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferInvalidCounterparty",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferInvalidEVMPrivateSpendKey",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferInvalidEVMPrivateViewKey",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferInvalidStateForCancel",
+        inputs: [
+            {
+                name: "state",
+                type: "uint8",
+                internalType: "enum OfferState",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferInvalidStateForClaim",
+        inputs: [
+            {
+                name: "state",
+                type: "uint8",
+                internalType: "enum OfferState",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferInvalidStateForClaimDeposit",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferInvalidStateForReady",
+        inputs: [
+            {
+                name: "state",
+                type: "uint8",
+                internalType: "enum OfferState",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferInvalidStateForRefund",
+        inputs: [
+            {
+                name: "state",
+                type: "uint8",
+                internalType: "enum OfferState",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferInvalidStateForTake",
+        inputs: [
+            {
+                name: "state",
+                type: "uint8",
+                internalType: "enum OfferState",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferInvalidStateForUpdate",
+        inputs: [
+            {
+                name: "state",
+                type: "uint8",
+                internalType: "enum OfferState",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferInvalidXMRPrivateSpendKey",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferMaximumOfferBookSizeReached",
+        inputs: [
+            {
+                name: "size",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferNoFundingRequest",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferNoPriceDefined",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferNotAfterT1",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferNotAfterT1OrRefunded",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferNotBetweenT0AndT1",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferNotCancellableByCaller",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferNotCounterparty",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferNotOwner",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferNotTaker",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferPriceTooHigh",
+        inputs: [
+            {
+                name: "price",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "maxprice",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferPublicSpendKeyAlreadyUsed",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferUnableToRefund",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferUnableToSendAmountDelta",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferUnknown",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferXMRAmountBelowOfferMinimum",
+        inputs: [
+            {
+                name: "amount",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "minimum",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorSellOfferXMRAmountTooLow",
+        inputs: [
+            {
+                name: "amount",
+                type: "uint256",
+                internalType: "uint256",
+            },
+            {
+                name: "minimum",
+                type: "uint256",
+                internalType: "uint256",
+            },
+        ],
+    },
+    {
+        type: "error",
+        name: "ErrorUnableToAcceptPayment",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorUnableToClaimDeposit",
+        inputs: [],
+    },
+    {
+        type: "error",
+        name: "ErrorUnableToPayClaimer",
+        inputs: [],
+    },
+] as const;
