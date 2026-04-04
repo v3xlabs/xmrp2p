@@ -43,11 +43,7 @@ error ErrorBuyOfferNotOwner();
 /// Error raised when decreasing the maximum amount of a Buy Offer and the delta amount could not be sent back to the offer owner
 error ErrorBuyOfferUnableToSendAmountDelta();
 
-/// This error is raised when a the creation of a BuyOffer is requested with a public spend key which has
-/// already been associated with an offer handled by this instance of the contract. This is a security measure
-/// to ensure that a public spend key whose private spend key was exposed, either via a call to claim or refund,
-/// is not reused.
-error ErrorBuyOfferPublicSpendKeyAlreadyUsed();
+error ErrorKeyAlreadyUsed();
 
 /// Error raised when the price specified in a take call is below the offer's fixed price
 /// @param price the offer's fixed price
