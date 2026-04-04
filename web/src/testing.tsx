@@ -13,19 +13,18 @@ export const Testing = () => {
     queryKey: ["orders"],
     queryFn: async () => {
       console.log("fetching offers");
+      const contractAddress = CONTRACT_ADDRESS[chainId()!] as `0x${string}`;
 
       const offers = await listSellOffers({
         provider,
-        contractAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-        // contractAddress: CONTRACT_ADDRESS[chainId()!] as `0x${string}`,
+        contractAddress,
         offset: BigInt(0),
         count: BigInt(10),
       });
 
       const offersB = await listBuyOffers({
         provider,
-        contractAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-        // contractAddress: CONTRACT_ADDRESS[chainId()!] as `0x${string}`,
+        contractAddress,
         offset: BigInt(0),
         count: BigInt(10),
       });
