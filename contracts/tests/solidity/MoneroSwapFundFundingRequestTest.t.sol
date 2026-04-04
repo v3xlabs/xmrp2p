@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {XMRP2P} from "../../src/XMRP2P.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {OfferType, OfferState} from "../../src/Enums.sol";
 import "../../src/Errors.sol";
@@ -11,7 +11,6 @@ import "../../src/Errors.sol";
 
 /// Tests related to FundingRequest
 contract MoneroSwapFundFundingRequestTest is Test {
-
     address ADDR_1 = address(0x1111111111111111111111111111111111111111);
     address ADDR_2 = address(0x2222222222222222222222222222222222222222);
 
@@ -66,15 +65,10 @@ contract MoneroSwapFundFundingRequestTest is Test {
         moneroswap.createFundingRequest(1 ether, 0);
 
         // Attempt to fund the FundingRequest with an incorrect amount
-        vm.deal(ADDR_2,2 ether);
+        vm.deal(ADDR_2, 2 ether);
         vm.prank(ADDR_2);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-            ErrorFundingRequestIncorrectAmount.selector,
-            2 ether,
-            1 ether
-        ));
-        moneroswap.fundFundingRequest{value: 2 ether}(ADDR_1);  
+        vm.expectRevert(abi.encodeWithSelector(ErrorFundingRequestIncorrectAmount.selector, 2 ether, 1 ether));
+        moneroswap.fundFundingRequest{value: 2 ether}(ADDR_1);
     }
 
     function testFundFundingRequest() public {

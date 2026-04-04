@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {XMRP2P} from "../../src/XMRP2P.sol";
 import "../../src/Errors.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {Utils} from "./Utils.t.sol";
@@ -11,7 +11,6 @@ import {EIP7702NoPaymentDelegate} from "./EIP7702NoPaymentDelegate.t.sol";
 
 /// Tests related to FundingRequest
 contract MoneroSwapClaimFundingRequestTest is Test {
-
     address ADDR_1;
     uint256 PK_1;
     address ADDR_2;
@@ -122,7 +121,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
 
         // Attemtp to claim the FundingRequest. The timestamp is too early (before t0)
         vm.prank(ADDR_2);
-        vm.warp(offer.t0);        
+        vm.warp(offer.t0);
         vm.expectRevert(ErrorFundingRequestNotClaimable.selector);
         moneroswap.claimFundingRequest(ADDR_1);
 
@@ -277,7 +276,7 @@ contract MoneroSwapClaimFundingRequestTest is Test {
 
         // Claim the offer (since the funder has an EIP7702 delegation which rejects payments, the claim won't pay principal or fee)
         vm.prank(ADDR_1);
-        moneroswap.claim(1, xmrPrivateSpendKey1); 
+        moneroswap.claim(1, xmrPrivateSpendKey1);
 
         // Balance of funder hasn't changed
         assertEq(balance, address(ADDR_2).balance);

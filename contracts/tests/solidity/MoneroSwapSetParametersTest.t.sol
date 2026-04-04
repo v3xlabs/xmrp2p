@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {XMRP2P} from "../../src/XMRP2P.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {OfferType, OfferState} from "../../src/Enums.sol";
 import "../../src/Errors.sol";
@@ -12,19 +12,12 @@ import "../../src/Errors.sol";
 import {Utils} from "./Utils.t.sol";
 
 contract MoneroSwapSetParametersTest is Test {
-
     function test_RevertWhen_DelayTooShort() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         uint256 delay = vm.randomUint() % Utils.MINIMUM_DELAY;
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorDelayTooShort.selector,
-                delay,
-                Utils.MINIMUM_DELAY
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorDelayTooShort.selector, delay, Utils.MINIMUM_DELAY));
         vm.prank(msg.sender);
         moneroswap.setParameters(
             1, // FundingRequestMaxBalance,
@@ -40,13 +33,7 @@ contract MoneroSwapSetParametersTest is Test {
             Utils.MINIMUM_DELAY + 1 // T1Delay
         );
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorDelayTooShort.selector,
-                delay,
-                Utils.MINIMUM_DELAY
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorDelayTooShort.selector, delay, Utils.MINIMUM_DELAY));
         vm.prank(msg.sender);
         moneroswap.setParameters(
             1, // FundingRequestMaxBalance,
@@ -60,7 +47,7 @@ contract MoneroSwapSetParametersTest is Test {
             1, // SellOfferCoverageRatio,
             Utils.MINIMUM_DELAY, // T0Delay,
             delay // T1Delay
-        );        
+        );
     }
 
     function testSetParameters() public {
@@ -77,7 +64,7 @@ contract MoneroSwapSetParametersTest is Test {
         uint256 SellOfferCoverageRatio = vm.randomUint();
         uint256 T0Delay = Utils.MINIMUM_DELAY + vm.randomUint();
         uint256 T1Delay = Utils.MINIMUM_DELAY + vm.randomUint();
-        
+
         // Set the parameters
         vm.prank(msg.sender);
         moneroswap.setParameters(

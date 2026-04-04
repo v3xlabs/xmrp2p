@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {XMRP2P} from "../../src/XMRP2P.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {OfferType, OfferState} from "../../src/Enums.sol";
 import "../../src/Errors.sol";
@@ -12,7 +12,6 @@ import "../../src/Errors.sol";
 import {Utils} from "./Utils.t.sol";
 
 contract MoneroSwapCancelFundingRequestTest is Test {
-
     address ADDR_1 = address(0x1111111111111111111111111111111111111111);
     address ADDR_2 = address(0x2222222222222222222222222222222222222222);
 

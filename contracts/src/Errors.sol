@@ -43,11 +43,7 @@ error ErrorBuyOfferNotOwner();
 /// Error raised when decreasing the maximum amount of a Buy Offer and the delta amount could not be sent back to the offer owner
 error ErrorBuyOfferUnableToSendAmountDelta();
 
-/// This error is raised when a the creation of a BuyOffer is requested with a public spend key which has
-/// already been associated with an offer handled by this instance of the contract. This is a security measure
-/// to ensure that a public spend key whose private spend key was exposed, either via a call to claim or refund,
-/// is not reused.
-error ErrorBuyOfferPublicSpendKeyAlreadyUsed();
+error ErrorKeyAlreadyUsed();
 
 /// Error raised when the price specified in a take call is below the offer's fixed price
 /// @param price the offer's fixed price
@@ -126,7 +122,7 @@ error ErrorBuyOfferNoValueAllowedWhenReducingMaxamount();
 
 /// This error occurs when attempting to create a buy offer when the offer book is already at the configured limit
 /// @param size the configured offer book maximum size
-error ErrorBuyOfferMaximumOfferBookSizeReached(uint256 size);
+error ErrorMaximumOfferBookSizeReached(uint256 size);
 
 /// This error is raised when price is 0 and oracleRatio is also 0
 error ErrorBuyOfferNoPriceDefined();
@@ -143,83 +139,6 @@ error ErrorBuyOfferUnableToPayBuyer();
 
 /// Error raised when attempting to call claimDeposit on a buy offer whose taker was funded
 error ErrorBuyOfferCannotClaimDepositOfFundedOffer();
-
-/// Error raised when attempting to create a funding request for an amount which is 0
-error ErrorFundingRequestZero();
-
-/// Error raised when attempting to create a funding request from an address whose balance is above the configured threshold FUNDING_REQUEST_MAXBALANCE
-/// The rationale is that the account should use its balance first.
-/// @param balance the current balance of the requesting account
-/// @param maxbalance the configured FUNDING_REQUEST_MAXBALANCE parameter
-error ErrorFundingRequestBalanceTooHigh(uint256 balance, uint256 maxbalance);
-
-/// Error raised when requesting a funding request from an account for which such a request already exists
-error ErrorFundingRequestAlreadyExistsForAddress();
-
-/// Error when attempting to fund a FundingRequest (via a call to fundFundingRequest) which has already been funded
-error ErrorFundingRequestAlreadyFunded();
-
-/// Error raised when attempting to fund a FundingRequest but with a transaction value which differs from
-/// the amount specified in the FundingRequest.
-/// @param amount The amount provided in the transaction.
-/// @param expected The amount requested in the FundingRequest
-error ErrorFundingRequestIncorrectAmount(uint256 amount, uint256 expected);
-
-/// Error raised when attempting to defund a FundingRequest that is currently being used as part of a transaction.
-error ErrorFundingRequestInUse();
-
-/// Error raised when attempting to defund a FundingRequest from an address other than that of the funder.
-error ErrorFundingRequestDefundableOnlyByFunder();
-
-/// Error raised when attempting to defund a FundingRequest that has already been funded.
-error ErrorFundingRequestCurrentlyFunded();
-
-/// Error raised when attempting to claim a FundingRequest from an address other than that of the funder or the fundee
-error ErrorFundingRequestClaimableOnlyByFunderOrFundee();
-
-/// Error raised when attempting to claim a FundingRequest which is not in use
-error ErrorFundingRequestNotInUse();
-
-/// Error raised when referencing a non existent FundingRequest,
-error ErrorFundingRequestNotFound();
-
-/// Error raised when attempting to use a FundingRequest which has already been used.
-error ErrorFundingRequestAlreadyInUse();
-
-/// Error raised when attempting to use a FundingRequest which has not been funded.
-error ErrorFundingRequestNotFunded();
-
-/// Error raised when attempting to claim a FundingRequest which is not in a compatible state
-error ErrorFundingRequestNotClaimable();
-
-/// Error raised when the account requesting a FundingRequest is not an EOA.
-/// Note that this may need to be adapted to account for EIP-7702
-error ErrorFundingRequestNotAnEOA();
-
-/// Error raised when a call to defundFundingRequest was unable to send the funds back to the funder
-error ErrorFundingRequestUnableToRefund();
-
-/// Error raised when attempting to create a FundingRequest with an amount which is lower than the promised fee
-error ErrorFundingRequestAmountBelowFee();
-
-/// Error raised when the fee is below the minimum configured fee ratio multiplied by the requested amount
-error ErrorFundingRequestFeeBelowMinimumRatio(uint256 ratio);
-
-/// Error raised when an account attempts to fund its own funding request
-error ErrorFundingRequestCannotSelfFund();
-
-/// This error occurs when attempting to create a sell offer when the offer book is already at the configured limit
-/// @param size the configured maximum sell offer book size (AXIMUM_SELL_OFFER_BOOK_SIZE)
-error ErrorSellOfferMaximumOfferBookSizeReached(uint256 size);
-
-/// Error raised when attempting to create a sell offer with no deposit when no funding request exists for the calling account
-error ErrorSellOfferNoFundingRequest();
-
-/// Error raised when attempting to create a sell offer with no deposit when the existing funding request of the calling account is not funded
-error ErrorSellOfferFundingRequestNotFunded();
-
-/// Error raised when attempting to create a sell offer with no deposit when the existing funding request of the calling account is already used
-error ErrorSellOfferFundingRequestAlreadyInUse();
 
 /// Error raised when attempting to create or update a sell offer with an amount below the configured minimum (MINIMUM_SELL_OFFER)
 /// @param minimum the current configured minimum sell offer amount

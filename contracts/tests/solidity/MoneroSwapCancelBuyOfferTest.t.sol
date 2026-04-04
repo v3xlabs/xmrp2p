@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {XMRP2P} from "../../src/XMRP2P.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {OfferType, OfferState} from "../../src/Enums.sol";
 import "../../src/Errors.sol";
@@ -13,7 +13,6 @@ import {OfferType, OfferState} from "../../src/Enums.sol";
 import {Utils} from "./Utils.t.sol";
 
 contract MoneroSwapCancelBuyOfferTest is Test {
-
     uint256 KEY_BASE = 0;
 
     address ADDR_1 = address(0x1111111111111111111111111111111111111111);
@@ -35,9 +34,9 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,             // fixed price
-            1_000_000_000_000,            // min XMR
+            address(0), // counterparty
+            1 ether, // fixed price
+            1_000_000_000_000, // min XMR
             KEY_BASE++,
             KEY_BASE++
         );
@@ -56,9 +55,9 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,             // fixed price
-            1_000_000_000_000,            // min XMR
+            address(0), // counterparty
+            1 ether, // fixed price
+            1_000_000_000_000, // min XMR
             KEY_BASE++,
             KEY_BASE++
         );
@@ -67,21 +66,16 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         vm.deal(ADDR_2, 2 ether);
         vm.prank(ADDR_2);
         moneroswap.takeBuyOffer{value: 1 ether}(
-            1,                 // offer id
+            1, // offer id
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
-            KEY_BASE++,      // publicspendkey
-            KEY_BASE++      // privateviewkey
+            1 ether, // minprice
+            KEY_BASE++, // publicspendkey
+            KEY_BASE++ // privateviewkey
         );
 
         // Attempt to cancel the offer
         vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferInvalidStateForCancel.selector,
-                OfferState.TAKEN
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferInvalidStateForCancel.selector, OfferState.TAKEN));
         moneroswap.cancelBuyOffer(1);
     }
 
@@ -93,9 +87,9 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         vm.prank(ADDR_1);
 
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,             // fixed price
-            1_000_000_000_000,            // min XMR
+            address(0), // counterparty
+            1 ether, // fixed price
+            1_000_000_000_000, // min XMR
             KEY_BASE++,
             KEY_BASE++
         );
@@ -103,12 +97,12 @@ contract MoneroSwapCancelBuyOfferTest is Test {
         uint256 liability = moneroswap.getLiability();
         assertEq(liability, 1 ether);
         uint256 balance = ADDR_1.balance;
-        
+
         // Cancel the offer
         vm.prank(ADDR_1);
         vm.expectEmit(true, true, true, true);
         emit MoneroSwap.OfferEvent(
-            1,                 // offer id
+            1, // offer id
             OfferType.BUY,
             OfferState.CANCELLED
         );
@@ -116,6 +110,6 @@ contract MoneroSwapCancelBuyOfferTest is Test {
 
         liability = moneroswap.getLiability();
         assertEq(liability, 0);
-        assertEq(balance + 1 ether, ADDR_1.balance);        
+        assertEq(balance + 1 ether, ADDR_1.balance);
     }
 }

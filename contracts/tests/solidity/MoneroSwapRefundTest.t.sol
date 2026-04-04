@@ -2,7 +2,7 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {XMRP2P} from "../../src/XMRP2P.sol";
 import "../../src/Errors.sol";
 import {OfferType, OfferState} from "../../src/Enums.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
@@ -12,7 +12,6 @@ import {EIP7702NoPaymentDelegate} from "./EIP7702NoPaymentDelegate.t.sol";
 
 /// Tests for testing scenarios related to the use of the refund function
 contract MoneroSwapRefundTest is Test {
-
     address ADDR_1;
     uint256 PK_1;
     address ADDR_2;
@@ -26,7 +25,6 @@ contract MoneroSwapRefundTest is Test {
     }
 
     uint256 constant UNITS_PER_XMR = 1_000_000_000_000;
-
 
     function test_RevertWhen_InvalidOffer() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
@@ -56,11 +54,11 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey  // public view key
+            evmPublicViewKey // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -69,7 +67,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeBuyOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -78,20 +76,11 @@ contract MoneroSwapRefundTest is Test {
         Offer memory offer = moneroswap.getBuyOffer(1);
         vm.warp(offer.t1 + 1);
         vm.prank(ADDR_1);
-        moneroswap.refund(
-            1,
-            evmPrivateSpendKey,
-            evmPrivateViewKey
-        );
+        moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
 
         // Attempt to refund the offer again
         vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferInvalidStateForRefund.selector,
-                OfferState.REFUNDED
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferInvalidStateForRefund.selector, OfferState.REFUNDED));
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
     }
 
@@ -114,11 +103,11 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey  // public view key
+            evmPublicViewKey // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -127,7 +116,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeBuyOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -137,20 +126,15 @@ contract MoneroSwapRefundTest is Test {
         // Claim the offer
         vm.prank(ADDR_2);
         moneroswap.claim(1, xmrPrivateSpendKey);
-        
+
         // Attempt to refund the offer
         vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferInvalidStateForRefund.selector,
-                OfferState.CLAIMED
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferInvalidStateForRefund.selector, OfferState.CLAIMED));
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
     }
 
     function test_RevertWhen_BuyOfferTakenAndBetweenT0AndT1() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -168,11 +152,11 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey  // public view key
+            evmPublicViewKey // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -181,13 +165,13 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeBuyOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
 
         Offer memory offer = moneroswap.getBuyOffer(1);
-        
+
         vm.warp(offer.t0 + 1); // Position time between T0 and T1 so refund cannot be called
 
         // Attempt to refund the offer
@@ -195,9 +179,9 @@ contract MoneroSwapRefundTest is Test {
         vm.expectRevert(ErrorBuyOfferBetweenT0AndT1.selector);
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
     }
-    
+
     function test_RevertWhen_BuyOfferReadyAndBeforeT1() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -215,11 +199,11 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey  // public view key
+            evmPublicViewKey // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -228,7 +212,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeBuyOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -238,7 +222,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.ready(1);
 
         Offer memory offer = moneroswap.getBuyOffer(1);
-        
+
         vm.warp(offer.t1 - 1); // Position time before T1 so refund cannot be called
 
         // Attempt to refund the offer
@@ -248,7 +232,7 @@ contract MoneroSwapRefundTest is Test {
     }
 
     function test_RevertWhen_BuyOfferNotOwner() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -266,11 +250,11 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey  // public view key
+            evmPublicViewKey // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -279,7 +263,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeBuyOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -295,7 +279,7 @@ contract MoneroSwapRefundTest is Test {
     }
 
     function test_RevertWhen_BuyOfferInvalidEVMPrivateSpendKey() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -313,11 +297,11 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey  // public view key
+            evmPublicViewKey // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -326,7 +310,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeBuyOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -340,9 +324,9 @@ contract MoneroSwapRefundTest is Test {
         vm.expectRevert(ErrorBuyOfferInvalidEVMPrivateSpendKey.selector);
         moneroswap.refund(1, evmPrivateSpendKey + 1, evmPrivateViewKey);
     }
-    
+
     function test_RevertWhen_BuyOfferInvalidEVMPrivateViewKey() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -360,11 +344,11 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey  // public view key
+            evmPublicViewKey // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -373,7 +357,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeBuyOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -383,9 +367,9 @@ contract MoneroSwapRefundTest is Test {
         vm.expectRevert(ErrorBuyOfferInvalidEVMPrivateViewKey.selector);
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey + 1);
     }
-    
+
     function test_RevertWhen_SellOfferInvalidStateRefunded() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -403,12 +387,12 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey  // private view key
+            xmrPrivateViewKey // private view key
         );
 
         // Take the offer
@@ -417,7 +401,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // minxmr
-            1 ether,           // maxprice
+            1 ether, // maxprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // publicViewKey
         );
@@ -430,17 +414,12 @@ contract MoneroSwapRefundTest is Test {
 
         // Attempt to refund it again
         vm.prank(ADDR_2);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorSellOfferInvalidStateForRefund.selector,
-                OfferState.REFUNDED
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorSellOfferInvalidStateForRefund.selector, OfferState.REFUNDED));
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
     }
 
     function test_RevertWhen_SellOfferInvalidStateClaimed() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -458,12 +437,12 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey  // private view key
+            xmrPrivateViewKey // private view key
         );
 
         // Take the offer
@@ -472,7 +451,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // minxmr
-            1 ether,           // maxprice
+            1 ether, // maxprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // publicViewKey
         );
@@ -487,17 +466,12 @@ contract MoneroSwapRefundTest is Test {
 
         // Attempt to refund
         vm.prank(ADDR_2);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorSellOfferInvalidStateForRefund.selector,
-                OfferState.CLAIMED
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorSellOfferInvalidStateForRefund.selector, OfferState.CLAIMED));
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
     }
 
     function test_RevertWhen_SellOfferTakenAndBetweenT0AndT1() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -515,12 +489,12 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey  // private view key
+            xmrPrivateViewKey // private view key
         );
 
         // Take the offer
@@ -529,7 +503,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // minxmr
-            1 ether,           // maxprice
+            1 ether, // maxprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // publicViewKey
         );
@@ -542,16 +516,12 @@ contract MoneroSwapRefundTest is Test {
 
         // Attempt to refund
         vm.prank(ADDR_2);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorSellOfferBetweenT0AndT1.selector
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorSellOfferBetweenT0AndT1.selector));
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
     }
 
     function test_RevertWhen_SellOfferReadyAndBeforeT1() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -569,12 +539,12 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey  // private view key
+            xmrPrivateViewKey // private view key
         );
 
         // Take the offer
@@ -583,7 +553,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // minxmr
-            1 ether,           // maxprice
+            1 ether, // maxprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // publicViewKey
         );
@@ -597,16 +567,12 @@ contract MoneroSwapRefundTest is Test {
 
         // Attempt to refund
         vm.prank(ADDR_2);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorSellOfferNotAfterT1.selector
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorSellOfferNotAfterT1.selector));
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
     }
 
     function test_RevertWhen_SellOfferNotCounterparty() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -624,12 +590,12 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey  // private view key
+            xmrPrivateViewKey // private view key
         );
 
         // Take the offer
@@ -638,7 +604,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // minxmr
-            1 ether,           // maxprice
+            1 ether, // maxprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // publicViewKey
         );
@@ -648,16 +614,12 @@ contract MoneroSwapRefundTest is Test {
 
         // Attempt to refund it again
         vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorSellOfferNotCounterparty.selector
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorSellOfferNotCounterparty.selector));
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
     }
 
     function test_RevertWhen_SellOfferInvalidEVMPrivateSpendKey() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -675,12 +637,12 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey  // private view key
+            xmrPrivateViewKey // private view key
         );
 
         // Take the offer
@@ -689,7 +651,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // minxmr
-            1 ether,           // maxprice
+            1 ether, // maxprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // publicViewKey
         );
@@ -700,11 +662,11 @@ contract MoneroSwapRefundTest is Test {
         // Attempt to refund the offer with an invalid private spend key
         vm.prank(ADDR_2);
         vm.expectRevert(ErrorSellOfferInvalidEVMPrivateSpendKey.selector);
-        moneroswap.refund(1, evmPrivateSpendKey + 1, evmPrivateViewKey);        
+        moneroswap.refund(1, evmPrivateSpendKey + 1, evmPrivateViewKey);
     }
 
     function test_RevertWhen_SellOfferInvalidEVMPrivateViewKey() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -722,12 +684,12 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey  // private view key
+            xmrPrivateViewKey // private view key
         );
 
         // Take the offer
@@ -736,7 +698,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // minxmr
-            1 ether,           // maxprice
+            1 ether, // maxprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // publicViewKey
         );
@@ -751,12 +713,11 @@ contract MoneroSwapRefundTest is Test {
         // Attempt to refund the offer with an invalid private view key
         vm.prank(ADDR_2);
         vm.expectRevert(ErrorSellOfferInvalidEVMPrivateViewKey.selector);
-        moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey + 1);        
-
+        moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey + 1);
     }
 
     function testRefundSellOffer_RevertWhen_TakeAndRefundCalledWithinSameBlock() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -774,12 +735,12 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey  // private view key
+            xmrPrivateViewKey // private view key
         );
 
         // Take the offer
@@ -788,7 +749,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // minxmr
-            1 ether,           // maxprice
+            1 ether, // maxprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // publicViewKey
         );
@@ -796,14 +757,14 @@ contract MoneroSwapRefundTest is Test {
         // Refund the offer
         vm.prank(ADDR_2);
         vm.expectRevert(ErrorSellOfferCannotRefundInTakenBlock.selector);
-        moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);        
+        moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
     }
 
     // The following 4 tests only cover the refund of taken offers as the implementation knowledge
     // tells us that this is no different than doing the same on a ready offer and that refunding before T0 or after T1 is the same.
     // To be 100% sure we should really test all cases...
     function testRefundBuyOffer() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -821,11 +782,11 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey  // public view key
+            evmPublicViewKey // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -834,7 +795,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeBuyOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -863,7 +824,7 @@ contract MoneroSwapRefundTest is Test {
     }
 
     function testRefundBuyOfferWithFundingRequest() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -881,11 +842,11 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey  // public view key
+            evmPublicViewKey // public view key
         );
 
         // create a FundingRequest and get it funded
@@ -898,11 +859,11 @@ contract MoneroSwapRefundTest is Test {
         assertEq(0, moneroswap.getFundingRequest(ADDR_2).usedby);
         // Take the offer
         vm.deal(ADDR_2, 1 ether);
-        vm.prank(ADDR_2);        
+        vm.prank(ADDR_2);
         moneroswap.takeBuyOffer{value: 0}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -931,7 +892,7 @@ contract MoneroSwapRefundTest is Test {
     }
 
     function testRefundSellOffer() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -949,12 +910,12 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey  // private view key
+            xmrPrivateViewKey // private view key
         );
 
         // Take the offer
@@ -963,7 +924,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // minxmr
-            1 ether,           // maxprice
+            1 ether, // maxprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // publicViewKey
         );
@@ -982,7 +943,7 @@ contract MoneroSwapRefundTest is Test {
         // Refund the offer
         vm.prank(ADDR_2);
         vm.expectEmit(true, true, true, true);
-        emit MoneroSwap.OfferEvent(1, OfferType.SELL, OfferState.REFUNDED);        
+        emit MoneroSwap.OfferEvent(1, OfferType.SELL, OfferState.REFUNDED);
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
 
         offer = moneroswap.getSellOffer(1);
@@ -995,7 +956,7 @@ contract MoneroSwapRefundTest is Test {
     }
 
     function testRefundSellOfferWithFundingRequest() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -1017,17 +978,17 @@ contract MoneroSwapRefundTest is Test {
         vm.prank(ADDR_2);
         moneroswap.fundFundingRequest{value: 1 ether}(ADDR_1);
         assertEq(0, moneroswap.getFundingRequest(ADDR_1).usedby);
-                
+
         // Create a buy offer
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 0}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey  // private view key
+            xmrPrivateViewKey // private view key
         );
 
         assertEq(1, moneroswap.getFundingRequest(ADDR_1).usedby);
@@ -1038,7 +999,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // minxmr
-            1 ether,           // maxprice
+            1 ether, // maxprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // publicViewKey
         );
@@ -1066,7 +1027,7 @@ contract MoneroSwapRefundTest is Test {
     }
 
     function testRefundBuyOfferWithSellerEIP7702Delegation() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -1084,11 +1045,11 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey  // public view key
+            evmPublicViewKey // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -1097,7 +1058,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeBuyOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -1132,7 +1093,7 @@ contract MoneroSwapRefundTest is Test {
     }
 
     function testRefundBuyOffer__RevertWhen_BuyerEIP7702Delegation() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -1150,11 +1111,11 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey, // public spend key
-            evmPublicViewKey  // public view key
+            evmPublicViewKey // public view key
         );
 
         // Take the offer, ready it and refund it twice
@@ -1163,7 +1124,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeBuyOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -1185,7 +1146,7 @@ contract MoneroSwapRefundTest is Test {
     }
 
     function testRefundSellOfferWithSellerEIP7702Delegation() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -1203,12 +1164,12 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey  // private view key
+            xmrPrivateViewKey // private view key
         );
 
         // Take the offer
@@ -1217,7 +1178,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // minxmr
-            1 ether,           // maxprice
+            1 ether, // maxprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // publicViewKey
         );
@@ -1239,7 +1200,7 @@ contract MoneroSwapRefundTest is Test {
         // Refund the offer
         vm.prank(ADDR_2);
         vm.expectEmit(true, true, true, true);
-        emit MoneroSwap.OfferEvent(1, OfferType.SELL, OfferState.REFUNDED);        
+        emit MoneroSwap.OfferEvent(1, OfferType.SELL, OfferState.REFUNDED);
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
 
         offer = moneroswap.getSellOffer(1);
@@ -1255,7 +1216,7 @@ contract MoneroSwapRefundTest is Test {
     }
 
     function testRefundSellOffer_RevertWhen_BuyerEIP7702Delegation() public {
-        MoneroSwap  moneroswap = new MoneroSwap(msg.sender);
+        MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Generate keys
         (
@@ -1273,12 +1234,12 @@ contract MoneroSwapRefundTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // max XMR
             xmrPublicSpendKey, // public spend key
-            xmrPrivateViewKey  // private view key
+            xmrPrivateViewKey // private view key
         );
 
         // Take the offer
@@ -1287,7 +1248,7 @@ contract MoneroSwapRefundTest is Test {
         moneroswap.takeSellOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // minxmr
-            1 ether,           // maxprice
+            1 ether, // maxprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // publicViewKey
         );
@@ -1304,11 +1265,10 @@ contract MoneroSwapRefundTest is Test {
 
         // Refund the offer
         vm.prank(ADDR_2);
-        vm.expectRevert(ErrorSellOfferUnableToRefund.selector);        
-        emit MoneroSwap.OfferEvent(1, OfferType.SELL, OfferState.REFUNDED);        
+        vm.expectRevert(ErrorSellOfferUnableToRefund.selector);
+        emit MoneroSwap.OfferEvent(1, OfferType.SELL, OfferState.REFUNDED);
         moneroswap.refund(1, evmPrivateSpendKey, evmPrivateViewKey);
 
         vm.signAndAttachDelegation(address(0), PK_2);
     }
-
 }

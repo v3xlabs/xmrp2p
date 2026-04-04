@@ -10,32 +10,32 @@ pragma solidity ^0.8.34;
 // and constants from https://tools.ietf.org/html/draft-josefsson-eddsa-ed25519-03
 
 library Ed25519 {
-    uint constant q = 2 ** 255 - 19;
-    uint constant d = 37095705934669439343138083508754565189542113879843219016388785533085940283555;
-                      // = -(121665/121666)
-    uint constant Bx = 15112221349535400772501151409588531511454012693041857206046113283949847762202;
-    uint constant By = 46316835694926478169428394003475163141307993866256225615783033603165251855960;
+    uint256 constant q = 2 ** 255 - 19;
+    uint256 constant d = 37095705934669439343138083508754565189542113879843219016388785533085940283555;
+    // = -(121665/121666)
+    uint256 constant Bx = 15112221349535400772501151409588531511454012693041857206046113283949847762202;
+    uint256 constant By = 46316835694926478169428394003475163141307993866256225615783033603165251855960;
 
     struct Point {
-        uint x;
-        uint y;
-        uint z;
+        uint256 x;
+        uint256 y;
+        uint256 z;
     }
 
     struct Scratchpad {
-        uint a;
-        uint b;
-        uint c;
-        uint d;
-        uint e;
-        uint f;
-        uint g;
-        uint h;
+        uint256 a;
+        uint256 b;
+        uint256 c;
+        uint256 d;
+        uint256 e;
+        uint256 f;
+        uint256 g;
+        uint256 h;
     }
 
-    function inv(uint a) internal view returns (uint invA) {
-        uint e = q - 2;
-        uint m = q;
+    function inv(uint256 a) internal view returns (uint256 invA) {
+        uint256 e = q - 2;
+        uint256 m = q;
 
         // use bigModExp precompile
         assembly {
@@ -53,8 +53,7 @@ library Ed25519 {
         }
     }
 
-    function ecAdd(Point memory p1,
-                   Point memory p2) internal pure returns (Point memory p3) {
+    function ecAdd(Point memory p1, Point memory p2) internal pure returns (Point memory p3) {
         Scratchpad memory tmp;
 
         tmp.a = mulmod(p1.z, p2.z, q);
@@ -64,12 +63,12 @@ library Ed25519 {
         tmp.e = mulmod(d, mulmod(tmp.c, tmp.d, q), q);
         tmp.f = addmod(tmp.b, q - tmp.e, q);
         tmp.g = addmod(tmp.b, tmp.e, q);
-        p3.x = mulmod(mulmod(tmp.a, tmp.f, q),
-                      addmod(addmod(mulmod(addmod(p1.x, p1.y, q),
-                                           addmod(p2.x, p2.y, q), q),
-                                    q - tmp.c, q), q - tmp.d, q), q);
-        p3.y = mulmod(mulmod(tmp.a, tmp.g, q),
-                      addmod(tmp.d, tmp.c, q), q);
+        p3.x = mulmod(
+            mulmod(tmp.a, tmp.f, q),
+            addmod(addmod(mulmod(addmod(p1.x, p1.y, q), addmod(p2.x, p2.y, q), q), q - tmp.c, q), q - tmp.d, q),
+            q
+        );
+        p3.y = mulmod(mulmod(tmp.a, tmp.g, q), addmod(tmp.d, tmp.c, q), q);
         p3.z = mulmod(tmp.f, tmp.g, q);
     }
 
@@ -84,13 +83,12 @@ library Ed25519 {
         tmp.f = addmod(tmp.e, tmp.d, q);
         tmp.h = mulmod(p1.z, p1.z, q);
         tmp.g = addmod(tmp.f, q - mulmod(2, tmp.h, q), q);
-        p2.x = mulmod(addmod(addmod(tmp.b, q - tmp.c, q), q - tmp.d, q),
-                      tmp.g, q);
+        p2.x = mulmod(addmod(addmod(tmp.b, q - tmp.c, q), q - tmp.d, q), tmp.g, q);
         p2.y = mulmod(tmp.f, addmod(tmp.e, q - tmp.d, q), q);
         p2.z = mulmod(tmp.f, tmp.g, q);
     }
 
-    function scalarMultBase(uint s) internal view returns (uint, uint) {
+    function scalarMultBase(uint256 s) internal view returns (uint256, uint256) {
         Point memory b;
         Point memory result;
         b.x = Bx;
@@ -101,12 +99,12 @@ library Ed25519 {
         result.z = 1;
 
         while (s > 0) {
-            if (s & 1 == 1) { result = ecAdd(result, b); }
+            if (s & 1 == 1) result = ecAdd(result, b);
             s = s >> 1;
             b = ecDouble(b);
         }
 
-        uint invZ = inv(result.z);
+        uint256 invZ = inv(result.z);
         result.x = mulmod(result.x, invZ, q);
         result.y = mulmod(result.y, invZ, q);
 
@@ -114,19 +112,19 @@ library Ed25519 {
     }
 
     function changeEndianness(uint256 _bigEnd) internal pure returns (uint256) {
-        uint shifted = 0;
-        uint i = 32;
-        while(i > 0) {
-          shifted <<= 8;
-          shifted |= _bigEnd & 0xff;
-          _bigEnd >>= 8;
-          i--;
+        uint256 shifted = 0;
+        uint256 i = 32;
+        while (i > 0) {
+            shifted <<= 8;
+            shifted |= _bigEnd & 0xff;
+            _bigEnd >>= 8;
+            i--;
         }
         return shifted;
     }
 
     function compressPoint(uint256 x, uint256 y) internal pure returns (uint256) {
-        uint256 compressed = y | ((x & 1) << 255);        
+        uint256 compressed = y | ((x & 1) << 255);
         // Return is in Big Endian order - need to change endianness to stick to Monero's convention of using Little Endian
         return compressed;
     }

@@ -3,12 +3,12 @@ pragma solidity ^0.8.30;
 
 contract EIP7702NoPaymentDelegate {
     /// Receive function
-    receive () external payable {
+    receive() external payable {
         revert();
     }
-    
+
     /// Fallback function
-    fallback () external payable {
+    fallback() external payable {
         revert();
     }
 }

@@ -39,12 +39,18 @@ importers:
 
   lib:
     dependencies:
+      '@noble/ed25519':
+        specifier: ^3.0.1
+        version: 3.0.1
       '@noble/hashes':
         specifier: ^2.0.1
         version: 2.0.1
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
+      viem:
+        specifier: ^2.47.6
+        version: 2.47.6(typescript@5.9.3)(zod@4.3.6)
     devDependencies:
       '@types/node':
         specifier: ^24.12.0
@@ -480,6 +486,9 @@ packages:
   '@noble/curves@1.9.1':
     resolution: {integrity: sha512-k11yZxZg+t+gWvBbIswW0yoJlu8cHOC7dhunwOzoWH/mXGBiYyR4YY6hAEK/3EUs4UpB8la1RfdRpeGsFHkWsA==}
     engines: {node: ^14.21.3 || >=16}
+
+  '@noble/ed25519@3.0.1':
+    resolution: {integrity: sha512-t/T8LuK0ym8ALQudCCQCtrRdMSxBnRgHXw+wg+YsSlE6d+on7sX3flqlSJ2mOs9xEuchM36kj9SuX5MG7pXQMA==}
 
   '@noble/hashes@1.8.0':
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
@@ -2903,6 +2912,8 @@ snapshots:
   '@noble/curves@1.9.1':
     dependencies:
       '@noble/hashes': 1.8.0
+
+  '@noble/ed25519@3.0.1': {}
 
   '@noble/hashes@1.8.0': {}
 
