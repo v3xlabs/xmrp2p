@@ -68,7 +68,7 @@ export const Swap = () => {
           <label for="input_amount" class="text-md py-1 flex justify-between items-center gap-1">
             <span>Sell</span>
           </label>
-          <TokenSelector token={fromToken} setToken={t => t !== toToken() && setFromToken(t)} />
+<TokenSelector token={fromToken} setToken={t => t === toToken() ? (setToToken(fromToken()), setFromToken(t)) : setFromToken(t)} />
         </div>
         <input placeholder="0" class="input w-full" id="input_amount" />
       </div>
@@ -91,7 +91,7 @@ export const Swap = () => {
           <label for="output_amount" class="text-md py-1 gap-1">
             <span>Buy</span>
           </label>
-          <TokenSelector token={toToken} setToken={t => t !== fromToken() && setToToken(t)} />
+<TokenSelector token={toToken} setToken={t => t === fromToken() ? (setFromToken(toToken()), setToToken(t)) : setToToken(t)} />
         </div>
         <input placeholder="0" class="input w-full" id="output_amount" />
       </div>
