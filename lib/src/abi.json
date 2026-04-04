@@ -105,11 +105,6 @@
         "internalType": "address"
       },
       {
-        "name": "manager",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
         "name": "price",
         "type": "uint256",
         "internalType": "uint256"
@@ -177,11 +172,6 @@
     "inputs": [
       {
         "name": "counterparty",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "manager",
         "type": "address",
         "internalType": "address"
       },
@@ -274,17 +264,17 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct MoneroSwap.Offer",
+        "internalType": "struct Offer",
         "components": [
           {
             "name": "type_",
             "type": "uint8",
-            "internalType": "enum MoneroSwap.OfferType"
+            "internalType": "enum OfferType"
           },
           {
             "name": "state",
             "type": "uint8",
-            "internalType": "enum MoneroSwap.OfferState"
+            "internalType": "enum OfferState"
           },
           {
             "name": "funded",
@@ -460,7 +450,7 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct MoneroSwap.FundingRequest",
+        "internalType": "struct FundingRequest",
         "components": [
           {
             "name": "requester",
@@ -614,17 +604,17 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct MoneroSwap.Offer",
+        "internalType": "struct Offer",
         "components": [
           {
             "name": "type_",
             "type": "uint8",
-            "internalType": "enum MoneroSwap.OfferType"
+            "internalType": "enum OfferType"
           },
           {
             "name": "state",
             "type": "uint8",
-            "internalType": "enum MoneroSwap.OfferState"
+            "internalType": "enum OfferState"
           },
           {
             "name": "funded",
@@ -793,7 +783,7 @@
       {
         "name": "offerType",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferType"
+        "internalType": "enum OfferType"
       },
       {
         "name": "offerPrice",
@@ -863,17 +853,17 @@
       {
         "name": "",
         "type": "tuple[]",
-        "internalType": "struct MoneroSwap.Offer[]",
+        "internalType": "struct Offer[]",
         "components": [
           {
             "name": "type_",
             "type": "uint8",
-            "internalType": "enum MoneroSwap.OfferType"
+            "internalType": "enum OfferType"
           },
           {
             "name": "state",
             "type": "uint8",
-            "internalType": "enum MoneroSwap.OfferState"
+            "internalType": "enum OfferState"
           },
           {
             "name": "funded",
@@ -1054,7 +1044,7 @@
       {
         "name": "",
         "type": "tuple[]",
-        "internalType": "struct MoneroSwap.FundingRequest[]",
+        "internalType": "struct FundingRequest[]",
         "components": [
           {
             "name": "requester",
@@ -1115,17 +1105,17 @@
       {
         "name": "",
         "type": "tuple[]",
-        "internalType": "struct MoneroSwap.Offer[]",
+        "internalType": "struct Offer[]",
         "components": [
           {
             "name": "type_",
             "type": "uint8",
-            "internalType": "enum MoneroSwap.OfferType"
+            "internalType": "enum OfferType"
           },
           {
             "name": "state",
             "type": "uint8",
-            "internalType": "enum MoneroSwap.OfferState"
+            "internalType": "enum OfferState"
           },
           {
             "name": "funded",
@@ -1513,11 +1503,6 @@
         "internalType": "address"
       },
       {
-        "name": "manager",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
         "name": "maxamount",
         "type": "uint256",
         "internalType": "uint256"
@@ -1567,11 +1552,6 @@
       },
       {
         "name": "counterparty",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "manager",
         "type": "address",
         "internalType": "address"
       },
@@ -1672,13 +1652,13 @@
         "name": "type_",
         "type": "uint8",
         "indexed": true,
-        "internalType": "enum MoneroSwap.OfferType"
+        "internalType": "enum OfferType"
       },
       {
         "name": "state",
         "type": "uint8",
         "indexed": true,
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ],
     "anonymous": false
@@ -1757,17 +1737,12 @@
   },
   {
     "type": "error",
-    "name": "ErrorBuyOfferInvalidOraclePriceRatio",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "ErrorBuyOfferInvalidStateForCancel",
     "inputs": [
       {
         "name": "state",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ]
   },
@@ -1778,7 +1753,7 @@
       {
         "name": "state",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ]
   },
@@ -1794,7 +1769,7 @@
       {
         "name": "state",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ]
   },
@@ -1805,7 +1780,7 @@
       {
         "name": "state",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ]
   },
@@ -1816,7 +1791,7 @@
       {
         "name": "state",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ]
   },
@@ -1827,7 +1802,7 @@
       {
         "name": "state",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ]
   },
@@ -2176,16 +2151,6 @@
   },
   {
     "type": "error",
-    "name": "ErrorSellOfferAlreadyClaimed",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "ErrorSellOfferAlreadyRefunded",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "ErrorSellOfferAmountAboveMaximum",
     "inputs": [
       {
@@ -2278,7 +2243,7 @@
       {
         "name": "state",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ]
   },
@@ -2289,7 +2254,7 @@
       {
         "name": "state",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ]
   },
@@ -2305,7 +2270,7 @@
       {
         "name": "state",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ]
   },
@@ -2316,7 +2281,7 @@
       {
         "name": "state",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ]
   },
@@ -2327,7 +2292,7 @@
       {
         "name": "state",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ]
   },
@@ -2338,7 +2303,7 @@
       {
         "name": "state",
         "type": "uint8",
-        "internalType": "enum MoneroSwap.OfferState"
+        "internalType": "enum OfferState"
       }
     ]
   },
@@ -2456,11 +2421,6 @@
   },
   {
     "type": "error",
-    "name": "ErrorSellOfferUnableToPayBuyer",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "ErrorSellOfferUnableToRefund",
     "inputs": []
   },
@@ -2524,11 +2484,6 @@
   {
     "type": "error",
     "name": "ErrorUnableToPayClaimer",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "ErrorUnableToRepayFunder",
     "inputs": []
   }
 ]
