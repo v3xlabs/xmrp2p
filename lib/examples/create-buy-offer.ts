@@ -51,7 +51,7 @@ const hash = await sendTransaction({
     privateKey: offerCreatorPk,
     provider,
     chainId: 31_337,
-    value: Value.fromEther("1"),
+    value: Value.fromEther("2"),
     ...buyOfferParams,
 });
 

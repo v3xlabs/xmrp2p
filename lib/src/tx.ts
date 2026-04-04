@@ -73,7 +73,8 @@ export const sendTransaction = async ({
     value?: bigint;
     from: Address;
 }) => {
-    const estimatedGas = await estimateGas({ provider, from, to, data });
+    const valueHex = value ? `0x${value.toString(16)}` : "0x0";
+    const estimatedGas = await estimateGas({ provider, from, to, data, value: valueHex });
 
     const nonce = toBigInt(
         await provider.request({
