@@ -11,9 +11,9 @@ import { config, queryClient } from "./config.ts";
 const root = document.querySelector("#root");
 
 render(() => (
-    <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>
-            <App />
-        </QueryClientProvider>
-    </WagmiProvider>
+  <WagmiProvider config={config}>
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+  </WagmiProvider>
 ), root!);
