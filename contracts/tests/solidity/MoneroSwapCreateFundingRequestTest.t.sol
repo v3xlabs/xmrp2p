@@ -3,14 +3,13 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {XMRP2P} from "../../src/XMRP2P.sol";
 import "../../src/Errors.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {Utils} from "./Utils.t.sol";
 
 /// Tests related to FundingRequest
 contract MoneroSwapFundingRequestTest is Test {
-
     address ADDR_1 = address(0x1111111111111111111111111111111111111111);
     address ADDR_2 = address(0x2222222222222222222222222222222222222222);
 
@@ -24,7 +23,7 @@ contract MoneroSwapFundingRequestTest is Test {
 
     function test_RevertIf_AlreadyExists() public {
         // Create a first FundingRequest for ADDR_1
-        vm. startPrank(tx.origin);
+        vm.startPrank(tx.origin);
         moneroswap.createFundingRequest(msg.sender.balance + 1, 0);
         vm.expectRevert(ErrorFundingRequestAlreadyExistsForAddress.selector);
         moneroswap.createFundingRequest(msg.sender.balance + 1, 0);
@@ -38,7 +37,7 @@ contract MoneroSwapFundingRequestTest is Test {
 
     function test_RevertIf_AmountZero() public {
         // Create a first FundingRequest for ADDR_1
-        vm. startPrank(tx.origin);
+        vm.startPrank(tx.origin);
         vm.expectRevert(ErrorFundingRequestZero.selector);
         moneroswap.createFundingRequest(0, 0);
         vm.stopPrank();
@@ -47,28 +46,22 @@ contract MoneroSwapFundingRequestTest is Test {
     function test_RevertIf_AmountBelowFee() public {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorFundingRequestAmountBelowFee.selector
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorFundingRequestAmountBelowFee.selector));
         moneroswap.createFundingRequest(ADDR_1.balance + 1, ADDR_1.balance + 2);
     }
 
     function test_RevertWhen_FeeBelowMinimum() public {
-
         uint256 FundingRequestMinFeeRatio = vm.randomUint() % Utils.RATIO_DENOMINATOR;
         vm.prank(msg.sender);
-        moneroswap.setParameters(0, FundingRequestMinFeeRatio, 0, 0, 0, 0, 0, 0, 0, Utils.MINIMUM_DELAY, Utils.MINIMUM_DELAY);
-        
+        moneroswap.setParameters(
+            0, FundingRequestMinFeeRatio, 0, 0, 0, 0, 0, 0, 0, Utils.MINIMUM_DELAY, Utils.MINIMUM_DELAY
+        );
+
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         uint256 fee = ((ADDR_1.balance + 1) * FundingRequestMinFeeRatio / Utils.RATIO_DENOMINATOR) - 1;
         vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorFundingRequestFeeBelowMinimumRatio.selector,
-                FundingRequestMinFeeRatio                
-            )
+            abi.encodeWithSelector(ErrorFundingRequestFeeBelowMinimumRatio.selector, FundingRequestMinFeeRatio)
         );
         moneroswap.createFundingRequest(ADDR_1.balance + 1, fee);
     }
@@ -80,13 +73,7 @@ contract MoneroSwapFundingRequestTest is Test {
         moneroswap.createFundingRequest(amount, 1);
         vm.deal(ADDR_2, amount - 1);
         vm.prank(ADDR_2);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorFundingRequestIncorrectAmount.selector,
-                amount - 1,
-                amount
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorFundingRequestIncorrectAmount.selector, amount - 1, amount));
         moneroswap.fundFundingRequest{value: amount - 1}(ADDR_1);
     }
 
@@ -100,5 +87,4 @@ contract MoneroSwapFundingRequestTest is Test {
         assertEq(fundingRequest.requester, tx.origin);
         assertEq(fundingRequest.fee, 1);
     }
-
 }

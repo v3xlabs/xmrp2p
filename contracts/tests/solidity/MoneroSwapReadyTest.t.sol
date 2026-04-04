@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {XMRP2P} from "../../src/XMRP2P.sol";
 import "../../src/Errors.sol";
 import {OfferType, OfferState} from "../../src/Enums.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
@@ -11,14 +11,13 @@ import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {Utils} from "./Utils.t.sol";
 
 contract MoneroSwapReadyTest is Test {
-
     uint256 KEY_BASE = 100000000000000000000;
 
     address ADDR_1 = address(0x1111111111111111111111111111111111111111);
     address ADDR_2 = address(0x2222222222222222222222222222222222222222);
 
     uint256 UNITS_PER_XMR = 1_000_000_000_000;
- 
+
     function test_RevertWhen_BuyOfferInvalidState() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
@@ -26,24 +25,19 @@ contract MoneroSwapReadyTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
-            KEY_BASE + 1,                 // public spend key
-            KEY_BASE + 2                 // public view key
+            KEY_BASE + 1, // public spend key
+            KEY_BASE + 2 // public view key
         );
 
         // Attempt to ready the offer
         vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferInvalidStateForReady.selector,
-                OfferState.OPEN
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferInvalidStateForReady.selector, OfferState.OPEN));
         moneroswap.ready(1);
     }
-    
+
     function test_RevertWhen_BuyOfferNotOwner() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
@@ -51,22 +45,22 @@ contract MoneroSwapReadyTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
-            KEY_BASE + 3,                 // public spend key
-            KEY_BASE + 4                 // public view key
+            KEY_BASE + 3, // public spend key
+            KEY_BASE + 4 // public view key
         );
 
         // Take the offer
         vm.deal(ADDR_2, 1 ether);
         vm.prank(ADDR_2);
         moneroswap.takeBuyOffer{value: 1 ether}(
-            1,                 // offer id
-            UNITS_PER_XMR,     // maxxmr
-            1 ether,           // minprice
-            KEY_BASE + 5,                 // publicspendkey
-            KEY_BASE + 6                 // privateviewkey
+            1, // offer id
+            UNITS_PER_XMR, // maxxmr
+            1 ether, // minprice
+            KEY_BASE + 5, // publicspendkey
+            KEY_BASE + 6 // privateviewkey
         );
 
         // Attempt to ready the offer
@@ -74,7 +68,7 @@ contract MoneroSwapReadyTest is Test {
         vm.expectRevert(ErrorBuyOfferNotOwner.selector);
         moneroswap.ready(1);
     }
-    
+
     function test_RevertWhen_BuyOfferAfterT0() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
@@ -82,22 +76,22 @@ contract MoneroSwapReadyTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
-            KEY_BASE + 7,                 // public spend key
-            KEY_BASE + 8                 // public view key
+            KEY_BASE + 7, // public spend key
+            KEY_BASE + 8 // public view key
         );
 
         // Take the offer
         vm.deal(ADDR_2, 1 ether);
         vm.prank(ADDR_2);
         moneroswap.takeBuyOffer{value: 1 ether}(
-            1,                 // offer id
-            UNITS_PER_XMR,     // maxxmr
-            1 ether,           // minprice
-            KEY_BASE + 9,                 // publicspendkey
-            KEY_BASE + 10                 // privateviewkey
+            1, // offer id
+            UNITS_PER_XMR, // maxxmr
+            1 ether, // minprice
+            KEY_BASE + 9, // publicspendkey
+            KEY_BASE + 10 // privateviewkey
         );
 
         Offer memory offer = moneroswap.getBuyOffer(1);
@@ -117,22 +111,22 @@ contract MoneroSwapReadyTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
-            KEY_BASE + 11,                 // public spend key
-            KEY_BASE + 12                 // public view key
+            KEY_BASE + 11, // public spend key
+            KEY_BASE + 12 // public view key
         );
 
         // Take the offer
         vm.deal(ADDR_2, 1 ether);
         vm.prank(ADDR_2);
         moneroswap.takeBuyOffer{value: 1 ether}(
-            1,                 // offer id
-            UNITS_PER_XMR,     // maxxmr
-            1 ether,           // minprice
-            KEY_BASE + 13,                 // publicspendkey
-            KEY_BASE + 14                 // privateviewkey
+            1, // offer id
+            UNITS_PER_XMR, // maxxmr
+            1 ether, // minprice
+            KEY_BASE + 13, // publicspendkey
+            KEY_BASE + 14 // privateviewkey
         );
 
         Offer memory offerBeforeReady = moneroswap.getBuyOffer(1);
@@ -176,22 +170,17 @@ contract MoneroSwapReadyTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // price
+            address(0), // counterparty
+            1 ether, // price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // maxxmr
-            KEY_BASE + 15,                 // public spend key
-            KEY_BASE + 16                 // public view key
+            KEY_BASE + 15, // public spend key
+            KEY_BASE + 16 // public view key
         );
 
         // Attempt to ready the offer
         vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorSellOfferInvalidStateForReady.selector,
-                OfferState.OPEN
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorSellOfferInvalidStateForReady.selector, OfferState.OPEN));
         moneroswap.ready(1);
     }
 
@@ -202,23 +191,23 @@ contract MoneroSwapReadyTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // price
+            address(0), // counterparty
+            1 ether, // price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // maxxmr
-            KEY_BASE + 17,                 // public spend key
-            KEY_BASE + 18                 // public view key
+            KEY_BASE + 17, // public spend key
+            KEY_BASE + 18 // public view key
         );
 
         // Take the offer
         vm.deal(ADDR_2, 1 ether);
         vm.prank(ADDR_2);
         moneroswap.takeSellOffer{value: 1 ether}(
-            1,                 // offer id
-            UNITS_PER_XMR,     // minxmr
-            1 ether,           // maxprice
-            KEY_BASE + 19,                 // publicspendkey
-            KEY_BASE + 20                 // privateviewkey
+            1, // offer id
+            UNITS_PER_XMR, // minxmr
+            1 ether, // maxprice
+            KEY_BASE + 19, // publicspendkey
+            KEY_BASE + 20 // privateviewkey
         );
 
         // Attempt to ready the offer
@@ -234,23 +223,23 @@ contract MoneroSwapReadyTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // price
+            address(0), // counterparty
+            1 ether, // price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // maxxmr
-            KEY_BASE + 21,                 // public spend key
-            KEY_BASE + 22                 // public view key
+            KEY_BASE + 21, // public spend key
+            KEY_BASE + 22 // public view key
         );
 
         // Take the offer
         vm.deal(ADDR_2, 1 ether);
         vm.prank(ADDR_2);
         moneroswap.takeSellOffer{value: 1 ether}(
-            1,                 // offer id
-            UNITS_PER_XMR,     // minxmr
-            1 ether,           // maxprice
-            KEY_BASE + 23,                 // publicspendkey
-            KEY_BASE + 24                 // privateviewkey
+            1, // offer id
+            UNITS_PER_XMR, // minxmr
+            1 ether, // maxprice
+            KEY_BASE + 23, // publicspendkey
+            KEY_BASE + 24 // privateviewkey
         );
 
         Offer memory offer = moneroswap.getSellOffer(1);
@@ -270,23 +259,23 @@ contract MoneroSwapReadyTest is Test {
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
         moneroswap.createSellOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // price
+            address(0), // counterparty
+            1 ether, // price
             1_000_000_000_000, // min XMR
             1_000_000_000_000, // maxxmr
-            KEY_BASE + 25,                 // public spend key
-            KEY_BASE + 26                 // public view key
+            KEY_BASE + 25, // public spend key
+            KEY_BASE + 26 // public view key
         );
 
         // Take the offer
         vm.deal(ADDR_2, 1 ether);
         vm.prank(ADDR_2);
         moneroswap.takeSellOffer{value: 1 ether}(
-            1,                 // offer id
-            UNITS_PER_XMR,     // minxmr
-            1 ether,           // maxprice
-            KEY_BASE + 27,                 // publicspendkey
-            KEY_BASE + 28                 // privateviewkey
+            1, // offer id
+            UNITS_PER_XMR, // minxmr
+            1 ether, // maxprice
+            KEY_BASE + 27, // publicspendkey
+            KEY_BASE + 28 // privateviewkey
         );
 
         Offer memory offerBeforeReady = moneroswap.getSellOffer(1);
@@ -321,7 +310,6 @@ contract MoneroSwapReadyTest is Test {
         assert(offerBeforeReady.finalxmr == offerAfterReady.finalxmr);
         assert(offerBeforeReady.t0 == offerAfterReady.t0);
         assert(offerBeforeReady.t1 == offerAfterReady.t1);
-
     }
 
     function test_RevertWhen_InvalidOffer() public {

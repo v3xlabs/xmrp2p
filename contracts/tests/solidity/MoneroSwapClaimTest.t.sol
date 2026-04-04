@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {XMRP2P} from "../../src/XMRP2P.sol";
 import "../../src/Errors.sol";
 import {OfferType, OfferState} from "../../src/Enums.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
@@ -12,7 +12,6 @@ import {Utils} from "./Utils.t.sol";
 import {EIP7702NoPaymentDelegate} from "./EIP7702NoPaymentDelegate.t.sol";
 
 contract MoneroSwapClaimTest is Test {
-
     uint256 KEY_BASE = 1000000;
 
     address ADDR_1;
@@ -43,10 +42,7 @@ contract MoneroSwapClaimTest is Test {
         );
 
         // Check when offer is in state OPEN
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorBuyOfferInvalidStateForClaim.selector,
-            OfferState.OPEN
-        ));
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferInvalidStateForClaim.selector, OfferState.OPEN));
         moneroswap.claim(1, 0);
     }
 
@@ -63,19 +59,12 @@ contract MoneroSwapClaimTest is Test {
         );
 
         // Take and ready the offer
-        moneroswap.takeBuyOffer{value: 1 ether}(
-            1,
-            1_000_000_000_000,
-            1 ether,
-            KEY_BASE++,
-            KEY_BASE++);
+        moneroswap.takeBuyOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, KEY_BASE++, KEY_BASE++);
         moneroswap.ready(1);
         Offer memory offer = moneroswap.getBuyOffer(1);
         vm.warp(offer.t1 + 1);
         // Check when offer is in state READY
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorBuyOfferAfterT1.selector
-        ));
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferAfterT1.selector));
         moneroswap.claim(1, 0);
     }
 
@@ -92,26 +81,17 @@ contract MoneroSwapClaimTest is Test {
         );
 
         // Take the offer
-        moneroswap.takeBuyOffer{value: 1 ether}(
-            1,
-            1_000_000_000_000,
-            1 ether,
-            KEY_BASE++,
-            KEY_BASE++);
+        moneroswap.takeBuyOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, KEY_BASE++, KEY_BASE++);
         Offer memory offer = moneroswap.getBuyOffer(1);
 
         // Check at t0
         vm.warp(offer.t0);
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorBuyOfferNotBetweenT0AndT1.selector
-        ));
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferNotBetweenT0AndT1.selector));
         moneroswap.claim(1, 0);
 
         // Check at t1 + 1
         vm.warp(offer.t1 + 1);
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorBuyOfferNotBetweenT0AndT1.selector
-        ));
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferNotBetweenT0AndT1.selector));
         moneroswap.claim(1, 0);
     }
 
@@ -130,19 +110,12 @@ contract MoneroSwapClaimTest is Test {
         // Take and ready the offer
         vm.deal(ADDR_1, 1 ether);
         vm.prank(ADDR_1);
-        moneroswap.takeBuyOffer{value: 1 ether}(
-            1,
-            1_000_000_000_000,
-            1 ether,
-            KEY_BASE++,
-            KEY_BASE++);
+        moneroswap.takeBuyOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, KEY_BASE++, KEY_BASE++);
         moneroswap.ready(1);
 
         // Attempt to claim from the wrong account
         vm.prank(ADDR_2);
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorBuyOfferNotTaker.selector
-        ));
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferNotTaker.selector));
         moneroswap.claim(1, 0);
     }
 
@@ -159,21 +132,14 @@ contract MoneroSwapClaimTest is Test {
         );
 
         // Take and ready the offer
-        moneroswap.takeBuyOffer{value: 1 ether}(
-            1,
-            1_000_000_000_000,
-            1 ether,
-            KEY_BASE++,
-            KEY_BASE++);
+        moneroswap.takeBuyOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, KEY_BASE++, KEY_BASE++);
         moneroswap.ready(1);
 
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorBuyOfferInvalidXMRPrivateSpendKey.selector
-        ));
-        moneroswap.claim(1, 0);        
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferInvalidXMRPrivateSpendKey.selector));
+        moneroswap.claim(1, 0);
     }
 
-    function test_RevertWhen_SellOfferInvalidState() public {        
+    function test_RevertWhen_SellOfferInvalidState() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Create a sell offer
@@ -186,11 +152,8 @@ contract MoneroSwapClaimTest is Test {
             KEY_BASE++ // private view key
         );
 
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorSellOfferInvalidStateForClaim.selector,
-            OfferState.OPEN
-        ));
-        moneroswap.claim(1, 0);        
+        vm.expectRevert(abi.encodeWithSelector(ErrorSellOfferInvalidStateForClaim.selector, OfferState.OPEN));
+        moneroswap.claim(1, 0);
     }
 
     function test_RevertWhen_SellOfferAfterT1() public {
@@ -207,19 +170,12 @@ contract MoneroSwapClaimTest is Test {
         );
 
         // Take and ready the offer
-        moneroswap.takeSellOffer{value: 1 ether}(
-            1,
-            1_000_000_000_000,
-            1 ether,
-            KEY_BASE++,
-            KEY_BASE++);
+        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, KEY_BASE++, KEY_BASE++);
         moneroswap.ready(1);
 
         vm.warp(moneroswap.getSellOffer(1).t1 + 1);
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorSellOfferAfterT1.selector
-        ));
-        moneroswap.claim(1, 0);        
+        vm.expectRevert(abi.encodeWithSelector(ErrorSellOfferAfterT1.selector));
+        moneroswap.claim(1, 0);
     }
 
     function test_RevertWhen_SellOfferNotOwner() public {
@@ -236,19 +192,12 @@ contract MoneroSwapClaimTest is Test {
         );
 
         // Take and ready the offer
-        moneroswap.takeSellOffer{value: 1 ether}(
-            1,
-            1_000_000_000_000,
-            1 ether,
-            KEY_BASE++,
-            KEY_BASE++);
+        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, KEY_BASE++, KEY_BASE++);
         moneroswap.ready(1);
 
         vm.prank(ADDR_2);
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorSellOfferNotOwner.selector
-        ));
-        moneroswap.claim(1, 0);        
+        vm.expectRevert(abi.encodeWithSelector(ErrorSellOfferNotOwner.selector));
+        moneroswap.claim(1, 0);
     }
 
     function test_RevertWhen_SellOfferNotBetweenT0AndT1() public {
@@ -265,24 +214,15 @@ contract MoneroSwapClaimTest is Test {
         );
 
         // Take and ready the offer
-        moneroswap.takeSellOffer{value: 1 ether}(
-            1,
-            1_000_000_000_000,
-            1 ether,
-            KEY_BASE++,
-            KEY_BASE++);
+        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, KEY_BASE++, KEY_BASE++);
 
         vm.warp(moneroswap.getSellOffer(1).t1 + 1);
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorSellOfferNotBetweenT0AndT1.selector
-        ));
+        vm.expectRevert(abi.encodeWithSelector(ErrorSellOfferNotBetweenT0AndT1.selector));
         moneroswap.claim(1, 0);
 
         vm.warp(moneroswap.getSellOffer(1).t0);
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorSellOfferNotBetweenT0AndT1.selector
-        ));
-        moneroswap.claim(1, 0);       
+        vm.expectRevert(abi.encodeWithSelector(ErrorSellOfferNotBetweenT0AndT1.selector));
+        moneroswap.claim(1, 0);
     }
 
     function test_RevertWhen_SellOfferInvalidXMRPrivateSpendKey() public {
@@ -299,27 +239,18 @@ contract MoneroSwapClaimTest is Test {
         );
 
         // Take and ready the offer
-        moneroswap.takeSellOffer{value: 1 ether}(
-            1,
-            1_000_000_000_000,
-            1 ether,
-            KEY_BASE++,
-            KEY_BASE++);
+        moneroswap.takeSellOffer{value: 1 ether}(1, 1_000_000_000_000, 1 ether, KEY_BASE++, KEY_BASE++);
         moneroswap.ready(1);
 
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorSellOfferInvalidXMRPrivateSpendKey.selector
-        ));
-        moneroswap.claim(1, 0);        
+        vm.expectRevert(abi.encodeWithSelector(ErrorSellOfferInvalidXMRPrivateSpendKey.selector));
+        moneroswap.claim(1, 0);
     }
 
     function test_RevertWhen_InvalidOffer() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
-        vm.expectRevert(abi.encodeWithSelector(
-            ErrorInvalidOffer.selector
-        ));
-        moneroswap.claim(1, 0);        
+        vm.expectRevert(abi.encodeWithSelector(ErrorInvalidOffer.selector));
+        moneroswap.claim(1, 0);
     }
 
     function testClaimBuyOffer() public {
@@ -353,7 +284,7 @@ contract MoneroSwapClaimTest is Test {
         moneroswap.takeBuyOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -365,12 +296,11 @@ contract MoneroSwapClaimTest is Test {
 
         vm.deal(ADDR_2, 0);
         vm.prank(ADDR_2);
-        moneroswap.claim(1, xmrPrivateSpendKey);        
+        moneroswap.claim(1, xmrPrivateSpendKey);
         // taker should have received the swap amount + its deposit
         assertEq(2 ether, ADDR_2.balance);
         // Contract has no liability
         assertEq(0, moneroswap.getLiability());
-
     }
 
     function testClaimBuyOfferFunded() public {
@@ -420,7 +350,7 @@ contract MoneroSwapClaimTest is Test {
         moneroswap.takeBuyOffer{value: 0}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -433,13 +363,13 @@ contract MoneroSwapClaimTest is Test {
 
         // liability has changed because the taker only bought 1 ether worth of XMR, so 1 ether was returned to the buyer already
         assertEq(2 ether, moneroswap.getLiability());
-    
+
         vm.prank(ADDR_1);
         moneroswap.ready(1);
 
         vm.deal(ADDR_2, 0);
         vm.prank(ADDR_2);
-        moneroswap.claim(1, xmrPrivateSpendKey);        
+        moneroswap.claim(1, xmrPrivateSpendKey);
         // taker should have received the swap amount minus the fee
         assertEq(1 ether - fee, ADDR_2.balance);
         // Funder should have receive the fee plus the funding amount
@@ -452,7 +382,7 @@ contract MoneroSwapClaimTest is Test {
         vm.expectRevert(ErrorFundingRequestNotFound.selector);
         moneroswap.getFundingRequest(ADDR_2);
     }
-    
+
     function testClaimSellOffer() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
@@ -485,7 +415,7 @@ contract MoneroSwapClaimTest is Test {
         moneroswap.takeSellOffer{value: 2 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // privateviewkey
         );
@@ -497,7 +427,7 @@ contract MoneroSwapClaimTest is Test {
 
         vm.deal(ADDR_1, 0);
         vm.prank(ADDR_1);
-        moneroswap.claim(1, xmrPrivateSpendKey);        
+        moneroswap.claim(1, xmrPrivateSpendKey);
         // taker should have received the swap amount + its deposit
         assertEq(2 ether, ADDR_1.balance);
         assertEq(0, moneroswap.getLiability());
@@ -542,14 +472,14 @@ contract MoneroSwapClaimTest is Test {
 
         // Liability has not changed since the sell offer is funded
         assertEq(1 ether, moneroswap.getLiability());
-        
+
         // Take and ready the offer
         vm.deal(ADDR_2, 2 ether);
         vm.prank(ADDR_2);
         moneroswap.takeSellOffer{value: 2 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // privateviewkey
         );
@@ -563,7 +493,7 @@ contract MoneroSwapClaimTest is Test {
 
         vm.deal(ADDR_1, 0);
         vm.prank(ADDR_1);
-        moneroswap.claim(1, xmrPrivateSpendKey);        
+        moneroswap.claim(1, xmrPrivateSpendKey);
         // taker should have received the swap amount minus the fee
         assertEq(1 ether - fee, ADDR_1.balance);
         // Funder should have receive the fee plus the funding amount
@@ -572,7 +502,6 @@ contract MoneroSwapClaimTest is Test {
         assertEq(1 ether, ADDR_2.balance);
         // Contract has no liability
         assertEq(0, moneroswap.getLiability());
-
     }
 
     function testClaimBuyOffer_RevertWhen_SellerEIP7702Delegation() public {
@@ -606,7 +535,7 @@ contract MoneroSwapClaimTest is Test {
         moneroswap.takeBuyOffer{value: 1 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -623,7 +552,7 @@ contract MoneroSwapClaimTest is Test {
         vm.prank(ADDR_2);
         vm.expectRevert(ErrorUnableToPayClaimer.selector);
         moneroswap.claim(1, xmrPrivateSpendKey);
-        vm.signAndAttachDelegation(address(0), PK_2);        
+        vm.signAndAttachDelegation(address(0), PK_2);
     }
 
     function testClaimSellOffer_RevertWhen_SellerEIP7702Delegation() public {
@@ -658,7 +587,7 @@ contract MoneroSwapClaimTest is Test {
         moneroswap.takeSellOffer{value: 2 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // privateviewkey
         );
@@ -674,9 +603,9 @@ contract MoneroSwapClaimTest is Test {
         vm.deal(ADDR_1, 0);
         vm.prank(ADDR_1);
         vm.expectRevert(ErrorUnableToPayClaimer.selector);
-        moneroswap.claim(1, xmrPrivateSpendKey);  
+        moneroswap.claim(1, xmrPrivateSpendKey);
 
-        vm.signAndAttachDelegation(address(0), PK_1);      
+        vm.signAndAttachDelegation(address(0), PK_1);
     }
 
     function testClaimBuyOfferFundedWithFunderEIP7702Delegation() public {
@@ -726,7 +655,7 @@ contract MoneroSwapClaimTest is Test {
         moneroswap.takeBuyOffer{value: 0}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             xmrPublicSpendKey, // publicspendkey
             xmrPrivateViewKey // privateviewkey
         );
@@ -739,7 +668,7 @@ contract MoneroSwapClaimTest is Test {
 
         // liability has changed because the taker only bought 1 ether worth of XMR, so 1 ether was returned to the buyer already
         assertEq(2 ether, moneroswap.getLiability());
-    
+
         vm.prank(ADDR_1);
         moneroswap.ready(1);
 
@@ -748,7 +677,7 @@ contract MoneroSwapClaimTest is Test {
 
         vm.deal(ADDR_2, 0);
         vm.prank(ADDR_2);
-        moneroswap.claim(1, xmrPrivateSpendKey);        
+        moneroswap.claim(1, xmrPrivateSpendKey);
         // taker should have received the swap amount minus the fee
         assertEq(1 ether - fee, ADDR_2.balance);
         // Funder should have received nothing since it has an EIP7702 delegation which rejects payments
@@ -804,14 +733,14 @@ contract MoneroSwapClaimTest is Test {
 
         // Liability has not changed since the sell offer is funded
         assertEq(1 ether, moneroswap.getLiability());
-        
+
         // Take and ready the offer
         vm.deal(ADDR_2, 2 ether);
         vm.prank(ADDR_2);
         moneroswap.takeSellOffer{value: 2 ether}(
             1,
             1_000_000_000_000, // maxxmr
-            1 ether,           // minprice
+            1 ether, // minprice
             evmPublicSpendKey, // publicspendkey
             evmPublicViewKey // privateviewkey
         );
@@ -828,7 +757,7 @@ contract MoneroSwapClaimTest is Test {
 
         vm.deal(ADDR_1, 0);
         vm.prank(ADDR_1);
-        moneroswap.claim(1, xmrPrivateSpendKey);        
+        moneroswap.claim(1, xmrPrivateSpendKey);
         // taker should have received the swap amount minus the fee
         assertEq(1 ether - fee, ADDR_1.balance);
         // Funder should have received nothing since its EIP7702 delegate refuses payments

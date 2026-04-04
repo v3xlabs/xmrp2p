@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {XMRP2P} from "../../src/XMRP2P.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {OfferType, OfferState} from "../../src/Enums.sol";
 import "../../src/Errors.sol";
@@ -11,9 +11,8 @@ import "../../src/Errors.sol";
 import {Utils} from "./Utils.t.sol";
 
 contract MoneroSwapListFundingRequestsTest is Test {
-
     address ADDR_1 = address(0x1111111111111111111111111111111111111111);
-    
+
     function testListFundingRequests() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
@@ -29,7 +28,7 @@ contract MoneroSwapListFundingRequestsTest is Test {
         // List buy offers by chunks of 2 with a step of 3
         for (uint160 i = 0; i < N + 4; i += 3) {
             FundingRequest[] memory requests = moneroswap.listFundingRequests(i, 2);
-           
+
             if (requests.length >= 1) {
                 assertEq(requests[0].amount, (i + 1) * 1 ether);
                 assertEq(requests[0].fee, i + 1);

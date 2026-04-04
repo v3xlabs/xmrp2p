@@ -3,12 +3,11 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {XMRP2P} from "../../src/XMRP2P.sol";
 
 import {Utils} from "./Utils.t.sol";
 
 contract MoneroSwapReceiveTest is Test {
-
     function testReceive() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
         (bool res) = payable(address(moneroswap)).send(1 ether);

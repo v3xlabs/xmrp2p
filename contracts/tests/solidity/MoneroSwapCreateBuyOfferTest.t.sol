@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MoneroSwap} from "../../src/MoneroSwap.sol";
+import {XMRP2P} from "../../src/XMRP2P.sol";
 import "../../src/Errors.sol";
 import {OfferType, OfferState} from "../../src/Enums.sol";
 import {Offer, FundingRequest} from "../../src/Structs.sol";
@@ -12,7 +12,6 @@ import {Utils} from "./Utils.t.sol";
 
 /// Tests for testing scenarios related to the use of the refund function
 contract MoneroSwapCreateBuyOfferTest is Test {
-
     uint256 KEY_BASE = 100000000;
 
     address ADDR_1 = address(0x1111111111111111111111111111111111111111);
@@ -37,7 +36,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
 
         // Create an offer
         vm.deal(ADDR_1, 10 ether);
-        vm.prank(ADDR_1);        
+        vm.prank(ADDR_1);
 
         uint256 evmDeposit = 2 ether;
 
@@ -45,19 +44,19 @@ contract MoneroSwapCreateBuyOfferTest is Test {
         vm.expectEmit(true, true, true, true);
         emit MoneroSwap.OfferEvent(1, OfferType.BUY, OfferState.OPEN);
         moneroswap.createBuyOffer{value: evmDeposit}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey,
             evmPublicViewKey
         );
 
         // Attempt to create another offer with the same public spend key
-        vm.prank(ADDR_1);       
+        vm.prank(ADDR_1);
         vm.expectRevert(ErrorBuyOfferPublicSpendKeyAlreadyUsed.selector);
         moneroswap.createBuyOffer{value: evmDeposit}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey,
             evmPublicViewKey
@@ -97,7 +96,7 @@ contract MoneroSwapCreateBuyOfferTest is Test {
 
         // Create an offer
         vm.deal(ADDR_1, 10 ether);
-        vm.prank(ADDR_1);        
+        vm.prank(ADDR_1);
 
         uint256 evmDeposit = 2 ether;
 
@@ -105,8 +104,8 @@ contract MoneroSwapCreateBuyOfferTest is Test {
         vm.expectEmit(true, true, true, true);
         emit MoneroSwap.OfferEvent(1, OfferType.BUY, OfferState.OPEN);
         moneroswap.createBuyOffer{value: evmDeposit}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey,
             evmPublicViewKey
@@ -125,16 +124,11 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             xmrPublicSpendKey
         ) = Utils.generateOfferKeys(vm);
 
-        vm.prank(ADDR_1);       
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferMaximumOfferBookSizeReached.selector,
-                1
-            )
-        );
+        vm.prank(ADDR_1);
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferMaximumOfferBookSizeReached.selector, 1));
         moneroswap.createBuyOffer{value: evmDeposit}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
             evmPublicSpendKey + 1,
             evmPublicViewKey + 1
@@ -158,34 +152,14 @@ contract MoneroSwapCreateBuyOfferTest is Test {
             86400, // T0Delay,
             86400 // T1Delay
         );
-        
+
         vm.deal(ADDR_1, 10 ether);
         vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferAmountBelowMinimum.selector,
-                10
-            )
-        );
-        moneroswap.createBuyOffer{value: 1}(
-            address(0),
-            1 ether,
-            1_000_000_000_000,
-            KEY_BASE + 1,
-            KEY_BASE + 2);
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferAmountBelowMinimum.selector, 10));
+        moneroswap.createBuyOffer{value: 1}(address(0), 1 ether, 1_000_000_000_000, KEY_BASE + 1, KEY_BASE + 2);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferAmountAboveMaximum.selector,
-                100
-            )
-        );
-        moneroswap.createBuyOffer{value: 101}(
-            address(0),
-            1 ether,
-            1_000_000_000_000,
-            KEY_BASE + 3,
-            KEY_BASE + 4);
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferAmountAboveMaximum.selector, 100));
+        moneroswap.createBuyOffer{value: 101}(address(0), 1 ether, 1_000_000_000_000, KEY_BASE + 3, KEY_BASE + 4);
     }
 
     function test_RevertWhen_NoPriceDefined() public {
@@ -207,17 +181,8 @@ contract MoneroSwapCreateBuyOfferTest is Test {
         );
         vm.deal(ADDR_1, 10 ether);
         vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferNoPriceDefined.selector
-            )
-        );
-        moneroswap.createBuyOffer{value: 0}(
-            address(0),
-            0,
-            1_000_000_000_000,
-            KEY_BASE + 5,
-            KEY_BASE + 6);
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferNoPriceDefined.selector));
+        moneroswap.createBuyOffer{value: 0}(address(0), 0, 1_000_000_000_000, KEY_BASE + 5, KEY_BASE + 6);
     }
 
     function test_RevertWhen_ActiveFundingRequest() public {
@@ -228,17 +193,8 @@ contract MoneroSwapCreateBuyOfferTest is Test {
         moneroswap.createFundingRequest(11 ether, 1 ether);
 
         vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferNoCreationWhenActiveFundingRequestExists.selector
-            )
-        );
-        moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),
-            1 ether,
-            1_000_000_000_000,
-            KEY_BASE++,
-            KEY_BASE++);
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferNoCreationWhenActiveFundingRequestExists.selector));
+        moneroswap.createBuyOffer{value: 1 ether}(address(0), 1 ether, 1_000_000_000_000, KEY_BASE++, KEY_BASE++);
     }
 
     function test_RevertWhen_UsedPublicSpendKey() public {
@@ -247,16 +203,16 @@ contract MoneroSwapCreateBuyOfferTest is Test {
         // Check key 1, should unused
         vm.prank(ADDR_1);
         assertEq(moneroswap.isKeyUsed(1), false);
-        
+
         vm.deal(ADDR_1, 10 ether);
         vm.prank(ADDR_1);
         // Create a buy offer with keys 1/2/3
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
-            1,                 // public spend key
-            2                 // public view key
+            1, // public spend key
+            2 // public view key
         );
 
         // Check key 1, should be used
@@ -265,62 +221,55 @@ contract MoneroSwapCreateBuyOfferTest is Test {
 
         // Attempt to create another offer with pub spend key 2 (used public view key)
         vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferPublicSpendKeyAlreadyUsed.selector
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferPublicSpendKeyAlreadyUsed.selector));
 
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
-            2,                 // public spend key
-            4                 // public view key
+            2, // public spend key
+            4 // public view key
         );
 
         // Attempt to create another offer with pub spend key 3 (used public message key)
         vm.prank(ADDR_1);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                ErrorBuyOfferPublicSpendKeyAlreadyUsed.selector
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(ErrorBuyOfferPublicSpendKeyAlreadyUsed.selector));
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(0),        // counterparty
-            1 ether,           // fixed price
+            address(0), // counterparty
+            1 ether, // fixed price
             1_000_000_000_000, // min XMR
-            3,                 // public spend key
-            6                 // public view key
-        );        
+            3, // public spend key
+            6 // public view key
+        );
     }
+
     function testCreateBuyOffer() public {
         MoneroSwap moneroswap = new MoneroSwap(msg.sender);
 
         // Retrieve current liability
         uint256 liability = moneroswap.getLiability();
-        
+
         vm.deal(ADDR_1, 10 ether);
         vm.prank(ADDR_1);
         vm.expectEmit(true, true, true, true);
         emit MoneroSwap.OfferEvent(
-            1,                 // offer id
+            1, // offer id
             OfferType.BUY,
             OfferState.OPEN
         );
         moneroswap.createBuyOffer{value: 1 ether}(
-            address(1),        // counterparty
-            3,                 // fixed price
-            4,                 // min XMR
-            KEY_BASE++,        // public spend key
-            KEY_BASE++        // public view key
+            address(1), // counterparty
+            3, // fixed price
+            4, // min XMR
+            KEY_BASE++, // public spend key
+            KEY_BASE++ // public view key
         );
 
         // Retrieve the offer just created
         Offer memory offer = moneroswap.getBuyOffer(1);
 
         // Check that the offer is the one we just created
-        assertEq(offer.id, 1);        
+        assertEq(offer.id, 1);
         assert(offer.type_ == OfferType.BUY);
         assert(offer.state == OfferState.OPEN);
         assertEq(offer.owner, ADDR_1);
