@@ -1,7 +1,7 @@
 import { encodeData } from "ox/AbiFunction";
-import { Address } from "ox/Address";
+import type { Address } from "ox/Address";
 
-import { ContractCall } from "../";
+import type { ContractCall } from "../types";
 
 const abi = {
     type: "function",

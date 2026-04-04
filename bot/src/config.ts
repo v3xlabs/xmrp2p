@@ -9,6 +9,8 @@ const numericValueSchema = z.coerce.number()
 
 const envSchema = z
     .object({
+        ROOT_SEED: z.string().trim()
+            .min(1, "ROOT_SEED is required"),
         CONTRACT: z.string().trim()
             .min(1, "CONTRACT is required"),
         RPC: z
