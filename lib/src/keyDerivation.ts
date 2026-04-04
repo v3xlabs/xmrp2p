@@ -8,15 +8,15 @@ const derivePrivateKeyAtPath = ({
 }: {
     rootSeed: string;
     path: string;
-}): Hex.Hex => Mnemonic.toPrivateKey(rootSeed, {
-    as: "Hex",
-    path,
-});
+}): Hex.Hex =>
+    Mnemonic.toPrivateKey(rootSeed, {
+        as: "Hex",
+        path,
+    });
 
 const sha512 = (value: Hex.Hex): Uint8Array => {
     const bytes = Hex.toBytes(value);
-    const digest = createHash("sha512")
-        .update(bytes)
+    const digest = createHash("sha512").update(bytes)
         .digest();
 
     return Uint8Array.from(digest);
