@@ -1,3 +1,7 @@
+export * from "./clients/evm";
+export * from "./domain/decisions";
+export * from "./domain/offer";
+export * from "./domain/pricing";
 export {
     deriveEvmAccountFromRootSeed,
     deriveMoneroHotWalletSeed,

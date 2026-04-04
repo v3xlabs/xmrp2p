@@ -12,7 +12,9 @@ const envSchema = z
         ROOT_SEED: z.string().trim()
             .min(1, "ROOT_SEED is required"),
         CONTRACT: z.string().trim()
-            .min(1, "CONTRACT is required"),
+            .min(1, "CONTRACT is required")
+            .regex(/^0x[a-fA-F0-9]+$/, "CONTRACT must be a valid 0x-prefixed hex value")
+            .transform((value): `0x${string}` => value as `0x${string}`),
         RPC: z
             .string()
             .trim()
@@ -38,6 +40,19 @@ const envSchema = z
         ORACLE_RATIO: numericValueSchema,
         ORACLE_OFFSET: numericValueSchema,
         GAS_ALLOWANCE: numericValueSchema,
+        ROLE: z.enum(["buyer", "seller"]).default("seller"),
+        MAX_ACTIVE: z.coerce.number()
+            .int("MAX_ACTIVE must be an integer")
+            .positive("MAX_ACTIVE must be > 0")
+            .default(1),
+        T0_SAFETY_MARGIN: z.coerce.number()
+            .int("T0_SAFETY_MARGIN must be an integer")
+            .nonnegative("T0_SAFETY_MARGIN must be >= 0")
+            .default(3600),
+        CONFIRMATION_MARGIN: z.coerce.number()
+            .int("CONFIRMATION_MARGIN must be an integer")
+            .nonnegative("CONFIRMATION_MARGIN must be >= 0")
+            .default(1800),
     })
     .superRefine((data, context) => {
         if (data.MINXMR > data.MAXXMR) {
@@ -58,5 +73,7 @@ const envSchema = z
     });
 
 export const appConfig = envSchema.parse(process.env);
+
+export const botConfig = appConfig;
 
 export type AppConfig = typeof appConfig;

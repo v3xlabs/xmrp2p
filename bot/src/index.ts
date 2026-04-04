@@ -3,30 +3,18 @@ import {
     deriveMoneroHotWalletSeed,
 } from "xmrp2p";
 
-import { appConfig } from "./config.js";
-
-const loopDelayMs = appConfig.LOOP_DELAY * 1000;
+import { botConfig } from "./config.js";
+import { createProviderPool } from "./evmProvider.js";
+import { createRunner } from "./runner.js";
 
 const evmAccount0 = deriveEvmAccountFromRootSeed({
-    rootSeed: appConfig.ROOT_SEED,
+    rootSeed: botConfig.ROOT_SEED,
     accountIndex: 0,
 });
 
 const moneroHotWallet = deriveMoneroHotWalletSeed({
-    rootSeed: appConfig.ROOT_SEED,
+    rootSeed: botConfig.ROOT_SEED,
 });
-
-const runBotTick = (): void => {
-    const now = new Date().toISOString();
-
-    console.log(`[${now}] bot tick`);
-    console.log(`contract=${appConfig.CONTRACT}`);
-    console.log(`rpc=${appConfig.RPC.join(", ")}`);
-    console.log(`xmr-range=${appConfig.MINXMR}..${appConfig.MAXXMR}`);
-    console.log(`price-range=${appConfig.MINPRICE}..${appConfig.MAXPRICE}`);
-    console.log(`evm-account[0]=${evmAccount0.address} (${evmAccount0.path})`);
-    console.log(`monero-hot-wallet-path=${moneroHotWallet.path}`);
-};
 
 const start = (): void => {
     console.log("Starting xmrp2p bot with validated env config.");
@@ -38,9 +26,13 @@ const start = (): void => {
     console.log(`monero-hot-wallet-private-key=${moneroHotWallet.privateKey}`);
     console.log(`monero-hot-wallet-seed-hex=${moneroHotWallet.seed}`);
 
-    runBotTick();
+    const providers = createProviderPool(botConfig.RPC);
+    const runner = createRunner({
+        config: botConfig,
+        providers,
+    });
 
-    setInterval(runBotTick, loopDelayMs);
+    runner.start();
 };
 
 start();
