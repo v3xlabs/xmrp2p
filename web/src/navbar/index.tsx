@@ -1,4 +1,5 @@
 
+import { ChainSelector } from "./chain";
 import { UserProfile } from "./profile";
 
 export const Navbar = () => (
@@ -7,7 +8,8 @@ export const Navbar = () => (
             <div class="font-bold text-xl">
                 xmrp2p.eth
             </div>
-            <div>
+            <div class="flex items-center gap-2">
+                <ChainSelector />
                 <UserProfile />
             </div>
         </nav>
