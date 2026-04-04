@@ -17,20 +17,6 @@ export const App = () => (
                         <OrderTable orders={["1", "2", "3", "4", "5"]} />
                     </div>
                 </section>
-
-                <section class="grow space-y-2">
-                    <h2 class="px-2">Order history</h2>
-                    <div class="card p-4">
-                        No open orders
-                    </div>
-                </section>
-
-                <section class="grow space-y-2">
-                    <h2 class="px-2">Open orders</h2>
-                    <div class="card p-4">
-                        No open orders
-                    </div>
-                </section>
             </div>
         </div>
     </div>
