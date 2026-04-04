@@ -75,6 +75,7 @@ export const sendTransaction = async ({
 }) => {
     const valueHex = value ? `0x${value.toString(16)}` : "0x0";
     const estimatedGas = await estimateGas({ provider, from, to, data, value: valueHex });
+    const gasWithBuffer = (estimatedGas * 12n) / 10n + 100_000n;
 
     const nonce = toBigInt(
         await provider.request({
@@ -110,7 +111,7 @@ export const sendTransaction = async ({
         to,
         data,
         value,
-        gas: estimatedGas,
+        gas: gasWithBuffer,
         nonce,
     });
 
