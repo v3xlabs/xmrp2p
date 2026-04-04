@@ -17,6 +17,8 @@ anvil
 Deploy contracts:
 
 ```sh
-forge script MoneroSwapDeployer --broadcast --slow
-forge script MoneroSwapRelayOracleDeployer --broadcast --slow
+forge script MoneroSwapDeployer --broadcast --slow --rpc-url localhost:8545 \
+  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+forge script MoneroSwapRelayOracleDeployer --broadcast --slow --rpc-url localhost:8545 \
+  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 ```
