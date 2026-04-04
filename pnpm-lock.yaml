@@ -75,6 +75,9 @@ importers:
       viem:
         specifier: ^2.47.6
         version: 2.47.6(typescript@5.9.3)(zod@3.25.76)
+      xmrp2p:
+        specifier: workspace:*
+        version: link:../lib
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.2.2
