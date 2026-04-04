@@ -14,7 +14,7 @@ const abi = {
 export const claimFundingRequestParameters = ({
     contractAddress,
     addr,
-}: ContractWriteParameters<{ addr: Address.Address; }>) => ({
+}: ContractWriteParameters<{ addr: Address; }>) => ({
     data: encodeData(abi, [addr]),
     to: contractAddress,
 });

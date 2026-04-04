@@ -1,4 +1,5 @@
 import { encodeData } from "ox/AbiFunction";
+import { Hex } from "ox/Hex";
 
 import type { ContractWriteParameters } from "../types";
 
@@ -17,7 +18,7 @@ export const messageParameters = ({
     contractAddress,
     offerid,
     content,
-}: ContractWriteParameters<{ offerid: bigint; content: string; }>) => ({
+}: ContractWriteParameters<{ offerid: bigint; content: Hex; }>) => ({
     data: encodeData(abi, [offerid, content]),
     to: contractAddress,
 });

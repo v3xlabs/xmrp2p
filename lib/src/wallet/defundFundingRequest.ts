@@ -14,7 +14,7 @@ const abi = {
 export const defundFundingRequestParameters = ({
     contractAddress,
     addr,
-}: ContractWriteParameters<{ addr: Address.Address; }>) => ({
+}: ContractWriteParameters<{ addr: Address; }>) => ({
     data: encodeData(abi, [addr]),
     to: contractAddress,
 });

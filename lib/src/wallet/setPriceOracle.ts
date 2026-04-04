@@ -19,7 +19,7 @@ export const setPriceOracleParameters = ({
     oracle,
     maxage,
 }: ContractWriteParameters<{
-    oracle: Address.Address;
+    oracle: Address;
     maxage: bigint;
 }>) => ({
     data: encodeData(abi, [oracle, maxage]),

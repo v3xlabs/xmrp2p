@@ -34,7 +34,7 @@ export const updateSellOfferParameters = ({
     msgpubkey,
 }: ContractWriteParameters<{
     id: bigint;
-    counterparty: Address.Address;
+    counterparty: Address;
     price: bigint;
     oracleRatio: bigint;
     oracleOffset: bigint;

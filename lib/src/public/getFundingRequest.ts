@@ -36,7 +36,7 @@ export const getFundingRequest = async ({
     provider,
     contractAddress,
     requester,
-}: ContractRead<{ requester: Address.Address; }>) => {
+}: ContractRead<{ requester: Address; }>) => {
     const result = await provider.request({
         method: "eth_call",
         params: [
