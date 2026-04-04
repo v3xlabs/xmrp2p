@@ -7,7 +7,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "buy": "tsx examples/buy-offer.ts"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +25,7 @@
     "ox": "^0.14.10"
   },
   "dependencies": {
-    "@noble/hashes": "^2.0.1"
+    "@noble/hashes": "^2.0.1",
+    "tsx": "^4.21.0"
   }
 }

@@ -3,6 +3,7 @@ import { Tabs } from "@kobalte/core/tabs";
 import { Navbar } from "./navbar";
 import { OrderTable } from "./orders/OrderTable";
 import { Swap } from "./swap";
+import { Testing } from "./testing";
 
 export const App = () => (
   <div class="w-full max-w-7xl mx-auto space-y-4">
@@ -33,6 +34,7 @@ export const App = () => (
             <div class="card p-2">
               <Tabs.Content value="open">
                 <OrderTable orders={["1", "2", "3", "4", "5"]} />
+                <Testing />
               </Tabs.Content>
               <Tabs.Content value="history">
                 <OrderTable orders={["1", "2", "3"]} />
