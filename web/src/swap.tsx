@@ -1,6 +1,6 @@
 import { SegmentedControl } from "@kobalte/core/segmented-control";
 import { Select } from "@kobalte/core/select";
-import { FaSolidCheck, FaSolidUpDown } from "solid-icons/fa";
+import { FaSolidChevronDown, FaSolidUpDown } from "solid-icons/fa";
 import { type Accessor, type Component, createSignal, For } from "solid-js";
 
 import eth from "./assets/eth.svg";
@@ -19,16 +19,17 @@ const tokens = {
 
 const TokenSelector: Component<{ token: Accessor<string>; setToken: (value: string) => void; }> = ({ token, setToken }) => (
   <Select
+    class=""
     options={Object.keys(tokens) as Array<keyof typeof tokens>}
     itemComponent={props => (
-      <Select.Item item={props.item} class="flex items-center justify-between py-1 px-2">
+      <Select.Item item={props.item} class="flex items-center justify-between py-1 px-2 hover:bg-(--thorin-background-secondary) hover:cursor-pointer ">
         <Select.ItemLabel class="flex items-center gap-1">
           <img src={tokens[props.item.rawValue as keyof typeof tokens].icon} alt={tokens[props.item.rawValue as keyof typeof tokens].name} class="w-4 h-4" />
           <span class="text-sm">{tokens[props.item.rawValue as keyof typeof tokens].name}</span>
         </Select.ItemLabel>
-        <Select.ItemIndicator class="select__item-indicator">
+        {/* <Select.ItemIndicator class="select__item-indicator">
           <FaSolidCheck class="w-4 h-4" />
-        </Select.ItemIndicator>
+        </Select.ItemIndicator> */}
       </Select.Item>
     )}
     value={token()}
@@ -43,9 +44,9 @@ const TokenSelector: Component<{ token: Accessor<string>; setToken: (value: stri
           </div>
         )}
       </Select.Value>
-      {/* <Select.Icon>
-          xy
-        </Select.Icon> */}
+      <Select.Icon>
+        <FaSolidChevronDown class="w-2.5 h-2.5" />
+      </Select.Icon>
     </Select.Trigger>
     <Select.Portal>
       <Select.Content class="card p-0.5">
