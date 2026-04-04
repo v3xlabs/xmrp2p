@@ -31,8 +31,8 @@ export const ConnectModal = () => {
                                 {
                                     connector => (
                                         <button
-                                          class="btn flex justify-between items-center hover:bg-(--thorin-background-disabled) w-full p-2 cursor-pointer rounded-md"
-                                          onClick={() => connect.mutate({ connector })}
+                                        class="btn flex justify-between items-center hover:bg-(--thorin-background-disabled) w-full p-2 cursor-pointer rounded-md"
+                                        onClick={() => connect.mutate({ connector })}
                                         >
                                             <span class="flex items-center gap-2">
                                                 <span>
