@@ -25,8 +25,9 @@ import "./Errors.sol";
 import "./Enums.sol";
 import "./Structs.sol";
 
-/// @title A MoneroSwap contract for performing Atomic swaps between the native currency of an EVM based blockchain and Monero
-/// @author hbs
+/// @title A XMRP2P contract for performing Atomic swaps between the native currency of an EVM based blockchain and Monero
+/// @author v3xlabs
+/// @notice special credit to hbs for the original implementation
 /// @notice Use this contract responsibly
 contract XMRP2P {
     enum OfferType {
@@ -52,12 +53,8 @@ contract XMRP2P {
         OfferType type_;
         /// State of the offer
         OfferState state;
-        /// Flag indicating wheter the offer was funded via a FundingRequest or not
-        bool funded;
         /// Owner of the offer, the address which called create{Buy,Sell}Offer
         address owner;
-        /// Manager of the offer, another address able to change the price. Only the owner can later change the manager.
-        address manager;
         /// Counterparty of the offer. This can be set at creation time, in which case only that counterparty can take the offer,
         /// or will be filled when the offer is taken.
         address counterparty;
@@ -66,22 +63,8 @@ contract XMRP2P {
         /// Maximum trade amount (in wei). This is set from the value transfered during the call to create{Buy,Sell}Offer
         /// and updated by calls to update{Buy,Sell}Offer
         uint256 maxamount;
-        /// Fixed price of the offer, in wei per XMR. If this is 0, then reliance on the oracle is assumed and an oracle MUST be defined.
+        /// Fixed price of the offer, in wei per XMR.
         uint256 price;
-        /// Price ratio vs oracle price, in parts of RATIO_DENOMINATOR
-        uint256 oracleRatio;
-        /// Price offset vs oracle price, in wei. This is so one can set a price to be the oracle price minus 1000 gwei for example.
-        int256 oracleOffset;
-        /// Minimum amount of XMR the owner is willing to buy (Buy offers)
-        uint256 minxmr;
-        /// Maximum amount of XMR the owner is willing to sell (Sell offers)
-        uint256 maxxmr;
-        /// Maximum price in wei per XMR the owner is willing to pay (for Buy offers)
-        uint256 maxprice;
-        /// Minimum price in wei per XMR the owner is willing to get for its XMR (for Sell offers)
-        uint256 minprice;
-        /// Deposit related to the offer
-        uint256 deposit;
         /// Timestamp when the offer was created or last updated (so users can asses of its freshness)
         uint256 lastupdate;
         /// Block number when the offer was taken. This is needed so retrieving messages can be done from a specific block.
@@ -101,21 +84,10 @@ contract XMRP2P {
         uint256 xmrPrivateSpendKey;
         /// Monero private view key of the XMR side of the trade. The EVM side of the trade doesn't need to share its private view key.
         uint256 xmrPrivateViewKey;
-        /// index of the offer in the id list
-        uint256 index;
-        /// Final price of the taken offer, in wei per XMR
-        uint256 finalprice;
-        /// Amount to refund to the offer taker, in wei
-        uint256 takerDeposit;
-        /// Final amount of XMR of the taken offer (in piconeros)
-        uint256 finalxmr;
         /// Timestamp until which 'ready' can be called, after, taken offer is considered in the READY state
         uint256 t0;
         /// Timestamp after which 'claim' can be called, after, taken offer can be refunded
         uint256 t1;
-        /// Public keys for exchanging messages (using ECDH to compute the encryption key) between the two parties
-        uint256 xmrPublicMsgKey;
-        uint256 evmPublicMsgKey;
     }
 
     /// Number of decimals used by the EVM native currency
@@ -137,11 +109,6 @@ contract XMRP2P {
     /// Contract Parameters.
     /// Those parameters may be set by the constructor or via the setParameters / setPriceOracle / setSavingsXDAIParameters functions
     struct Parameters {
-        /// Maximum balance for requesting funding. Any account with a balance over this limit will not be able to create a funding request.
-        /// Set this to 1 to disable the possibility to create funding requests
-        uint256 FUNDING_REQUEST_MAXBALANCE;
-        /// Minimum fee expressed as a ratio of the requested amount. The actual ratio is this value divided by RATIO_DENOMINATOR
-        uint256 FUNDING_REQUEST_MIN_FEE_RATIO;
         /// Minimum buy offer (in wei)
         uint256 MINIMUM_BUY_OFFER;
         /// Maximum buy offer (in wei)
@@ -150,15 +117,6 @@ contract XMRP2P {
         uint256 MINIMUM_SELL_OFFER;
         /// Maximum sell offer (in wei)
         uint256 MAXIMUM_SELL_OFFER;
-        /// Maximum number of active buy offers
-        uint256 MAXIMUM_BUY_OFFER_BOOK_SIZE;
-        /// Maximum number of active sell offers
-        uint256 MAXIMUM_SELL_OFFER_BOOK_SIZE;
-        /// The sell offer coverage ratio. A sell offer with a deposit of X cannot be taken
-        /// for more than X * RATIO_DENOMINATOR / SELL_OFFER_COVERAGE_RATIO
-        uint256 SELL_OFFER_COVERAGE_RATIO;
-        /// Maximum age of oracle price, in seconds.
-        uint256 XMREVMMaxage;
         //
         // The atomic swap protocol relies on two milestones t0 and t1 which define what each party can do.
         //
@@ -176,15 +134,6 @@ contract XMRP2P {
         uint256 T0_DELAY;
         /// Delay (in s) between t0 and t1
         uint256 T1_DELAY;
-        //
-        // Oracle parameters
-        //
-
-        /// Oracle contract for determining the XMR price in EVM base unit (xDAI, POL, ETH, ...)
-        /// This contract must implement ChainLink's AggregatorV3Interface
-        address XMREVM;
-        /// Oracle decimals. Number of decimals used for expressing the price of XMR in the native EVM curreny
-        uint8 XMREVMDecimals;
     }
 
     Parameters public PARAMETERS;
