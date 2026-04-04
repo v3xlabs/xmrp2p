@@ -63,12 +63,14 @@ export const sendTransaction = async ({
     to,
     data,
     from,
+    value,
 }: {
     provider: Provider;
     chainId: number;
     privateKey: Hex;
     to: Address;
     data: Hex;
+    value?: bigint;
     from: Address;
 }) => {
     const estimatedGas = await estimateGas({ provider, from, to, data });
@@ -106,7 +108,7 @@ export const sendTransaction = async ({
         maxPriorityFeePerGas,
         to,
         data,
-        value: 0n,
+        value,
         gas: estimatedGas,
         nonce,
     });
