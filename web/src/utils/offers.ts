@@ -1,34 +1,35 @@
-import { createQuery } from "@tanstack/solid-query";
-import { useChainId, useClient } from "@wagmi/solid";
-import { type Client, publicActions } from "viem";
-import { getOffers } from "xmrp2p";
+import { createInfiniteQuery } from "@tanstack/solid-query";
+import { useChainId } from "@wagmi/solid";
+import { readContract } from "@wagmi/solid/actions";
+import { ABI, getOffers } from "xmrp2p";
 
-import { CONTRACT_ADDRESS } from "../config";
+import { config, CONTRACT_ADDRESS } from "../config";
 
-export type Offer = Awaited<ReturnType<typeof getOffers>>;
+export type Offer = Awaited<ReturnType<typeof getOffers>>[number];
 
-export const useBuyOffers = () => {
-  const client = useClient();
-  const xx = publicActions(client() as Client);
+const PAGE_SIZE = 10n;
+
+export const useOffers = () => {
   const chainId = useChainId();
 
-  return createQuery(() => ({
-    queryKey: ["orders", "buy"],
-    queryFn: async () => {
+  return createInfiniteQuery(() => ({
+    queryKey: ["offers"],
+    queryFn: async ({ pageParam = 0 }) => {
       const contractAddress = CONTRACT_ADDRESS[chainId()!] as `0x${string}`;
 
-      const offers = await getOffers(xx);
+      const offers = await readContract(config, {
+        abi: ABI,
+        functionName: "listOffers",
+        args: [BigInt(pageParam) * PAGE_SIZE, PAGE_SIZE + 1n],
+        address: contractAddress,
+        chainId: chainId()!,
+      });
 
       console.log({ offers });
 
-      // return await listBuyOffers({
-      //   provider,
-      //   contractAddress,
-      //   offset: BigInt(0),
-      //   count: BigInt(10),
-      // });
-      return [];
+      return offers.filter(offer => offer.state !== 0);
     },
-    // enabled: !!chainId() && !!client() && !!CONTRACT_ADDRESS[chainId()!],
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => (lastPage.length === 10 ? pages.length : undefined),
   }));
 };

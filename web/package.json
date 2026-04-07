@@ -14,8 +14,10 @@
     "@tanstack/solid-query": "^5.96.2",
     "@tanstack/solid-table": "^8.21.3",
     "@wagmi/solid": "^0.0.5",
+    "classnames": "^2.5.1",
     "solid-icons": "^1.2.0",
     "solid-js": "^1.9.11",
+    "ts-pattern": "^5.9.0",
     "viem": "^2.47.6",
     "xmrp2p": "workspace:*"
   },

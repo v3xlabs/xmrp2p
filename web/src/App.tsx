@@ -8,8 +8,8 @@ import { Testing } from "./testing";
 export const App = () => (
   <div class="w-full max-w-7xl mx-auto space-y-4">
     <Navbar />
-    <div class="flex gap-4">
-      <section class="w-[400px] space-y-2">
+    <div class="flex gap-4 flex-col lg:flex-row px-4">
+      <section class="w-full lg:w-[400px] space-y-2">
         <h2 class="px-2">Create Offer</h2>
         <Swap />
       </section>
@@ -33,11 +33,11 @@ export const App = () => (
             </div>
             <div class="card p-2">
               <Tabs.Content value="open">
-                <OrderTable orders={["1", "2", "3", "4", "5"]} />
+                <OrderTable />
                 <Testing />
               </Tabs.Content>
               <Tabs.Content value="history">
-                <OrderTable orders={["1", "2", "3"]} />
+                <OrderTable />
               </Tabs.Content>
             </div>
           </Tabs>

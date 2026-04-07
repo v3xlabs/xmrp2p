@@ -1,5 +1,4 @@
 build:
-
 	# appends the abi directly with " as const;" no newlines
 	cd contracts && forge build --silent && jq -c '.abi' ./out/XMRP2P.sol/XMRP2P.json \
 	| sed 's/^/export const ABI = /' \
@@ -8,3 +7,4 @@ build:
 
 deploy:
 	cd contracts && forge script XMRP2PDeployer --broadcast --slow --rpc-url localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+	cast send --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 0x225f137127d9067788314bc7fcc1f36746a3c3B5 --value 1000000000000000000

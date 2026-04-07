@@ -85,12 +85,18 @@ importers:
       '@wagmi/solid':
         specifier: ^0.0.5
         version: 0.0.5(@tanstack/query-core@5.96.2)(@tanstack/solid-query@5.96.2(solid-js@1.9.12))(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(solid-js@1.9.12)(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      classnames:
+        specifier: ^2.5.1
+        version: 2.5.1
       solid-icons:
         specifier: ^1.2.0
         version: 1.2.0(solid-js@1.9.12)
       solid-js:
         specifier: ^1.9.11
         version: 1.9.12
+      ts-pattern:
+        specifier: ^5.9.0
+        version: 5.9.0
       viem:
         specifier: ^2.47.6
         version: 2.47.6(typescript@5.9.3)(zod@4.3.6)

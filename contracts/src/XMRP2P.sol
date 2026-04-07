@@ -148,7 +148,6 @@ contract XMRP2P is Ownable {
 
         require(evmAmount >= parameters.MINIMUM_OFFER && evmAmount <= parameters.MAXIMUM_OFFER, ErrorInvalidAmount());
 
-        Offer memory offer;
         offer.kind = offerType;
         offer.id = nextOfferId++;
         offer.state = OfferState.OPEN;
@@ -387,6 +386,17 @@ contract XMRP2P is Ownable {
             value: address(this).balance - liability
         }("");
         require(res, ErrorUnableToRefund());
+    }
+
+    function listOffers(uint256 offset, uint256 count) public view returns (Offer[] memory) {
+        // uint256 max = nextOfferId - offset - count;
+        // max = max > 0 ? max : 0;
+
+        Offer[] memory _offers = new Offer[](count);
+        for (uint256 i = 0; i < count; i++) {
+            _offers[i] = offers[offset + i];
+        }
+        return _offers;
     }
 
     function _setParameters(Parameters memory _parameters) internal {

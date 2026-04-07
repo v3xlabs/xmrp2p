@@ -1,9 +1,9 @@
 import { createMemo, For, Show, Suspense } from "solid-js";
 
-import { useBuyOffers } from "./utils/offers";
+import { useOffers } from "./utils/offers";
 
 export const Testing = () => {
-  const x = useBuyOffers();
+  const x = useOffers();
   const data = createMemo(() => x.data);
 
   return (
