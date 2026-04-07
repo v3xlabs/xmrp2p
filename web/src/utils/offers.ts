@@ -1,26 +1,25 @@
 import { createQuery } from "@tanstack/solid-query";
 import { useChainId, useClient } from "@wagmi/solid";
-import type { Provider as OxProvider } from "ox/Provider";
+import { type Client, publicActions } from "viem";
+import { getOffers } from "xmrp2p";
 
-// import { listBuyOffers } from "xmrp2p";
 import { CONTRACT_ADDRESS } from "../config";
 
-// export type Offer = Awaited<ReturnType<typeof listBuyOffers>>[number];
-export type Offer = {
-  id: number;
-  price: number;
-  state: string;
-};
+export type Offer = Awaited<ReturnType<typeof getOffers>>;
 
 export const useBuyOffers = () => {
   const client = useClient();
+  const xx = publicActions(client() as Client);
   const chainId = useChainId();
-  const provider = client() as OxProvider;
 
   return createQuery(() => ({
     queryKey: ["orders", "buy"],
     queryFn: async () => {
       const contractAddress = CONTRACT_ADDRESS[chainId()!] as `0x${string}`;
+
+      const offers = await getOffers(xx);
+
+      console.log({ offers });
 
       // return await listBuyOffers({
       //   provider,

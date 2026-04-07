@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
     "buy": "tsx examples/buy-offer.ts"
   },
   "keywords": [],
