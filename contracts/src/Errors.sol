@@ -35,6 +35,10 @@ error ErrorInvalidOfferAmount();
 
 error ErrorOfferNotOpen();
 
+error ErrorParametersInvalid();
+
+error ErrorInvalidAmount();
+
 /// Error raised when an address attempts to create a BuyOffer while there exists a FundingRequest for that same address.
 /// The rationale is that if the address opens a BuyOffer then it has a balance which would have allowed to open a SellOffer.
 /// So we disallow creating a BuyOffer unless the FundingRequest is removed, either voluntarily or because the SellOffer which

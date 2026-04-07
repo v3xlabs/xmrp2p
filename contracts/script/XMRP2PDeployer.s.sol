@@ -14,16 +14,13 @@ contract XMRP2PDeployer is Script {
         vm.startBroadcast();
 
         XMRP2P xmrp2p = new XMRP2P{value: VALUE}(XMRP2P.Parameters({
-            MINIMUM_BUY_OFFER: 0.001 ether,
-            MAXIMUM_BUY_OFFER: 100 ether,
-            MINIMUM_SELL_OFFER: 0.001 ether,
-            MAXIMUM_SELL_OFFER: 100 ether,
-            DEPOSIT_RATIO: 1,
+            MINIMUM_OFFER: 0.00001 ether,
+            MAXIMUM_OFFER: 10 ether,
+            DEPOSIT_RATIO: 1000, // 1000 = 10%
             MAXIMUM_OFFER_BOOK_SIZE: 100,
-            MINIMUM_DELAY: 24 hours,
-            T0_DELAY: 1 hours,
-            T1_DELAY: 1 hours
-        }));
+            T0_DELAY: 24 hours,
+            T1_DELAY: 24 hours
+        }), OWNER);
         console.log("Contract address: ", address(xmrp2p));
 
         vm.stopBroadcast();
