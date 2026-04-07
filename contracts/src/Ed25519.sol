@@ -38,8 +38,12 @@ library Ed25519 {
         uint256 m = q;
 
         // use bigModExp precompile
-        assembly {
+        assembly ("memory-safe") {
             let p := mload(0x40)
+            // WARNING: this line was added and magically made it work
+            mstore(0x40, add(p, 0xc0))
+            // THIS IS THE END OF THAT LINE THAT WAS ADDED thank u
+
             mstore(p, 0x20)
             mstore(add(p, 0x20), 0x20)
             mstore(add(p, 0x40), 0x20)

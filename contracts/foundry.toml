@@ -5,6 +5,10 @@ src = "src"
 test = "tests/solidity"
 out = "out"
 libs = ["lib"]
+remappings = [
+    "forge-std/=lib/forge-std/src/",
+    "src/=lib/solady/src/",
+]
 # Configuration to enable deterministic deployments
 solc = "0.8.34"
 solc_version = "0.8.34"

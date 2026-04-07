@@ -5,7 +5,6 @@ import {console} from "forge-std/Test.sol";
 import {VmSafe} from "forge-std/Vm.sol";
 import {Ed25519} from "../../src/Ed25519.sol";
 import {XMRP2P} from "../../src/XMRP2P.sol";
-import {Offer, FundingRequest} from "../../src/Structs.sol";
 import {OfferType, OfferState} from "../../src/Enums.sol";
 import "../../src/Errors.sol";
 
@@ -51,8 +50,8 @@ library Utils {
     }
 
     function checkLiability(address addr) public view {
-        MoneroSwap moneroswap = MoneroSwap(payable(addr));
-        uint256 liability = moneroswap.getLiability();
+        XMRP2P moneroswap = XMRP2P(payable(addr));
+        uint256 liability = moneroswap.liability();
         uint256 contractBalance = address(moneroswap).balance;
 
         console.log("Contract   ", contractBalance);

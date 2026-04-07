@@ -11,6 +11,30 @@ import "./Enums.sol";
 // Errors
 //
 
+error ErrorNonMember();
+
+error ErrorInvalidPrivateSpendKey();
+
+error ErrorClaimUnavailable();
+
+error ErrorOfferNotReadyOrTaken();
+
+error ErrorOfferAfterT0();
+
+error ErrorUnableToRefund();
+
+error ErrorInvalidEVMPrivateViewKey();
+
+error ErrorSellOfferCannotQuitInTakenBlock();
+
+error ErrorOfferNotTaken();
+
+error ErrorInvalidOfferStateForQuit();
+
+error ErrorInvalidOfferAmount();
+
+error ErrorOfferNotOpen();
+
 /// Error raised when an address attempts to create a BuyOffer while there exists a FundingRequest for that same address.
 /// The rationale is that if the address opens a BuyOffer then it has a balance which would have allowed to open a SellOffer.
 /// So we disallow creating a BuyOffer unless the FundingRequest is removed, either voluntarily or because the SellOffer which

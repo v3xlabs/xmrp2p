@@ -18,6 +18,5 @@ enum OfferState {
     CANCELLED, // Cancelled offers are those no longer valid
     REFUNDED, // Refunded offers are those for which the buyer requested a refund
     READY, // Ready offers are those for which the Monero deposit was confirmed by the buyer
-    CLAIMED, // Claimed offers are those whose Monero seller has claimed the amount of EVM currency paid for its XMR
-    UPDATING // This is a temporary state during offer parameters update
+    CLAIMED // Claimed offers are those whose Monero seller has claimed the amount of EVM currency paid for its XMR
 }

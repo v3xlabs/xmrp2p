@@ -5,26 +5,9 @@ pragma solidity ^0.8.34;
 import {Ed25519} from "./Ed25519.sol";
 import "./Errors.sol";
 import "./Enums.sol";
-import "./Structs.sol";
-import { Ownable } from '../lib/solady/src/auth/Ownable.sol';
+import {Ownable} from "../lib/solady/src/auth/Ownable.sol";
 
-contract XMRP2P {
-    enum OfferType {
-        INVALID, // Used so the default value 0 is invalid
-        BUY,
-        SELL
-    }
-
-    enum OfferState {
-        INVALID, // Used so the default value 0 is invalid
-        OPEN, // Open offers are those still seeking a counterparty
-        TAKEN, // Taken offers are those with both a buyer and a seller
-        CANCELLED, // Cancelled offers are those no longer valid
-        REFUNDED, // Refunded offers are those for which the buyer requested a refund
-        READY, // Ready offers are those for which the Monero deposit was confirmed by the buyer
-        CLAIMED // Claimed offers are those whose Monero seller has claimed the amount of EVM currency paid for its XMR
-    }
-
+contract XMRP2P is Ownable {
     /// The Offer structure is used to describe both buy and sell offers
     struct Offer {
         uint256 id;
@@ -33,10 +16,10 @@ contract XMRP2P {
         address owner;
         address counterparty;
         uint256 amount;
+        uint256 deposit;
         uint256 price;
         uint256 lastupdate;
         uint256 blockTaken;
-
         /// Monero public spend key of the EVM side of the trade
         uint256 evmPublicSpendKey;
         /// Monero private spend key of the EVM side of the trade. Set during a call to refund.
@@ -53,10 +36,26 @@ contract XMRP2P {
         /// Monero private view key of the XMR side of the trade. The EVM side of the trade doesn't need to share its private view key.
         uint256 xmrPrivateViewKey;
         /// Timestamp until which 'ready' can be called, after, taken offer is considered in the READY state
+        /// 'ready deadline'
         uint256 t0;
+        /// 'claim deadline'
         /// Timestamp after which 'claim' can be called, after, taken offer can be refunded
         uint256 t1;
     }
+
+    struct Parameters {
+        uint256 MINIMUM_BUY_OFFER;
+        uint256 MAXIMUM_BUY_OFFER;
+        uint256 MINIMUM_SELL_OFFER;
+        uint256 MAXIMUM_SELL_OFFER;
+        uint256 DEPOSIT_RATIO;
+        uint256 MAXIMUM_OFFER_BOOK_SIZE;
+        uint256 MINIMUM_DELAY;
+        uint256 T0_DELAY;
+        uint256 T1_DELAY;
+    }
+
+    Parameters public parameters;
 
     /// Minimum T0 and T1 delays.
     /// Setting those delays too low can lead to funds being 'stolen' by giving the XMR side the possibility to
@@ -87,15 +86,9 @@ contract XMRP2P {
         _mutex = false;
     }
 
-    event OfferEvent(
-        uint256 offer_id,
-        OfferType indexed kind,
-        OfferState indexed state
-    );
+    event OfferEvent(uint256 offer_id, OfferType indexed kind, OfferState indexed state);
 
-    constructor() payable {
-
-    }
+    constructor() payable {}
 
     /// Receive function safeguard
     receive() external payable {
@@ -107,22 +100,24 @@ contract XMRP2P {
         require(0 == msg.value, ErrorUnableToAcceptPayment());
     }
 
-    _keySanity(uint256 pubKey) internal {
+    function _keySanity(uint256 pubKey) internal {
         require(!usedPublicKeys[pubKey], ErrorKeyAlreadyUsed());
         usedPublicKeys[pubKey] = true;
     }
 
-    _offer(OfferType offerType, uint256 price, address counterparty, uint256 pubSpendKey, uint256 pubViewKey) internal {
+    function _offer(OfferType offerType, uint256 price, address counterparty, uint256 pubSpendKey, uint256 pubViewKey)
+        internal returns (Offer memory offer)
+    {
         require(
-            0 == PARAMETERS.MAXIMUM_OFFER_BOOK_SIZE || offers.length < PARAMETERS.MAXIMUM_OFFER_BOOK_SIZE,
-            ErrorMaximumOfferBookSizeReached(offers.length)
+            0 == parameters.MAXIMUM_OFFER_BOOK_SIZE || nextOfferId < parameters.MAXIMUM_OFFER_BOOK_SIZE,
+            ErrorMaximumOfferBookSizeReached(nextOfferId)
         );
 
         _keySanity(pubSpendKey);
         _keySanity(pubViewKey);
 
-        uint256 evmAmount = offerType == OfferType.BUY ? msg.value : msg.value * (1/DEPOSIT_RATIO);
-        uint256 deposit = offerType == evmAmount * DEPOSIT_RATIO;
+        uint256 evmAmount = offerType == OfferType.BUY ? msg.value : msg.value * (1 / parameters.DEPOSIT_RATIO);
+        uint256 deposit = offerType == OfferType.BUY ? evmAmount * parameters.DEPOSIT_RATIO : msg.value;
 
         Offer memory offer;
         offer.kind = offerType;
@@ -132,7 +127,7 @@ contract XMRP2P {
         offer.owner = msg.sender;
         offer.counterparty = counterparty;
         offer.amount = evmAmount;
-        offer.deposit = evmAmount * price;
+        offer.deposit = deposit;
         offer.price = price;
 
         liability += msg.value;
@@ -141,19 +136,183 @@ contract XMRP2P {
     }
 
     /// Create buy offer
-    buy(uint256 price, address counterparty, uint256 pubSpendKey, uint256 pubViewKey) public payable {
-        Offer memory offer = _offer(OfferType.BUY, price, counterparty, pubSpendKey, pubViewKey);
-        offer.evmPublicSpendKey = spendKey;
-        offer.evmPublicViewKey = viewKey;
+    // pubSpendingKey
+    // pubViewingKey
+    function buy(uint256 price, address counterparty, uint256 spendingKey, uint256 viewingKey) public payable {
+        Offer memory offer = _offer(OfferType.BUY, price, counterparty, spendingKey, viewingKey);
+        offer.evmPublicSpendKey = spendingKey;
+        offer.evmPublicViewKey = viewingKey;
         offers[offer.id] = offer;
     }
 
     /// Create sell offer
-    sell(uint256 price, address counterparty, uint256 pubSpendKey, uint256 privViewKey) public payable {
-        uint256 pubViewKey = '';
-        _offer(OfferType.SELL, price, counterparty, pubSpendKey, pubViewKey);
-        offer.xmrPublicSpendKey = pubSpendKey;
-        offer.xmrPrivateViewKey = privViewKey;
+    // pubSpendingKey
+    // privViewingKey
+    function sell(uint256 price, address counterparty, uint256 spendingKey, uint256 viewingKey) public payable {
+        Offer memory offer = _offer(OfferType.SELL, price, counterparty, spendingKey, viewingKey);
+        offer.xmrPublicSpendKey = spendingKey;
+        offer.xmrPrivateViewKey = viewingKey;
         offers[offer.id] = offer;
+    }
+
+    /// Take an offer
+    /// @param offerId Offer ID
+    /// @param spendingKey (public)
+    /// @param viewingKey (private (buy), public (sell))
+    function take(uint256 offerId, uint256 spendingKey, uint256 viewingKey) public payable nonReentrant {
+        Offer storage offer = offers[offerId];
+        require(offer.state == OfferState.OPEN, ErrorOfferNotOpen());
+        require(address(0) == offer.counterparty || offer.counterparty == msg.sender, ErrorNonMember());
+
+        _keySanity(spendingKey);
+        if (offer.kind == OfferType.BUY) {
+            // Compute the public view key associated with the provided private view key and add it
+            // to the usedPublicKeys mapping. This is a costly operation but it adds security.
+            (uint256 x, uint256 y) = Ed25519.scalarMultBase(viewingKey);
+            uint256 publicViewingKey = Ed25519.changeEndianness(Ed25519.compressPoint(x, y));
+            _keySanity(publicViewingKey);
+            offer.xmrPublicSpendKey = spendingKey;
+            offer.xmrPrivateViewKey = viewingKey;
+        } else {
+            _keySanity(viewingKey);
+            offer.evmPublicSpendKey = spendingKey;
+            offer.evmPublicViewKey = viewingKey;
+        }
+
+        offer.state = OfferState.TAKEN;
+        offer.counterparty = msg.sender;
+        offer.blockTaken = block.number;
+        offer.t0 = block.timestamp + parameters.T0_DELAY;
+        offer.t1 = offer.t0 + parameters.T1_DELAY;
+        offer.lastupdate = block.timestamp;
+        liability += msg.value;
+
+        emit OfferEvent(offer.id, offer.kind, offer.state);
+    }
+
+    /// Cancel an offer
+    /// @param offerId Offer ID
+    /// The deposit or amount will be returned to the caller
+    function cancel(uint256 offerId) public nonReentrant {
+        Offer storage offer = offers[offerId];
+        require(offer.state == OfferState.OPEN, ErrorOfferNotOpen());
+        require(offer.owner == msg.sender, ErrorNonMember());
+
+        uint256 amount = offer.kind == OfferType.BUY ? offer.amount : offer.kind == OfferType.SELL ? offer.deposit : 0;
+        require(amount > 0, ErrorInvalidOfferAmount());
+
+        offer.state = OfferState.CANCELLED;
+        offer.lastupdate = block.timestamp;
+
+        liability -= amount;
+        (bool res,) = payable(msg.sender).call{value: amount}("");
+        require(res, ErrorUnableToRefund());
+
+        emit OfferEvent(offer.id, offer.kind, offer.state);
+    }
+
+    /// Quit an offer
+    /// Callable by the evm side of a trade
+    /// @param offerId Offer ID
+    /// @param spendingKey EVM spending key
+    /// @param viewingKey EVM viewing key
+    function quit(uint256 offerId, uint256 spendingKey, uint256 viewingKey) public nonReentrant {
+        Offer storage offer = offers[offerId];
+
+        require(
+            (offer.kind == OfferType.BUY && msg.sender == offer.owner)
+                || (offer.kind == OfferType.SELL && msg.sender == offer.counterparty),
+            ErrorNonMember()
+        );
+
+        require(
+            offer.kind == OfferType.BUY && offer.state == OfferState.TAKEN
+                && (block.timestamp <= offer.t0 || block.timestamp > offer.t1) || offer.kind == OfferType.SELL
+                && offer.state == OfferState.TAKEN && (block.timestamp <= offer.t0 || block.timestamp > offer.t1)
+                || offer.kind != OfferType.INVALID && offer.state == OfferState.READY && block.timestamp > offer.t1,
+            ErrorInvalidOfferStateForQuit()
+        );
+        require(offer.kind != OfferType.SELL || block.number > offer.blockTaken, ErrorSellOfferCannotQuitInTakenBlock());
+
+        (uint256 x, uint256 y) = Ed25519.scalarMultBase(spendingKey);
+        require(
+            offer.evmPublicSpendKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
+            ErrorBuyOfferInvalidEVMPrivateSpendKey()
+        );
+        (x, y) = Ed25519.scalarMultBase(viewingKey);
+        require(
+            offer.evmPublicViewKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
+            ErrorInvalidEVMPrivateViewKey()
+        );
+
+        offer.evmPrivateSpendKey = spendingKey;
+        offer.evmPrivateViewKey = viewingKey;
+        offer.state = OfferState.REFUNDED;
+        offer.lastupdate = block.timestamp;
+
+        uint256 amount_r1 =
+            offer.kind == OfferType.BUY ? offer.amount : offer.kind == OfferType.SELL ? offer.deposit : 0;
+        uint256 amount_r2 =
+            offer.kind == OfferType.BUY ? offer.deposit : offer.kind == OfferType.SELL ? offer.amount : 0;
+        (bool res,) = payable(offer.owner).call{value: amount_r1}("");
+        require(res, ErrorUnableToRefund());
+        (bool res2,) = payable(offer.counterparty).call{value: amount_r2}("");
+        require(res2, ErrorUnableToRefund());
+        liability -= amount_r1;
+        liability -= amount_r2;
+
+        emit OfferEvent(offer.id, offer.kind, offer.state);
+    }
+
+    /// Ready an offer
+    /// This function is called by the buyer once the XMR deposit has been validated
+    function ready(uint256 offerId) public nonReentrant {
+        Offer storage offer = offers[offerId];
+        require(offer.state == OfferState.TAKEN, ErrorOfferNotTaken());
+        require(block.timestamp <= offer.t0, ErrorOfferAfterT0());
+        require(
+            (offer.kind == OfferType.BUY && msg.sender == offer.owner)
+                || (offer.kind == OfferType.SELL && msg.sender == offer.counterparty),
+            ErrorNonMember()
+        );
+        offer.state = OfferState.READY;
+        offer.lastupdate = block.timestamp;
+
+        emit OfferEvent(offer.id, offer.kind, offer.state);
+    }
+
+    function claim(uint256 offerId, uint256 privateSpendKey) public nonReentrant {
+        Offer storage offer = offers[offerId];
+        require(offer.state == OfferState.READY || offer.state == OfferState.TAKEN, ErrorOfferNotReadyOrTaken());
+
+        require(
+            (offer.state == OfferState.TAKEN && block.timestamp > offer.t0 && block.timestamp <= offer.t1)
+                || (offer.state == OfferState.READY && block.timestamp <= offer.t1),
+            ErrorClaimUnavailable()
+        );
+        require(
+            (offer.kind == OfferType.BUY && msg.sender == offer.counterparty)
+                || (offer.kind == OfferType.SELL && msg.sender == offer.owner),
+            ErrorNonMember()
+        );
+
+        (uint256 x, uint256 y) = Ed25519.scalarMultBase(privateSpendKey);
+        require(
+            offer.xmrPublicSpendKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
+            ErrorInvalidPrivateSpendKey()
+        );
+        offer.xmrPrivateSpendKey = privateSpendKey;
+
+        offer.state = OfferState.CLAIMED;
+        offer.lastupdate = block.timestamp;
+
+        liability -= offer.amount;
+        liability -= offer.deposit;
+
+        uint256 amount = offer.amount + offer.deposit;
+        (bool res,) = payable(offer.owner).call{value: amount}("");
+        require(res, ErrorUnableToPayClaimer());
+
+        emit OfferEvent(offer.id, offer.kind, offer.state);
     }
 }

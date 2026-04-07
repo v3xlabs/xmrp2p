@@ -13,8 +13,8 @@ contract XMRP2PDeployer is Script {
     function run() public {
         vm.startBroadcast();
 
-        MoneroSwap moneroswap = new MoneroSwap{value: VALUE}(OWNER);
-        console.log("Contract address: ", address(moneroswap));
+        XMRP2P xmrp2p = new XMRP2P{value: VALUE}();
+        console.log("Contract address: ", address(xmrp2p));
 
         vm.stopBroadcast();
     }
