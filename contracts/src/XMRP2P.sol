@@ -88,7 +88,9 @@ contract XMRP2P is Ownable {
 
     event OfferEvent(uint256 offer_id, OfferType indexed kind, OfferState indexed state);
 
-    constructor() payable {}
+    constructor(Parameters memory _parameters) payable {
+        parameters = _parameters;
+    }
 
     /// Receive function safeguard
     receive() external payable {
@@ -109,7 +111,7 @@ contract XMRP2P is Ownable {
         internal returns (Offer memory offer)
     {
         require(
-            0 == parameters.MAXIMUM_OFFER_BOOK_SIZE || nextOfferId < parameters.MAXIMUM_OFFER_BOOK_SIZE,
+            0 == parameters.MAXIMUM_OFFER_BOOK_SIZE || nextOfferId <= parameters.MAXIMUM_OFFER_BOOK_SIZE,
             ErrorMaximumOfferBookSizeReached(nextOfferId)
         );
 
@@ -130,7 +132,7 @@ contract XMRP2P is Ownable {
         offer.deposit = deposit;
         offer.price = price;
 
-        liability += msg.value;
+        liability += offer.kind == OfferType.BUY ? offer.deposit : offer.amount;
 
         return offer;
     }
@@ -179,13 +181,19 @@ contract XMRP2P is Ownable {
             offer.evmPublicViewKey = viewingKey;
         }
 
+        require(
+            (offer.kind == OfferType.BUY && msg.value >= offer.deposit) ||
+            (offer.kind == OfferType.SELL && msg.value >= offer.amount),
+            ErrorInvalidOfferAmount()
+        );
+        liability += offer.kind == OfferType.BUY ? offer.deposit : offer.amount;
+
         offer.state = OfferState.TAKEN;
         offer.counterparty = msg.sender;
         offer.blockTaken = block.number;
         offer.t0 = block.timestamp + parameters.T0_DELAY;
         offer.t1 = offer.t0 + parameters.T1_DELAY;
         offer.lastupdate = block.timestamp;
-        liability += msg.value;
 
         emit OfferEvent(offer.id, offer.kind, offer.state);
     }
@@ -250,16 +258,16 @@ contract XMRP2P is Ownable {
         offer.state = OfferState.REFUNDED;
         offer.lastupdate = block.timestamp;
 
-        uint256 amount_r1 =
+        uint256 amountR1 =
             offer.kind == OfferType.BUY ? offer.amount : offer.kind == OfferType.SELL ? offer.deposit : 0;
-        uint256 amount_r2 =
+        uint256 amountR2 =
             offer.kind == OfferType.BUY ? offer.deposit : offer.kind == OfferType.SELL ? offer.amount : 0;
-        (bool res,) = payable(offer.owner).call{value: amount_r1}("");
+        (bool res,) = payable(offer.owner).call{value: amountR1}("");
         require(res, ErrorUnableToRefund());
-        (bool res2,) = payable(offer.counterparty).call{value: amount_r2}("");
+        (bool res2,) = payable(offer.counterparty).call{value: amountR2}("");
         require(res2, ErrorUnableToRefund());
-        liability -= amount_r1;
-        liability -= amount_r2;
+        liability -= amountR1;
+        liability -= amountR2;
 
         emit OfferEvent(offer.id, offer.kind, offer.state);
     }
@@ -281,6 +289,10 @@ contract XMRP2P is Ownable {
         emit OfferEvent(offer.id, offer.kind, offer.state);
     }
 
+    /// Claim an offer
+    /// @param offerId Offer ID
+    /// @param privateSpendKey XMR private spend key
+    /// The claim function completes a swap by revealing the private spend key
     function claim(uint256 offerId, uint256 privateSpendKey) public nonReentrant {
         Offer storage offer = offers[offerId];
         require(offer.state == OfferState.READY || offer.state == OfferState.TAKEN, ErrorOfferNotReadyOrTaken());
@@ -310,9 +322,14 @@ contract XMRP2P is Ownable {
         liability -= offer.deposit;
 
         uint256 amount = offer.amount + offer.deposit;
-        (bool res,) = payable(offer.owner).call{value: amount}("");
+        (bool res,) = payable(msg.sender).call{value: amount}("");
         require(res, ErrorUnableToPayClaimer());
 
         emit OfferEvent(offer.id, offer.kind, offer.state);
+    }
+
+    function recover() public onlyOwner {
+        (bool res,) = payable(msg.sender).call{value: address(this).balance - liability}("");
+        require(res, ErrorUnableToRefund());
     }
 }
