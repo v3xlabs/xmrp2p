@@ -12,7 +12,7 @@ contract XMRP2PDeployer is Script {
     bytes32 constant SALT = bytes32(0);
     uint256 constant VALUE = 0;
     uint256 constant SAMPLE_BUY_ORDER_AMOUNT = 0.01 ether;
-    uint256 constant SAMPLE_PRICE = 150;
+    uint256 constant SAMPLE_PRICE = 6566502730000;
     uint256 constant SAMPLE_EVM_PRIVATE_SPEND_KEY = 0xebb84529f27fe2b7dde8bfadafcb3e07e0b43510ef2b20746effe5962ff33d02;
     uint256 constant SAMPLE_EVM_PRIVATE_VIEW_KEY = 0x3c27472aaaf62fcea2ef1e0f1ff031d5fcec66c60275c793453f93f5387fa207;
 

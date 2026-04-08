@@ -33,6 +33,6 @@ export const useOffers = () => {
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => (lastPage.length >= 10 ? pages.length : undefined),
-    refetchInterval: 5000,
+    refetchInterval: 50000,
   }));
 };

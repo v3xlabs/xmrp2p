@@ -1,11 +1,12 @@
-import { SegmentedControl } from "@kobalte/core/segmented-control";
 import { FaSolidUpDown } from "solid-icons/fa";
-import { For, Show, Suspense } from "solid-js";
+import { Show, Suspense } from "solid-js";
 import { match } from "ts-pattern";
 import { formatEther } from "viem";
 
 import ethIcon from "../assets/eth.svg";
 import { useCreateOrder } from "../hooks/useCreateOrder";
+import { useMarketRate } from "../utils/prices/useMarketRate";
+import { Price } from "./price";
 import { TokenSelector } from "./TokenSelector";
 
 export const Swap = () => {
@@ -29,11 +30,15 @@ export const Swap = () => {
       suggestedRate,
       rate,
       depositAmount,
+      buyAmountValue,
+      sellAmountValue,
     } } = useCreateOrder();
+
+  const market = useMarketRate();
 
   return (
     <div class="card p-4 space-y-2">
-      <div>
+      <div class="relative">
         <div class="flex justify-between items-center gap-1">
           <label for="input_amount" class="text-md py-1">
             Sell
@@ -49,18 +54,21 @@ export const Swap = () => {
           value={sellAmount()}
           onInput={e => handleSellChange(e.currentTarget.value)}
         />
+        <div class="text-end tabular-nums pt-1 text-sm absolute right-2 bottom-1 text-(--thorin-text-secondary)">
+          <Price token={fromToken} amount={sellAmountValue} />
+        </div>
       </div>
 
       <div class="flex justify-center -my-4">
         <button
-          class="aspect-square p-2 group border border-(--thorin-border) rounded-md bg-(--thorin-background-primary) hover:bg-(--thorin-background-secondary) hover:cursor-pointer"
+          class="relative aspect-square p-2 group border border-(--thorin-border) rounded-md bg-(--thorin-background-primary) hover:bg-(--thorin-background-secondary) hover:cursor-pointer"
           onClick={handleSwapTokens}
         >
           <FaSolidUpDown class="group-hover:rotate-180 transition-all w-4 h-4" />
         </button>
       </div>
 
-      <div>
+      <div class="relative">
         <div class="flex justify-between items-center gap-1">
           <label for="output_amount" class="text-md py-1">
             Buy
@@ -76,57 +84,64 @@ export const Swap = () => {
           value={buyAmount()}
           onInput={e => handleBuyChange(e.currentTarget.value)}
         />
+        <div class="text-end tabular-nums pt-1 text-sm absolute right-2 bottom-1 text-(--thorin-text-secondary)">
+          <Price token={toToken} amount={buyAmountValue} />
+        </div>
       </div>
 
       <div>
         <div class="flex justify-between items-center mb-1">
-          <label class="text-sm text-(--thorin-text-secondary)">Rate</label>
-          {match(marketRate)
-            .when(
-              q => q.isPending,
-              () => (
-                <span class="text-xs text-(--thorin-text-disabled)">
-                  Fetching market rate...
-                </span>
-              ),
-            )
-            .when(
-              q => q.isError,
-              () => (
-                <span class="text-xs text-(--thorin-red-primary)">
-                  Rate unavailable
-                </span>
-              ),
-            )
-            .otherwise(() => (
-              <Show when={suggestedRate()}>
-                {sr => (
-                  <button
-                    class="text-xs text-(--thorin-blue-primary) hover:text-(--thorin-blue-bright) cursor-pointer transition-colors"
-                    onClick={handleUseSuggestedRate}
-                  >
-                    Market ≈
-                    {" "}
-                    {sr().toFixed(2)}
-                    {" "}
-                    XMR/ETH
-                  </button>
-                )}
-              </Show>
-            ))}
+          <label class="">Rate</label>
         </div>
-        <div class="relative">
-          <input
-            placeholder="0"
-            class="input w-full pr-20"
-            type="text"
-            inputMode="decimal"
-            value={rate()}
-            onInput={e => applyRate(e.currentTarget.value)}
-          />
-          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--thorin-text-secondary) pointer-events-none">
-            XMR/ETH
-          </span>
+        <div class="flex gap-1">
+          <div class="relative">
+            <input
+              placeholder="0"
+              class="input pr-20"
+              type="text"
+              inputMode="decimal"
+              value={rate()}
+              onInput={e => applyRate(e.currentTarget.value)}
+            />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--thorin-text-secondary) pointer-events-none">
+              XMR/ETH
+            </span>
+          </div>
+          <div>
+            {match(marketRate)
+              .when(
+                q => q.isPending,
+                () => (
+                  <span class="text-xs text-(--thorin-text-disabled)">
+                    Fetching market rate...
+                  </span>
+                ),
+              )
+              .when(
+                q => q.isError,
+                () => (
+                  <span class="text-xs text-(--thorin-red-primary)">
+                    Rate unavailable
+                  </span>
+                ),
+              )
+              .otherwise(() => (
+                <Show when={suggestedRate()}>
+                  {sr => (
+                    <button
+                      class="text-xs text-(--thorin-blue-primary) hover:text-(--thorin-blue-bright) cursor-pointer transition-colors border rounded-md py-1"
+                      onClick={handleUseSuggestedRate}
+                    >
+                      Suggested
+                      {" "}
+                      {sr().toFixed(2)}
+                      {" "}
+                      XMR/ETH
+                    </button>
+                  )}
+                </Show>
+              ))}
+          </div>
         </div>
       </div>
 

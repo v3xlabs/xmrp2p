@@ -1,5 +1,5 @@
 import { createMemo, createSignal } from "solid-js";
-import { parseEther } from "viem";
+import { parseEther, parseUnits } from "viem";
 
 import { useMarketRate } from "../utils/prices/useMarketRate";
 import { useApp } from "./useApp";
@@ -35,6 +35,9 @@ export const useSwap = () => {
   const rateValue = createMemo(() => (rate() ? BigInt(Math.round(Number.parseFloat(rate()) * 10 ** 12)) : undefined));
 
   const suggestedRate = () => marketRate.data?.xmrPerEth ?? null;
+
+  const buyAmountValue = createMemo(() => parseUnits(buyAmount(), toToken() === "eth" ? 18 : 12));
+  const sellAmountValue = createMemo(() => parseUnits(sellAmount(), fromToken() === "eth" ? 18 : 12));
 
   const handleToChange = (value: string) => {
     if (value === fromToken()) setFromToken(toToken());
@@ -173,5 +176,7 @@ export const useSwap = () => {
     suggestedRate,
     rate,
     depositAmount,
+    buyAmountValue,
+    sellAmountValue,
   };
 };

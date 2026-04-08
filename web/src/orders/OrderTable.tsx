@@ -13,9 +13,11 @@ import { formatEther, formatUnits } from "viem";
 
 import ethIcon from "../assets/eth.svg";
 import xmrIcon from "../assets/xmr.svg";
-import { truncateAddress } from "../utils/address";
+import { Price } from "../swap/price";
+import { Addr } from "../utils/address";
 import { type Offer, useOffers } from "../utils/offers";
 import { StatusBadge } from "./StatusBadge";
+import { FaSolidTrash } from "solid-icons/fa";
 
 const columnHelper = createColumnHelper<Offer>();
 
@@ -34,7 +36,7 @@ const columns = [
               : "text-(--thorin-red-primary)",
           )}
         >
-          {isBuy ? "Buy XMR" : "Sell XMR"}
+          {isBuy ? "Buy" : "Sell"}
         </span>
       );
     },
@@ -42,30 +44,16 @@ const columns = [
   columnHelper.accessor("owner", {
     header: "Owner",
     cell: ({ row }) => (
-      <div class="text-right tabular-nums font-medium">
-        {truncateAddress(row.original.owner)}
+      <div class="text-left tabular-nums">
+        <Addr address={row.original.owner} />
       </div>
     ),
   }),
   columnHelper.accessor("counterparty", {
     header: "Counterparty",
     cell: ({ row }) => (
-      <div class="text-right tabular-nums font-medium">
-        {truncateAddress(row.original.counterparty)}
-      </div>
-    ),
-  }),
-  columnHelper.display({
-    id: "eth_amount", // eslint-disable-line no-restricted-syntax
-    header: () => (
-      <div class="flex items-center gap-1 justify-end">
-        <img src={ethIcon} alt="ETH" class="w-4 h-4" />
-        <span>ETH</span>
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div class="text-right tabular-nums font-medium">
-        {formatEther(row.original.amount)}
+      <div class="text-left tabular-nums">
+        <Addr address={row.original.counterparty} />
       </div>
     ),
   }),
@@ -81,6 +69,21 @@ const columns = [
     ),
   }),
   columnHelper.display({
+    id: "eth_amount", // eslint-disable-line no-restricted-syntax
+    header: () => (
+      <div class="flex items-center gap-1 justify-end">
+        <img src={ethIcon} alt="ETH" class="w-4 h-4" />
+        <span>ETH</span>
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div class="text-end tabular-nums">
+        <div class="font-medium">{formatEther(row.original.amount)}</div>
+        <Price token={() => "eth"} amount={() => row.original.amount} />
+      </div>
+    ),
+  }),
+  columnHelper.display({
     id: "xmr_amount", // eslint-disable-line no-restricted-syntax
     header: () => (
       <div class="flex items-center gap-1 justify-end">
@@ -89,12 +92,19 @@ const columns = [
       </div>
     ),
     cell: ({ row }) => {
-      const xmrAmount = formatEther(
-        row.original.amount * row.original.price / 10n ** 12n,
+      const xmrAmountValue = row.original.amount * row.original.price / 10n ** 18n;
+      const xmrAmount = formatUnits(
+        xmrAmountValue,
+        12,
       );
 
       return (
-        <div class="text-right tabular-nums font-medium">{xmrAmount}</div>
+        <div class="text-right tabular-nums">
+          <div class="font-medium">{xmrAmount}</div>
+          <div>
+            <Price token={() => "xmr"} amount={() => xmrAmountValue} />
+          </div>
+        </div>
       );
     },
   }),
@@ -103,6 +113,18 @@ const columns = [
     cell: ({ row }) => (
       <div class="flex justify-end">
         <StatusBadge state={row.original.state} />
+      </div>
+    ),
+  }),
+  columnHelper.display({
+    // eslint-disable-next-line no-restricted-syntax
+    id: "actions",
+    header: () => <div class="text-right">Actions</div>,
+    cell: ({ row }) => (
+      <div class="flex justify-end">
+        <button class="btn py-1 px-1">
+          Take
+        </button>
       </div>
     ),
   }),
@@ -173,9 +195,9 @@ export const OrderTable: Component = () => {
                             {header.isPlaceholder
                               ? null
                               : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext(),
-                                )}
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
                           </th>
                         )}
                       </For>
