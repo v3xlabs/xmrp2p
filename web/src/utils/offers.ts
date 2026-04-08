@@ -1,22 +1,20 @@
 import { createInfiniteQuery } from "@tanstack/solid-query";
-import { useChainId } from "@wagmi/solid";
 import { readContract } from "@wagmi/solid/actions";
 import { ABI, getOffers } from "xmrp2p";
 
-import { config, CONTRACT_ADDRESS } from "../config";
+import { config } from "../config";
+import { useApp } from "../hooks/useApp";
 
 export type Offer = Awaited<ReturnType<typeof getOffers>>[number];
 
 const PAGE_SIZE = 10n;
 
 export const useOffers = () => {
-  const chainId = useChainId();
+  const { chainId, contractAddress } = useApp();
 
   return createInfiniteQuery(() => ({
-    queryKey: ["offers"],
+    queryKey: ["c", chainId(), "offers"],
     queryFn: async ({ pageParam }) => {
-      const contractAddress = CONTRACT_ADDRESS[chainId()!] as `0x${string}`;
-
       console.log({ pageParam });
 
       // await new Promise(resolve => setTimeout(resolve, 2000));
@@ -25,8 +23,8 @@ export const useOffers = () => {
         abi: ABI,
         functionName: "listOffers",
         args: [BigInt(pageParam) * PAGE_SIZE, PAGE_SIZE + 1n, true],
-        address: contractAddress,
-        chainId: chainId()!,
+        address: contractAddress(),
+        chainId: chainId(),
       });
 
       console.log({ offers });

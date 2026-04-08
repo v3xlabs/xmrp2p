@@ -1,7 +1,6 @@
 import { SegmentedControl } from "@kobalte/core/segmented-control";
-import { createQuery, useMutation } from "@tanstack/solid-query";
-import { useChainId } from "@wagmi/solid";
-import { readContract, writeContract } from "@wagmi/solid/actions";
+import { useMutation } from "@tanstack/solid-query";
+import { writeContract } from "@wagmi/solid/actions";
 import { FaSolidUpDown } from "solid-icons/fa";
 import { createMemo, createSignal, For, Show, Suspense } from "solid-js";
 import { match } from "ts-pattern";
@@ -10,7 +9,8 @@ import { english, generateMnemonic } from "viem/accounts";
 import { anvil } from "viem/chains";
 import { ABI, generateMoneroKeys } from "xmrp2p";
 
-import { config, CONTRACT_ADDRESS, queryClient } from "../config";
+import { config, queryClient } from "../config";
+import { useApp } from "../hooks/useApp";
 import { useMarketRate } from "../utils/prices/useMarketRate";
 import { TokenSelector } from "./TokenSelector";
 
@@ -33,30 +33,14 @@ const computeRate = (
 ): number => (fromToken === "xmr" ? sell / buy : buy / sell);
 
 export const Swap = () => {
+  const { contractAddress, parameters, chainId } = useApp();
   const [fromToken, setFromToken] = createSignal("xmr");
   const [toToken, setToToken] = createSignal("eth");
   const [sellAmount, setSellAmount] = createSignal("");
   const [buyAmount, setBuyAmount] = createSignal("");
   const [rate, setRate] = createSignal("");
 
-  const chainId = useChainId();
   const marketRate = useMarketRate();
-
-  const parameters = createQuery(() => ({
-    queryKey: ["parameters"],
-    queryFn: async () => {
-      console.log({ chainId: chainId() });
-      const parameters = await readContract(config, {
-        abi: ABI,
-        functionName: "parameters",
-        address: CONTRACT_ADDRESS[chainId()] as `0x${string}`,
-      });
-
-      console.log({ parameters });
-
-      return parameters;
-    },
-  }));
 
   const suggestedRate = () => marketRate.data?.xmrPerEth ?? null;
 
@@ -198,7 +182,7 @@ export const Swap = () => {
           publicSpendKey,
           publicViewKey,
         ],
-        address: CONTRACT_ADDRESS[chainId()!] as `0x${string}`,
+        address: contractAddress(),
         value: ethAmount(),
         // eslint-disable-next-line no-restricted-syntax
         chainId: anvil.id,
