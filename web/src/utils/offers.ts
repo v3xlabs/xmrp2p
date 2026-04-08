@@ -19,6 +19,8 @@ export const useOffers = () => {
 
       console.log({ pageParam });
 
+      // await new Promise(resolve => setTimeout(resolve, 2000));
+
       const offers = await readContract(config, {
         abi: ABI,
         functionName: "listOffers",
@@ -33,5 +35,6 @@ export const useOffers = () => {
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => (lastPage.length >= 10 ? pages.length : undefined),
+    refetchInterval: 5000,
   }));
 };
