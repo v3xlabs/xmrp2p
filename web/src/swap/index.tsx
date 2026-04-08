@@ -1,214 +1,35 @@
 import { SegmentedControl } from "@kobalte/core/segmented-control";
-import { useMutation } from "@tanstack/solid-query";
-import { writeContract } from "@wagmi/solid/actions";
 import { FaSolidUpDown } from "solid-icons/fa";
-import { createMemo, createSignal, For, Show, Suspense } from "solid-js";
+import { For, Show, Suspense } from "solid-js";
 import { match } from "ts-pattern";
-import { formatEther, parseEther } from "viem";
-import { english, generateMnemonic } from "viem/accounts";
-import { anvil } from "viem/chains";
-import { ABI, generateMoneroKeys } from "xmrp2p";
+import { formatEther } from "viem";
 
-import { config, queryClient } from "../config";
-import { useApp } from "../hooks/useApp";
-import { useMarketRate } from "../utils/prices/useMarketRate";
+import ethIcon from "../assets/eth.svg";
+import { useCreateOrder } from "../hooks/useCreateOrder";
 import { TokenSelector } from "./TokenSelector";
 
-const formatNum = (n: number): string => {
-  if (Number.isNaN(n) || !Number.isFinite(n)) return "";
-
-  return Number.parseFloat(n.toFixed(8)).toString();
-};
-
-const computeBuy = (sell: number, rate: number, fromToken: string): number =>
-  (fromToken === "xmr" ? sell / rate : sell * rate);
-
-const computeSell = (buy: number, rate: number, fromToken: string): number =>
-  (fromToken === "xmr" ? buy * rate : buy / rate);
-
-const computeRate = (
-  sell: number,
-  buy: number,
-  fromToken: string,
-): number => (fromToken === "xmr" ? sell / buy : buy / sell);
-
 export const Swap = () => {
-  const { contractAddress, parameters, chainId } = useApp();
-  const [fromToken, setFromToken] = createSignal("xmr");
-  const [toToken, setToToken] = createSignal("eth");
-  const [sellAmount, setSellAmount] = createSignal("");
-  const [buyAmount, setBuyAmount] = createSignal("");
-  const [rate, setRate] = createSignal("");
-
-  const marketRate = useMarketRate();
-
-  const suggestedRate = () => marketRate.data?.xmrPerEth ?? null;
-
-  const setFromTokenSafe = (value: string) => {
-    if (value === toToken()) setToToken(fromToken());
-
-    setFromToken(value);
-  };
-
-  const setToTokenSafe = (value: string) => {
-    if (value === fromToken()) setFromToken(toToken());
-
-    setToToken(value);
-  };
-
-  const handleSellChange = (value: string) => {
-    setSellAmount(value);
-
-    const sell = Number.parseFloat(value);
-
-    if (Number.isNaN(sell) || sell <= 0) return;
-
-    const r = Number.parseFloat(rate());
-
-    if (!Number.isNaN(r) && r > 0) {
-      setBuyAmount(formatNum(computeBuy(sell, r, fromToken())));
-    }
-    else {
-      const buy = Number.parseFloat(buyAmount());
-
-      if (!Number.isNaN(buy) && buy > 0) {
-        setRate(formatNum(computeRate(sell, buy, fromToken())));
-      }
-    }
-  };
-
-  const handleBuyChange = (value: string) => {
-    setBuyAmount(value);
-
-    const buy = Number.parseFloat(value);
-
-    if (Number.isNaN(buy) || buy <= 0) return;
-
-    const r = Number.parseFloat(rate());
-
-    if (!Number.isNaN(r) && r > 0) {
-      setSellAmount(formatNum(computeSell(buy, r, fromToken())));
-    }
-    else {
-      const sell = Number.parseFloat(sellAmount());
-
-      if (!Number.isNaN(sell) && sell > 0) {
-        setRate(formatNum(computeRate(sell, buy, fromToken())));
-      }
-    }
-  };
-
-  const applyRate = (rateValue: string) => {
-    setRate(rateValue);
-
-    const r = Number.parseFloat(rateValue);
-
-    if (Number.isNaN(r) || r <= 0) return;
-
-    const sell = Number.parseFloat(sellAmount());
-
-    if (!Number.isNaN(sell) && sell > 0) {
-      setBuyAmount(formatNum(computeBuy(sell, r, fromToken())));
-
-      return;
-    }
-
-    const buy = Number.parseFloat(buyAmount());
-
-    if (!Number.isNaN(buy) && buy > 0) {
-      setSellAmount(formatNum(computeSell(buy, r, fromToken())));
-    }
-  };
-
-  const handleUseSuggestedRate = () => {
-    const sr = suggestedRate();
-
-    if (sr == null) return;
-
-    applyRate(formatNum(sr));
-  };
-
-  const handleSwapTokens = () => {
-    const tempToken = fromToken();
-
-    setFromToken(toToken());
-    setToToken(tempToken);
-
-    const tempAmount = sellAmount();
-
-    setSellAmount(buyAmount());
-    setBuyAmount(tempAmount);
-  };
-
-  const offerType = () => (fromToken() === "eth" ? 1 : 2);
-
-  const depositAmount = createMemo(() => {
-    const deposit_ratio = BigInt(parameters.data?.[2] ?? 0);
-    const denominator = 10_000n;
-
-    console.log({ deposit_ratio, denominator });
-
-    const raw = fromToken() === "eth" ? sellAmount() : buyAmount();
-    const rawx = Number.parseFloat(raw) > 0 ? parseEther(raw) : 0n;
-
-    return ((rawx * deposit_ratio) / denominator);
-  });
-
-  const ethAmount = () => {
-    const raw = fromToken() === "eth" ? sellAmount() : depositAmount();
-
-    if (typeof raw === "bigint") return raw;
-
-    return raw && Number.parseFloat(raw) > 0 ? parseEther(raw) : 0n;
-  };
-
-  const createOffer = useMutation(() => ({
-    mutationFn: async () => {
-      // from floating point to piconeros per eth
-      const rateValue = BigInt(Math.round(Number.parseFloat(rate()) * 10 ** 12));
-      // const seedphrase = "test test test test test test test test test junk junk junk";
-      const seedphrase = generateMnemonic(english);
-      const { publicSpendKey, publicViewKey } = generateMoneroKeys(seedphrase);
-
-      console.log({ ethAmount: ethAmount(), offerType: offerType(), rateValue });
-
-      const hash = await writeContract(config, {
-        abi: ABI,
-        functionName: "offer",
-        args: [
-          offerType(),
-          rateValue,
-          "0x0000000000000000000000000000000000000000",
-          publicSpendKey,
-          publicViewKey,
-        ],
-        address: contractAddress(),
-        value: ethAmount(),
-        // eslint-disable-next-line no-restricted-syntax
-        chainId: anvil.id,
-      });
-
-      console.log({ hash });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["offers"] });
-    },
-  }));
-
-  const isFormValid = () => {
-    const sell = Number.parseFloat(sellAmount());
-    const buy = Number.parseFloat(buyAmount());
-    const r = Number.parseFloat(rate());
-
-    return (
-      !Number.isNaN(sell)
-      && sell > 0
-      && !Number.isNaN(buy)
-      && buy > 0
-      && !Number.isNaN(r)
-      && r > 0
-    );
-  };
+  const {
+    prepareOrder,
+    createOffer,
+    offerType,
+    swap: {
+      applyRate,
+      fromToken,
+      toToken,
+      handleSwapTokens,
+      handleUseSuggestedRate,
+      marketRate,
+      handleToChange,
+      handleFromChange,
+      buyAmount,
+      handleBuyChange,
+      sellAmount,
+      handleSellChange,
+      suggestedRate,
+      rate,
+      depositAmount,
+    } } = useCreateOrder();
 
   return (
     <div class="card p-4 space-y-2">
@@ -217,7 +38,7 @@ export const Swap = () => {
           <label for="input_amount" class="text-md py-1">
             Sell
           </label>
-          <TokenSelector token={fromToken} setToken={setFromTokenSafe} />
+          <TokenSelector token={fromToken} setToken={handleFromChange} />
         </div>
         <input
           placeholder="0"
@@ -244,7 +65,7 @@ export const Swap = () => {
           <label for="output_amount" class="text-md py-1">
             Buy
           </label>
-          <TokenSelector token={toToken} setToken={setToTokenSafe} />
+          <TokenSelector token={toToken} setToken={handleToChange} />
         </div>
         <input
           placeholder="0"
@@ -309,7 +130,7 @@ export const Swap = () => {
         </div>
       </div>
 
-      <div>
+      {/* <div>
         <SegmentedControl
           class="flex justify-between gap-2"
           defaultValue="1"
@@ -342,23 +163,28 @@ export const Swap = () => {
             </div>
           </div>
         </SegmentedControl>
-      </div>
+      </div> */}
 
       <Suspense>
-        <Show when={depositAmount()}>
-          <div>
-            You are sending:
-            {" "}
-            {formatEther(depositAmount())}
-            {" "}
-            ETH
+        <Show when={depositAmount() && offerType() === 2}>
+          <div class="flex items-center justify-between">
+            <div>
+              Deposit
+            </div>
+            <div class="inline-flex items-center gap-1">
+              {formatEther(depositAmount())}
+              {" "}
+              ETH
+              {" "}
+              <img src={ethIcon} alt="ETH" class="w-4 h-4" />
+            </div>
           </div>
         </Show>
       </Suspense>
 
       <button
         class="btn-primary btn-lg w-full"
-        disabled={createOffer.isPending || !isFormValid() || ethAmount() === 0n}
+        disabled={prepareOrder.data?.result == undefined}
         onClick={() => createOffer.mutate()}
       >
         Create Order

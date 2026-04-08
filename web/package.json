@@ -13,6 +13,7 @@
     "@openlv/connector": "0.0.1-beta.12",
     "@tanstack/solid-query": "^5.96.2",
     "@tanstack/solid-table": "^8.21.3",
+    "@wagmi/core": "^3.4.2",
     "@wagmi/solid": "^0.0.5",
     "classnames": "^2.5.1",
     "solid-icons": "^1.2.0",
