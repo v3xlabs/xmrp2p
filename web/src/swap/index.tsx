@@ -5,7 +5,7 @@ import { readContract, writeContract } from "@wagmi/solid/actions";
 import { FaSolidUpDown } from "solid-icons/fa";
 import { createMemo, createSignal, For, Show, Suspense } from "solid-js";
 import { match } from "ts-pattern";
-import { parseEther } from "viem";
+import { formatEther, parseEther } from "viem";
 import { english, generateMnemonic } from "viem/accounts";
 import { anvil } from "viem/chains";
 import { ABI, generateMoneroKeys } from "xmrp2p";
@@ -363,17 +363,18 @@ export const Swap = () => {
       <Suspense>
         <Show when={depositAmount()}>
           <div>
-            oth:
+            You are sending:
             {" "}
+            {formatEther(depositAmount())}
             {" "}
-            {depositAmount().toString()}
+            ETH
           </div>
         </Show>
       </Suspense>
 
       <button
         class="btn-primary btn-lg w-full"
-        disabled={createOffer.isPending || !isFormValid()}
+        disabled={createOffer.isPending || !isFormValid() || ethAmount() === 0n}
         onClick={() => createOffer.mutate()}
       >
         Create Order

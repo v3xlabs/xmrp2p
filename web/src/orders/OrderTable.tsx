@@ -11,9 +11,9 @@ import { formatEther, formatUnits } from "viem";
 
 import ethIcon from "../assets/eth.svg";
 import xmrIcon from "../assets/xmr.svg";
+import { truncateAddress } from "../utils/address";
 import { type Offer, useOffers } from "../utils/offers";
 import { StatusBadge } from "./StatusBadge";
-import { truncateAddress } from "../utils/address";
 
 const columnHelper = createColumnHelper<Offer>();
 
@@ -110,7 +110,7 @@ export const OrderTable: Component = () => {
   const query = useOffers();
 
   const activeOffers = createMemo(() =>
-    ((query?.data?.pages.flatMap(page => page) ?? []) as Offer[]).filter(offer => offer.state !== 0),
+    ((query?.data?.pages.flat() ?? []) as Offer[]).filter(offer => offer.state !== 0),
   );
 
   const table = createSolidTable(() => ({
@@ -148,9 +148,9 @@ export const OrderTable: Component = () => {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </th>
                   )}
                 </For>

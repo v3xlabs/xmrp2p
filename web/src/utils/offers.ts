@@ -14,13 +14,15 @@ export const useOffers = () => {
 
   return createInfiniteQuery(() => ({
     queryKey: ["offers"],
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam }) => {
       const contractAddress = CONTRACT_ADDRESS[chainId()!] as `0x${string}`;
+
+      console.log({ pageParam });
 
       const offers = await readContract(config, {
         abi: ABI,
         functionName: "listOffers",
-        args: [BigInt(pageParam) * PAGE_SIZE, PAGE_SIZE + 1n],
+        args: [BigInt(pageParam) * PAGE_SIZE, PAGE_SIZE + 1n, true],
         address: contractAddress,
         chainId: chainId()!,
       });
@@ -30,6 +32,6 @@ export const useOffers = () => {
       return offers.filter(offer => offer.state !== 0);
     },
     initialPageParam: 0,
-    getNextPageParam: (lastPage, pages) => (lastPage.length === 10 ? pages.length : undefined),
+    getNextPageParam: (lastPage, pages) => (lastPage.length >= 10 ? pages.length : undefined),
   }));
 };

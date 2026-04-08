@@ -12,7 +12,7 @@ export const getOffers = async (actions: PublicActions) => {
     const x = await actions.readContract({
         abi: ABI,
         functionName: "listOffers",
-        args: [0n, 10n],
+        args: [0n, 10n, false],
         address: CONTRACT_ADDRESS,
     });
 

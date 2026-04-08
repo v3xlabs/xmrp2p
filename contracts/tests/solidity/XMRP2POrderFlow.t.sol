@@ -238,7 +238,7 @@ contract XMRP2POrderFlowTest is Test {
     }
 
     function _offerSnapshot(uint256 offer_number) internal view returns (XMRP2P.Offer memory) {
-        return exchange.listOffers(offer_number, 1)[0];
+        return exchange.listOffers(offer_number, 1, false)[0];
     }
 
     function _generateOfferKeys() internal returns (OfferKeys memory swapKeys) {
