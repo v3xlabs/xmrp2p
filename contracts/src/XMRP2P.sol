@@ -5,7 +5,7 @@ pragma solidity ^0.8.34;
 import {Ed25519} from "./Ed25519.sol";
 import "./Errors.sol";
 import "./Enums.sol";
-import {Ownable} from "../lib/solady/src/auth/Ownable.sol";
+import {Ownable} from "solady/auth/Ownable.sol";
 
 contract XMRP2P is Ownable {
     /// The Offer structure is used to describe both buy and sell offers
@@ -165,6 +165,8 @@ contract XMRP2P is Ownable {
         liability += offer.kind == OfferType.BUY ? offer.amount : offer.deposit;
 
         offers[offer.id] = offer;
+
+        emit OfferEvent(offer.id, offer.kind, offer.state);
     }
 
     /// Take an offer

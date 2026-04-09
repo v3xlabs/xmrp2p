@@ -41,7 +41,7 @@ export const StatusBadge: Component<{ state: number; }> = (props) => {
   return (
     <span
       class={classnames(
-        "px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
+        "text-xs font-medium px-1.5 py-0.5 whitespace-nowrap",
         c.className,
       )}
     >

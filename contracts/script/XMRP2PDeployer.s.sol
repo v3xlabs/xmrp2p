@@ -8,7 +8,7 @@ import {OfferType} from "../src/Enums.sol";
 import {XMRP2P} from "../src/XMRP2P.sol";
 
 contract XMRP2PDeployer is Script {
-    address constant OWNER = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+    address constant OWNER = 0x225f137127d9067788314bc7fcc1f36746a3c3B5;
     bytes32 constant SALT = bytes32(0);
     uint256 constant VALUE = 0;
     uint256 constant SAMPLE_BUY_ORDER_AMOUNT = 0.01 ether;
@@ -23,7 +23,7 @@ contract XMRP2PDeployer is Script {
             XMRP2P.Parameters({
                 MINIMUM_OFFER: 0.00001 ether,
                 MAXIMUM_OFFER: 10 ether,
-                DEPOSIT_RATIO: 1000, // 1000 = 10%
+                DEPOSIT_RATIO: 500, // 1000 = 10%, 500 = 5%
                 MAXIMUM_OFFER_BOOK_SIZE: 100,
                 T0_DELAY: 24 hours,
                 T1_DELAY: 24 hours
@@ -32,17 +32,17 @@ contract XMRP2PDeployer is Script {
         );
         console.log("Contract address: ", address(xmrp2p));
 
-        (uint256 spendX, uint256 spendY) =
-            Ed25519.scalarMultBase(Ed25519.changeEndianness(SAMPLE_EVM_PRIVATE_SPEND_KEY));
-        uint256 samplePublicSpendKey = Ed25519.changeEndianness(Ed25519.compressPoint(spendX, spendY));
+        // (uint256 spendX, uint256 spendY) =
+        //     Ed25519.scalarMultBase(Ed25519.changeEndianness(SAMPLE_EVM_PRIVATE_SPEND_KEY));
+        // uint256 samplePublicSpendKey = Ed25519.changeEndianness(Ed25519.compressPoint(spendX, spendY));
 
-        (uint256 viewX, uint256 viewY) = Ed25519.scalarMultBase(Ed25519.changeEndianness(SAMPLE_EVM_PRIVATE_VIEW_KEY));
-        uint256 samplePublicViewKey = Ed25519.changeEndianness(Ed25519.compressPoint(viewX, viewY));
+        // (uint256 viewX, uint256 viewY) = Ed25519.scalarMultBase(Ed25519.changeEndianness(SAMPLE_EVM_PRIVATE_VIEW_KEY));
+        // uint256 samplePublicViewKey = Ed25519.changeEndianness(Ed25519.compressPoint(viewX, viewY));
 
-        XMRP2P.Offer memory sampleOffer = xmrp2p.offer{value: SAMPLE_BUY_ORDER_AMOUNT}(
-            OfferType.BUY, SAMPLE_PRICE, address(0), samplePublicSpendKey, samplePublicViewKey
-        );
-        console.log("Sample offer id: ", sampleOffer.id);
+        // XMRP2P.Offer memory sampleOffer = xmrp2p.offer{value: SAMPLE_BUY_ORDER_AMOUNT}(
+        //     OfferType.BUY, SAMPLE_PRICE, address(0), samplePublicSpendKey, samplePublicViewKey
+        // );
+        // console.log("Sample offer id: ", sampleOffer.id);
 
         vm.stopBroadcast();
     }

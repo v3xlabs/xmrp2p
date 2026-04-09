@@ -1,9 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/solid-query";
-import { simulateContract, writeContract } from "@wagmi/solid/actions";
+import { getAccount, simulateContract, writeContract } from "@wagmi/solid/actions";
 import { english, generateMnemonic } from "viem/accounts";
 import { ABI, generateMoneroKeys } from "xmrp2p";
 
 import { config, queryClient } from "../config";
+import { storeOrderKeys } from "../utils/keyStore";
+import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
 import { useSwap } from "./useSwap";
 
@@ -12,10 +14,10 @@ export const useCreateOrder = () => {
   const { offerType, rateValue, ethAmount, ...swap } = useSwap();
 
   const seedphrase = generateMnemonic(english);
-  const { publicSpendKey, publicViewKey } = generateMoneroKeys(seedphrase);
+  const keys = generateMoneroKeys(seedphrase);
 
   const prepareOrder = useQuery(() => ({
-    queryKey: ["c", chainId(), "prepareOrder", offerType(), rateValue(), ethAmount()],
+    queryKey: queryKeys.prepareOrder(chainId()!, offerType(), rateValue() ?? 0n, ethAmount()),
     queryFn: async () => {
       const address = contractAddress();
       const value = ethAmount();
@@ -23,39 +25,58 @@ export const useCreateOrder = () => {
 
       if (!address || !rateValuex) return null;
 
-      console.log("simulating");
+      const type = offerType();
+      const viewKey = type === 1 ? keys.publicViewKey : keys.privateViewKey;
 
       const data = await simulateContract(config, {
         abi: ABI,
         functionName: "offer",
         args: [
-          offerType(),
+          type,
           rateValuex,
           "0x0000000000000000000000000000000000000000",
-          publicSpendKey,
-          publicViewKey,
+          keys.publicSpendKey,
+          viewKey,
         ],
         address,
         value,
       });
 
-      console.log({ data });
-
       return data;
     },
   }));
+
   const createOffer = useMutation(() => ({
     mutationFn: async () => {
-      console.log({ ethAmount: ethAmount(), offerType: offerType(), rateValue });
-
       if (!prepareOrder.data) return;
 
       const hash = await writeContract(config, prepareOrder.data.request);
 
-      console.log({ hash });
+      const account = getAccount(config);
+
+      if (!account.address) throw new Error("Wallet not connected");
+
+      const simulatedOffer = prepareOrder.data.result;
+      const offerId = simulatedOffer.id; // eslint-disable-line no-restricted-syntax
+      const type = offerType();
+      const role = type === 1 ? "evm" : "xmr";
+
+      storeOrderKeys({
+        offer_id: offerId.toString(),
+        chain_id: chainId()!,
+        wallet_address: account.address,
+        role: role as "evm" | "xmr",
+        mnemonic: seedphrase,
+        privateSpendKey: keys.privateSpendKey.toString(),
+        privateViewKey: keys.privateViewKey.toString(),
+        publicSpendKey: keys.publicSpendKey.toString(),
+        publicViewKey: keys.publicViewKey.toString(),
+      });
+
+      return hash;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["offers"] });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(chainId()!) });
     },
   }));
 

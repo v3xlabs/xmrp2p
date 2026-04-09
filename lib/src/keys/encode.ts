@@ -12,12 +12,11 @@ export const encodeMoneroAddress = (publicSpendKey: bigint, publicViewKey: bigin
     hex += publicSpendKey.toString(16).padStart(64, "0");
     hex += publicViewKey.toString(16).padStart(64, "0");
 
-    // Compute keccak of 'bytes' to add the checksum to the address
-    const k = keccak256(hexToBytes("0x" + hex));
+    const k = keccak256(`0x${hex}` as `0x${string}`);
 
     hex += k.slice(2, 10);
 
-    const bytes = hexToBytes("0x" + hex);
+    const bytes = hexToBytes(hex);
     let offset = 0;
     let addr = "";
 
@@ -25,7 +24,6 @@ export const encodeMoneroAddress = (publicSpendKey: bigint, publicViewKey: bigin
         const blockbytes = bytes.slice(offset, offset + 8);
         let block = base58encode(blockbytes);
 
-        // pad blocks if not padded
         if (blockbytes.length == 8) {
             while (block.length < 11) {
                 block = "1" + block;
