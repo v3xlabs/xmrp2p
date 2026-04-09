@@ -7,7 +7,7 @@ import {
 } from "@tanstack/solid-table";
 import classnames from "classnames";
 import { CgSpinner } from "solid-icons/cg";
-import { type Component, createMemo, createSignal, For, Show } from "solid-js";
+import { type Accessor, type Component, createEffect, createMemo, createSignal, For, Show } from "solid-js";
 import { match } from "ts-pattern";
 import { formatEther, formatUnits } from "viem";
 
@@ -120,50 +120,21 @@ const columns = [
 
 const isPast = (offer: Offer) => offer.state == 3 || offer.state == 4 || offer.state == 6;
 
-export const OrderTable: Component = () => {
-  const [selectedOfferId, setSelectedOfferId] = createSignal<bigint | null>(null);
-  const query = useOffers(selectedOfferId);
-
-  const allOffers = createMemo(() =>
-    ((query?.data?.pages.flat() ?? []) as Offer[]).filter(offer => offer.state !== 0),
-  );
-
-  const selectedOffer = createMemo(() => {
-    const offerId = selectedOfferId();
-
-    if (!offerId) return null;
-
-    return allOffers().find(o => o.id === offerId) ?? null; // eslint-disable-line no-restricted-syntax
-  });
-
-  const openOffers = createMemo(() =>
-    allOffers().filter(offer => !isPast(offer)),
-  );
-
-  const pastOffers = createMemo(() =>
-    allOffers().filter(isPast),
-  );
-
-  const openTable = createSolidTable({
+const Table = (props: { offers: Accessor<Offer[]>; isLoading: boolean; isError: boolean; selectOffer: (offerId: bigint) => void; }) => {
+  const table = createSolidTable({
     columns,
-    data: openOffers(),
+    get data() { return props.offers(); },
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const pastTable = createSolidTable({
-    columns,
-    data: pastOffers(),
-    getCoreRowModel: getCoreRowModel(),
-  });
-
-  const renderTable = (table: typeof openTable | typeof pastTable, offers: () => Offer[]) => (
+  return (
     <Show
-      when={offers().length > 0}
+      when={props.offers().length > 0}
       fallback={(
         <div class="py-8 text-center text-(--thorin-text-secondary) text-sm">
-          {match(query)
+          {match(props)
             .when(
-              q => q.isPending,
+              q => q.isLoading,
               () => "Loading offers...",
             )
             .when(
@@ -200,7 +171,7 @@ export const OrderTable: Component = () => {
             {row => (
               <tr
                 class="hover:bg-(--thorin-background-secondary) transition-colors cursor-pointer"
-                onClick={() => setSelectedOfferId(row.original.id)} // eslint-disable-line no-restricted-syntax
+                onClick={() => props.selectOffer(row.original.id)} // eslint-disable-line no-restricted-syntax
               >
                 <For each={row.getVisibleCells()}>
                   {cell => (
@@ -217,11 +188,39 @@ export const OrderTable: Component = () => {
           </For>
         </tbody>
       </table>
-      <Show when={query.hasNextPage}>
-        <button class="btn" onClick={() => query.fetchNextPage()}>Load more</button>
-      </Show>
     </Show>
   );
+};
+
+export const OrderTable: Component = () => {
+  const [selectedOfferId, setSelectedOfferId] = createSignal<bigint | null>(null);
+  const query = useOffers(selectedOfferId);
+
+  const allOffers = createMemo(() =>
+    ((query?.data?.pages.flat() ?? []) as Offer[]).filter(offer => offer.state !== 0),
+  );
+
+  const selectedOffer = createMemo(() => {
+    const offerId = selectedOfferId();
+
+    if (!offerId) return null;
+
+    return allOffers().find(o => o.id === offerId) ?? null; // eslint-disable-line no-restricted-syntax
+  });
+
+  const openOffers = createMemo(() =>
+    allOffers().filter(offer => !isPast(offer)),
+  );
+
+  const pastOffers = createMemo(() =>
+    allOffers().filter(isPast),
+  );
+
+  createEffect(() => {
+    console.log("query", query.data?.pages.flat().length);
+    console.log("openOffers", openOffers().length);
+    console.log("pastOffers", pastOffers().length);
+  });
 
   return (
     <>
@@ -248,10 +247,16 @@ export const OrderTable: Component = () => {
         </div>
         <div class="card p-2">
           <Tabs.Content value="open">
-            {renderTable(openTable, openOffers)}
+            <Table offers={openOffers} isLoading={query.isLoading} isError={query.isError} selectOffer={setSelectedOfferId} />
+            <Show when={query.hasNextPage}>
+              <button class="btn" onClick={() => query.fetchNextPage()}>Load more</button>
+            </Show>
           </Tabs.Content>
           <Tabs.Content value="history">
-            {renderTable(pastTable, pastOffers)}
+            <Table offers={pastOffers} isLoading={query.isLoading} isError={query.isError} selectOffer={setSelectedOfferId} />
+            <Show when={query.hasNextPage}>
+              <button class="btn" onClick={() => query.fetchNextPage()}>Load more</button>
+            </Show>
           </Tabs.Content>
         </div>
       </Tabs>

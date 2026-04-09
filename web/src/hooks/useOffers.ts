@@ -20,6 +20,7 @@ export const useOffers = (activeOfferId?: Accessor<bigint | null>) => {
   return createInfiniteQuery(() => ({
     queryKey: queryKeys.offers.all(chainId()!),
     queryFn: async ({ pageParam }) => {
+      console.log("chainId", chainId()!);
       const offers = await readContract(config, {
         abi: ABI,
         functionName: "listOffers",
@@ -27,6 +28,8 @@ export const useOffers = (activeOfferId?: Accessor<bigint | null>) => {
         address: contractAddress() as `0x${string}`,
         chainId: chainId()!,
       });
+
+      console.log("offers", offers);
 
       return offers.filter(offer => offer.state !== 0);
     },

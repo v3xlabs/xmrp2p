@@ -33,7 +33,7 @@ export const useOfferEvents = (
         abi: ABI,
         eventName: "OfferEvent",
         address,
-        fromBlock: 0n,
+        // fromBlock: lastupdate() ?? 90 - 200n,
       });
 
       const filtered = logs
