@@ -1,6 +1,7 @@
 export const queryKeys = {
   offers: {
     all: (chainId: number) => ["c", chainId, "offers"] as const,
+    single: (chainId: number, offerId: bigint) => ["c", chainId, "offers", offerId] as const,
   },
   parameters: (chainId: number) => ["c", chainId, "parameters"] as const,
   prepareOrder: (chainId: number, offerType: number, rate: bigint, ethAmount: bigint) =>

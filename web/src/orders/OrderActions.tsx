@@ -1,6 +1,5 @@
-import { useConnection } from "@wagmi/solid";
-import { type Component, Show } from "solid-js";
-import { match } from "ts-pattern";
+import { useBlockNumber, useConnection } from "@wagmi/solid";
+import { type Component, Match, Show, Switch } from "solid-js";
 
 import { useApp } from "../hooks/useApp";
 import type { Offer } from "../hooks/useOffers";
@@ -16,8 +15,6 @@ import { EscrowPayment } from "./EscrowPayment";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-const now = () => Math.floor(Date.now() / 1000);
-
 export const OrderActions: Component<{
   offer: Offer;
   onClose: () => void;
@@ -25,6 +22,7 @@ export const OrderActions: Component<{
 }> = (props) => {
   const connection = useConnection();
   const { chainId } = useApp();
+  const blockHeight = useBlockNumber();
 
   const userAddress = () => connection().address;
   const storedKeys = () => {
@@ -39,6 +37,8 @@ export const OrderActions: Component<{
   const userIsEvmSide = () => isEvmSide(props.offer, userAddress());
   const userIsXmrSide = () => isXmrSide(props.offer, userAddress());
 
+  const now = () => blockHeight.data ?? 0;
+
   const isBeforeT0 = () => props.offer.t0 > 0n && now() <= Number(props.offer.t0);
   const isAfterT0 = () => props.offer.t0 > 0n && now() > Number(props.offer.t0);
   const isAfterT1 = () => props.offer.t1 > 0n && now() > Number(props.offer.t1);
@@ -46,11 +46,11 @@ export const OrderActions: Component<{
 
   return (
     <div class="space-y-3">
-      {match({ state: props.offer.state, userIsOwner: userIsOwner(), userIsEvmSide: userIsEvmSide(), userIsXmrSide: userIsXmrSide() })
-        .with({ state: 1, userIsOwner: true }, () => (
+      <Switch>
+        <Match when={props.offer.state === 1 && userIsOwner()}>
           <CancelAction offer_id={props.offer.id /* eslint-disable-line no-restricted-syntax */} />
-        ))
-        .with({ state: 1, userIsOwner: false }, () => (
+        </Match>
+        <Match when={props.offer.state === 1 && !userIsOwner()}>
           <Show
             when={userAddress()}
             fallback={<div class="text-center text-sm text-(--thorin-text-secondary) py-2">Connect wallet to take this order</div>}
@@ -59,11 +59,11 @@ export const OrderActions: Component<{
               <TakeAction offer={props.offer} />
             </Show>
           </Show>
-        ))
-        .with({ state: 2, userIsEvmSide: true }, () => (
+        </Match>
+        <Match when={props.offer.state === 2 && userIsEvmSide()}>
           <div class="space-y-2">
             <Show when={storedKeys()}>
-              {keys => <EscrowViewKeys offer={props.offer} storedKeys={keys()} restoreHeight={props.restoreHeight} />}
+              <EscrowViewKeys offer={props.offer} storedKeys={storedKeys()!} restoreHeight={props.restoreHeight} />
             </Show>
             <Show when={isBeforeT0()}>
               <ReadyAction offer_id={props.offer.id /* eslint-disable-line no-restricted-syntax */} />
@@ -72,7 +72,7 @@ export const OrderActions: Component<{
               <QuitAction
                 offer_id={props.offer.id /* eslint-disable-line no-restricted-syntax */}
                 storedKeys={storedKeys()!}
-                label="Quit (Refund Both Parties)"
+                label="Cancel Order"
               />
             </Show>
             <Show when={!storedKeys()}>
@@ -81,8 +81,8 @@ export const OrderActions: Component<{
               </div>
             </Show>
           </div>
-        ))
-        .with({ state: 2, userIsXmrSide: true }, () => (
+        </Match>
+        <Match when={props.offer.state === 2 && userIsXmrSide()}>
           <div class="space-y-2">
             <EscrowPayment offer={props.offer} />
             <Show when={isAfterT0() && isBeforeT1() && storedKeys()}>
@@ -93,8 +93,8 @@ export const OrderActions: Component<{
               />
             </Show>
           </div>
-        ))
-        .with({ state: 5, userIsXmrSide: true }, () => (
+        </Match>
+        <Match when={props.offer.state === 5 && userIsXmrSide()}>
           <div class="space-y-2">
             <div class="text-sm text-(--thorin-green-primary) text-center py-1 font-medium">
               XMR deposit verified by buyer
@@ -112,11 +112,11 @@ export const OrderActions: Component<{
               </div>
             </Show>
           </div>
-        ))
-        .with({ state: 5, userIsEvmSide: true }, () => (
+        </Match>
+        <Match when={props.offer.state === 5 && userIsEvmSide()}>
           <div class="space-y-2">
             <Show when={storedKeys()}>
-              {keys => <EscrowViewKeys offer={props.offer} storedKeys={keys()} restoreHeight={props.restoreHeight} />}
+              <EscrowViewKeys offer={props.offer} storedKeys={storedKeys()!} restoreHeight={props.restoreHeight} />
             </Show>
             <div class="text-sm text-(--thorin-text-secondary) text-center py-2">
               XMR verified. Waiting for the seller to claim...
@@ -129,8 +129,8 @@ export const OrderActions: Component<{
               />
             </Show>
           </div>
-        ))
-        .with({ state: 6 }, () => (
+        </Match>
+        <Match when={props.offer.state === 6}>
           <div class="space-y-2">
             <Show when={storedKeys() && userIsEvmSide()}>
               <EscrowSpendKeys offer={props.offer} storedKeys={storedKeys()!} restoreHeight={props.restoreHeight} />
@@ -139,8 +139,8 @@ export const OrderActions: Component<{
               Trade completed successfully
             </div>
           </div>
-        ))
-        .with({ state: 4 }, () => (
+        </Match>
+        <Match when={props.offer.state === 4}>
           <div class="space-y-2">
             <div class="text-sm text-(--thorin-orange-primary) text-center py-1 font-medium">
               Order refunded
@@ -149,13 +149,13 @@ export const OrderActions: Component<{
               <EscrowSpendKeys offer={props.offer} storedKeys={storedKeys()!} restoreHeight={props.restoreHeight} />
             </Show>
           </div>
-        ))
-        .with({ state: 3 }, () => (
+        </Match>
+        <Match when={props.offer.state === 3}>
           <div class="text-sm text-(--thorin-text-secondary) text-center py-2">
             Order was cancelled
           </div>
-        ))
-        .otherwise(() => null)}
+        </Match>
+      </Switch>
     </div>
   );
 };

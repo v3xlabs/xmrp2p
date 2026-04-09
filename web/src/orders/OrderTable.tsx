@@ -200,14 +200,6 @@ export const OrderTable: Component = () => {
     ((query?.data?.pages.flat() ?? []) as Offer[]).filter(offer => offer.state !== 0),
   );
 
-  const selectedOffer = createMemo(() => {
-    const offerId = selectedOfferId();
-
-    if (!offerId) return null;
-
-    return allOffers().find(o => o.id === offerId) ?? null; // eslint-disable-line no-restricted-syntax
-  });
-
   const openOffers = createMemo(() =>
     allOffers().filter(offer => !isPast(offer)),
   );
@@ -261,10 +253,12 @@ export const OrderTable: Component = () => {
         </div>
       </Tabs>
 
-      <OrderDetailModal
-        offer={selectedOffer()}
-        onClose={() => setSelectedOfferId(null)}
-      />
+      <Show when={selectedOfferId()}>
+        <OrderDetailModal
+          offerId={selectedOfferId()!}
+          onClose={() => setSelectedOfferId(null)}
+        />
+      </Show>
     </>
   );
 };

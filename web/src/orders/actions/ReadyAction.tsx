@@ -16,7 +16,7 @@ export const ReadyAction: Component<{
         disabled={!simulation.data || write.isPending}
         onClick={() => write.mutate()}
       >
-        <Show when={write.isPending} fallback="Confirm XMR Received (Ready)">
+        <Show when={write.isPending} fallback="Confirm XMR Received">
           <CgSpinner class="animate-spin inline mr-1" />
           Confirming...
         </Show>

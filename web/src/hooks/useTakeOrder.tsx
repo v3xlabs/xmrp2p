@@ -88,7 +88,8 @@ export const useTakeOrder = (offer: Accessor<Offer | undefined>) => {
       return hash;
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(chainId()!) });
+      // eslint-disable-next-line no-restricted-syntax
+      queryClient.invalidateQueries({ queryKey: queryKeys.offers.single(chainId()!, offer()?.id ?? 0n) });
     },
   }));
 

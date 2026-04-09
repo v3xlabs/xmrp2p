@@ -7,29 +7,29 @@ import { type Component, Show } from "solid-js";
 
 import { useBlockTimestamp } from "../hooks/useBlockTimestamp";
 import { useMoneroHeight } from "../hooks/useMoneroHeight";
-import type { Offer } from "../hooks/useOffers";
+import { useOffer } from "../hooks/useOffer";
 import { OrderActions } from "./OrderActions";
-import { OrderEvents } from "./OrderEvents";
 import { OrderInfo } from "./OrderInfo";
 
 export const OrderDetailModal: Component<{
-  offer: Offer | null;
+  offerId: bigint;
   onClose: () => void;
 }> = (props) => {
   const connection = useConnection();
   const userAddress = () => connection().address;
+  const offer = useOffer(props.offerId);
 
-  const blockTaken = () => props.offer?.blockTaken;
+  const blockTaken = () => offer.data?.blockTaken;
   const takenTimestamp = useBlockTimestamp(blockTaken);
   const moneroHeight = useMoneroHeight(() => takenTimestamp.data);
 
   return (
-    <Dialog open={!!props.offer} onOpenChange={(open) => { if (!open) props.onClose(); }}>
+    <Dialog open={!!offer.data} onOpenChange={(open) => { if (!open) props.onClose(); }}>
       <Dialog.Portal>
         <Dialog.Overlay class="dialog__overlay" />
         <div class="dialog__positioner">
           <Dialog.Content class="card !rounded-2xl p-4 w-full max-w-lg max-h-[90vh] overflow-y-auto relative">
-            <Show when={props.offer}>
+            <Show when={offer.data}>
               {offer => (
                 <>
                   <div class="dialog__header">
@@ -45,7 +45,7 @@ export const OrderDetailModal: Component<{
                   </div>
                   <div class="space-y-2">
                     <OrderInfo offer={offer()} restoreHeight={moneroHeight.data} userAddress={userAddress()} />
-                    <OrderEvents offer_id={offer().id /* eslint-disable-line no-restricted-syntax */} lastupdate={offer().lastupdate} />
+                    {/* <OrderEvents offer_id={offer().id} lastupdate={offer().lastupdate} /> */}
                     <OrderActions offer={offer()} onClose={props.onClose} restoreHeight={moneroHeight.data} />
                   </div>
                 </>

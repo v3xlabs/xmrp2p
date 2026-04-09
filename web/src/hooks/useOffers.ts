@@ -3,7 +3,7 @@ import { readContract } from "@wagmi/solid/actions";
 import type { Accessor } from "solid-js";
 import { ABI, getOffers } from "xmrp2p";
 
-import { config } from "../config";
+import { config, queryClient } from "../config";
 import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
 
@@ -20,7 +20,6 @@ export const useOffers = (activeOfferId?: Accessor<bigint | null>) => {
   return createInfiniteQuery(() => ({
     queryKey: queryKeys.offers.all(chainId()!),
     queryFn: async ({ pageParam }) => {
-      console.log("chainId", chainId()!);
       const offers = await readContract(config, {
         abi: ABI,
         functionName: "listOffers",
@@ -29,9 +28,21 @@ export const useOffers = (activeOfferId?: Accessor<bigint | null>) => {
         chainId: chainId()!,
       });
 
-      console.log("offers", offers);
+      const offersFiltered = offers.filter(offer => offer.state !== 0);
 
-      return offers.filter(offer => offer.state !== 0);
+      for (const offer of offersFiltered) {
+        // eslint-disable-next-line no-restricted-syntax
+        const stale = queryClient.getQueryData(queryKeys.offers.single(chainId()!, offer.id));
+
+        if (JSON.stringify(stale) === JSON.stringify(offer)) {
+          continue;
+        }
+
+        // eslint-disable-next-line no-restricted-syntax
+        queryClient.setQueryData(queryKeys.offers.single(chainId()!, offer.id), () => offer);
+      }
+
+      return offersFiltered;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => (lastPage.length >= 10 ? pages.length : undefined),

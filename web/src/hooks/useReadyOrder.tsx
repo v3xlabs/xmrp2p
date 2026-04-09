@@ -28,7 +28,7 @@ export const useReadyOrder = (offerId: Accessor<bigint | undefined>) => {
       return writeContract(config, simulation.data.request);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(chainId()!) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.offers.single(chainId()!, offerId() ?? 0n) });
     },
   }));
 

@@ -1,4 +1,6 @@
 
+import { SolidQueryDevtools } from "@tanstack/solid-query-devtools";
+
 import { Navbar } from "./navbar";
 import { OrderTable } from "./orders/OrderTable";
 import { SettingsButton } from "./settings";
@@ -21,5 +23,6 @@ export const App = () => (
         </section>
       </div>
     </div>
+    <SolidQueryDevtools />
   </div>
 );

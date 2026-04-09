@@ -41,7 +41,7 @@ export const useClaimOrder = (params: Accessor<ClaimParams | undefined>) => {
       return writeContract(config, simulation.data.request);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(chainId()!) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.offers.single(chainId()!, params()?.offer_id ?? 0n) });
     },
   }));
 

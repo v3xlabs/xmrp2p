@@ -16,8 +16,6 @@ export const getOffers = async (actions: PublicActions) => {
         address: CONTRACT_ADDRESS,
     });
 
-    console.log(x);
-
     return x;
 };
 
@@ -27,8 +25,6 @@ export const getParameters = async (actions: PublicActions) => {
         functionName: "parameters",
         address: CONTRACT_ADDRESS,
     });
-
-    console.log(x);
 
     return x;
 };

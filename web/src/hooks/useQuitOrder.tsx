@@ -1,4 +1,5 @@
 import { createQuery, useMutation } from "@tanstack/solid-query";
+import { useBlockNumber } from "@wagmi/solid";
 import { simulateContract, writeContract } from "@wagmi/solid/actions";
 import type { Accessor } from "solid-js";
 import { ABI } from "xmrp2p";
@@ -6,6 +7,7 @@ import { ABI } from "xmrp2p";
 import { config, queryClient } from "../config";
 import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
+import { useOffer } from "./useOffer";
 
 export type QuitParams = {
   offer_id: bigint;
@@ -15,10 +17,18 @@ export type QuitParams = {
 
 export const useQuitOrder = (params: Accessor<QuitParams | undefined>) => {
   const { chainId, contractAddress } = useApp();
+  const offer = useOffer(params()?.offer_id ?? 0n);
+
+  const blockNumber = useBlockNumber();
 
   const simulation = createQuery(() => {
     const p = params();
     const address = contractAddress();
+
+    const enabled = (
+      !!p && !!address && p.privateSpendKey !== 0n && p.privateViewKey !== 0n
+      && !!blockNumber.data && !!offer.data?.blockTaken && (blockNumber.data > (offer.data.blockTaken ?? 0n + 1n))
+    ) || false;
 
     return {
       queryKey: queryKeys.simulate.quit(
@@ -55,7 +65,7 @@ export const useQuitOrder = (params: Accessor<QuitParams | undefined>) => {
           return { error: error as Error };
         }
       },
-      enabled: !!p && !!address && p.privateSpendKey !== 0n && p.privateViewKey !== 0n,
+      enabled,
     };
   });
 
@@ -68,7 +78,7 @@ export const useQuitOrder = (params: Accessor<QuitParams | undefined>) => {
       return writeContract(config, simulation.data.request);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(chainId()!) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.offers.single(chainId()!, params()?.offer_id ?? 0n) });
     },
   }));
 
