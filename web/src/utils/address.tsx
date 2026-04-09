@@ -2,6 +2,7 @@ import { createQuery } from "@tanstack/solid-query";
 import { type Component, Show, Suspense } from "solid-js";
 import type { Address } from "viem";
 
+import { queryKeys } from "./queryKeys";
 import { useEnsName } from "./useEnstate";
 
 export const truncateAddress = (address: string | Address | undefined) => (address ? address.slice(0, 5) + "..." + address.slice(-3) : undefined);
@@ -11,7 +12,13 @@ const Addry = (props: { address: string | Address | undefined; }) => (
 );
 
 export const Addr: Component<{ address: string | Address | undefined; }> = (props) => {
-  const ensData = createQuery(() => ({ queryKey: ["addy", props.address], queryFn: x => useEnsName(x.queryKey[1]) }));
+  const ensData = createQuery(() => ({
+    queryKey: queryKeys.address(props.address ?? ""),
+    queryFn: () => useEnsName(props.address),
+    enabled: !!props.address,
+    retry: false,
+    staleTime: Number(60 * 60 * 1000), // 1 hour
+  }));
 
   return (
     <span>

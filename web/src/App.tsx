@@ -1,6 +1,7 @@
 
 import { Navbar } from "./navbar";
 import { OrderTable } from "./orders/OrderTable";
+import { SettingsButton } from "./settings";
 import { Swap } from "./swap";
 
 export const App = () => (
@@ -8,7 +9,10 @@ export const App = () => (
     <Navbar />
     <div class="flex gap-4 flex-col lg:flex-row px-4">
       <section class="w-full lg:w-[400px] space-y-2">
-        <h2 class="px-2">Create Offer</h2>
+        <div class="flex justify-between items-center">
+          <h2 class="px-2">Create Offer</h2>
+          <SettingsButton />
+        </div>
         <Swap />
       </section>
       <div class="space-y-2 grow">

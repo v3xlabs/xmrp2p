@@ -5,12 +5,13 @@ import type { Address } from "viem";
 
 import { ABI } from "../../../lib/src/abi";
 import { config } from "../config";
+import { queryKeys } from "../utils/queryKeys";
 
 export const useParameters = (
   chainId: Accessor<number | undefined>,
   contractAddress: Accessor<Address | undefined>,
 ) => createQuery(() => ({
-  queryKey: ["c", chainId(), "parameters"],
+  queryKey: queryKeys.parameters(chainId()!),
   queryFn: async () => {
     const address = contractAddress();
 

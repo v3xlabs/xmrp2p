@@ -7,17 +7,17 @@ import {
 } from "@tanstack/solid-table";
 import classnames from "classnames";
 import { CgSpinner } from "solid-icons/cg";
-import { type Component, createMemo, For, Show } from "solid-js";
+import { type Accessor, type Component, createEffect, createMemo, createSignal, For, Show } from "solid-js";
 import { match } from "ts-pattern";
 import { formatEther, formatUnits } from "viem";
 
 import ethIcon from "../assets/eth.svg";
 import xmrIcon from "../assets/xmr.svg";
+import { type Offer, useOffers } from "../hooks/useOffers";
 import { Price } from "../swap/price";
 import { Addr } from "../utils/address";
-import { type Offer, useOffers } from "../utils/offers";
+import { OrderDetailModal } from "./OrderDetailModal";
 import { StatusBadge } from "./StatusBadge";
-import { FaSolidTrash } from "solid-icons/fa";
 
 const columnHelper = createColumnHelper<Offer>();
 
@@ -116,123 +116,155 @@ const columns = [
       </div>
     ),
   }),
-  columnHelper.display({
-    // eslint-disable-next-line no-restricted-syntax
-    id: "actions",
-    header: () => <div class="text-right">Actions</div>,
-    cell: ({ row }) => (
-      <div class="flex justify-end">
-        <button class="btn py-1 px-1">
-          Take
-        </button>
-      </div>
-    ),
-  }),
 ];
 
-export const OrderTable: Component = () => {
-  const query = useOffers();
+const isPast = (offer: Offer) => offer.state == 3 || offer.state == 4 || offer.state == 6;
 
-  const activeOffers = createMemo(() =>
+const Table = (props: { offers: Accessor<Offer[]>; isLoading: boolean; isError: boolean; selectOffer: (offerId: bigint) => void; }) => {
+  const table = createSolidTable({
+    columns,
+    get data() { return props.offers(); },
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <Show
+      when={props.offers().length > 0}
+      fallback={(
+        <div class="py-8 text-center text-(--thorin-text-secondary) text-sm">
+          {match(props)
+            .when(
+              q => q.isLoading,
+              () => "Loading offers...",
+            )
+            .when(
+              q => q.isError,
+              () => "Failed to load offers",
+            )
+            .otherwise(() => "No orders")}
+        </div>
+      )}
+    >
+      <table class="w-full border-collapse">
+        <thead>
+          <For each={table.getHeaderGroups()}>
+            {headerGroup => (
+              <tr>
+                <For each={headerGroup.headers}>
+                  {header => (
+                    <th class="border-b border-(--thorin-border) px-3 py-2 text-left text-xs font-medium text-(--thorin-text-secondary) uppercase tracking-wider">
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </th>
+                  )}
+                </For>
+              </tr>
+            )}
+          </For>
+        </thead>
+        <tbody>
+          <For each={table.getRowModel().rows}>
+            {row => (
+              <tr
+                class="hover:bg-(--thorin-background-secondary) transition-colors cursor-pointer"
+                onClick={() => props.selectOffer(row.original.id)} // eslint-disable-line no-restricted-syntax
+              >
+                <For each={row.getVisibleCells()}>
+                  {cell => (
+                    <td class="px-3 py-2.5 text-sm">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </td>
+                  )}
+                </For>
+              </tr>
+            )}
+          </For>
+        </tbody>
+      </table>
+    </Show>
+  );
+};
+
+export const OrderTable: Component = () => {
+  const [selectedOfferId, setSelectedOfferId] = createSignal<bigint | null>(null);
+  const query = useOffers(selectedOfferId);
+
+  const allOffers = createMemo(() =>
     ((query?.data?.pages.flat() ?? []) as Offer[]).filter(offer => offer.state !== 0),
   );
 
-  const table = createSolidTable(() => ({
-    columns,
-    data: activeOffers(),
-    getCoreRowModel: getCoreRowModel(),
-  }));
+  const selectedOffer = createMemo(() => {
+    const offerId = selectedOfferId();
+
+    if (!offerId) return null;
+
+    return allOffers().find(o => o.id === offerId) ?? null; // eslint-disable-line no-restricted-syntax
+  });
+
+  const openOffers = createMemo(() =>
+    allOffers().filter(offer => !isPast(offer)),
+  );
+
+  const pastOffers = createMemo(() =>
+    allOffers().filter(isPast),
+  );
+
+  createEffect(() => {
+    console.log("query", query.data?.pages.flat().length);
+    console.log("openOffers", openOffers().length);
+    console.log("pastOffers", pastOffers().length);
+  });
 
   return (
-    <Tabs aria-label="Orders" defaultValue="open" class="relative">
-      <div class="px-2 flex justify-between items-end">
-        <Tabs.List class="relative flex items-center">
-          {
-            [
-              ["open", "Open orders"],
-              ["history", "Past orders"],
-            ].map(([value, label]) => (
-              <Tabs.Trigger value={value} class="data-selected:font-bold cursor-pointer px-2 py-1">
-                {label}
-              </Tabs.Trigger>
-            ))
-          }
-          <Tabs.Indicator class="h-1.5 bg-(--thorin-background-primary) absolute bottom-0 transition-all rounded-t-sm opacity-100 border border-(--thorin-border)" />
-        </Tabs.List>
-        <div class="py-2">
-          <Show when={query.isLoading || query.isFetching || query.isFetching}>
-            <CgSpinner class="animate-spin" />
-          </Show>
+    <>
+      <Tabs aria-label="Orders" defaultValue="open" class="relative">
+        <div class="px-2 flex justify-between items-end">
+          <Tabs.List class="relative flex items-center">
+            {
+              [
+                ["open", "Open orders"],
+                ["history", "Past orders"],
+              ].map(([value, label]) => (
+                <Tabs.Trigger value={value} class="data-selected:font-bold cursor-pointer px-2 py-2">
+                  {label}
+                </Tabs.Trigger>
+              ))
+            }
+            <Tabs.Indicator class="h-1.5 bg-(--thorin-background-primary) absolute bottom-0 transition-all rounded-t-sm opacity-100 border border-(--thorin-border)" />
+          </Tabs.List>
+          <div class="py-2">
+            <Show when={query.isLoading || query.isFetching}>
+              <CgSpinner class="animate-spin" />
+            </Show>
+          </div>
         </div>
-      </div>
-      <div class="card p-2">
-        <Tabs.Content value="open">
-          <Show
-            when={activeOffers().length > 0}
-            fallback={(
-              <div class="py-8 text-center text-(--thorin-text-secondary) text-sm">
-                {match(query)
-                  .when(
-                    q => q.isPending,
-                    () => "Loading offers...",
-                  )
-                  .when(
-                    q => q.isError,
-                    () => "Failed to load offers",
-                  )
-                  .otherwise(() => "No open offers")}
-              </div>
-            )}
-          >
-            <table class="w-full border-collapse">
-              <thead>
-                <For each={table.getHeaderGroups()}>
-                  {headerGroup => (
-                    <tr>
-                      <For each={headerGroup.headers}>
-                        {header => (
-                          <th class="border-b border-(--thorin-border) px-3 py-2 text-left text-xs font-medium text-(--thorin-text-secondary) uppercase tracking-wider">
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                              )}
-                          </th>
-                        )}
-                      </For>
-                    </tr>
-                  )}
-                </For>
-              </thead>
-              <tbody>
-                <For each={table.getRowModel().rows}>
-                  {row => (
-                    <tr class="hover:bg-(--thorin-background-secondary) transition-colors">
-                      <For each={row.getVisibleCells()}>
-                        {cell => (
-                          <td class="px-3 py-2.5 text-sm">
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </td>
-                        )}
-                      </For>
-                    </tr>
-                  )}
-                </For>
-              </tbody>
-            </table>
+        <div class="card p-2">
+          <Tabs.Content value="open">
+            <Table offers={openOffers} isLoading={query.isLoading} isError={query.isError} selectOffer={setSelectedOfferId} />
             <Show when={query.hasNextPage}>
               <button class="btn" onClick={() => query.fetchNextPage()}>Load more</button>
             </Show>
-          </Show>
-        </Tabs.Content>
-        <Tabs.Content value="history">
-          <div>History</div>
-        </Tabs.Content>
-      </div>
-    </Tabs>
+          </Tabs.Content>
+          <Tabs.Content value="history">
+            <Table offers={pastOffers} isLoading={query.isLoading} isError={query.isError} selectOffer={setSelectedOfferId} />
+            <Show when={query.hasNextPage}>
+              <button class="btn" onClick={() => query.fetchNextPage()}>Load more</button>
+            </Show>
+          </Tabs.Content>
+        </div>
+      </Tabs>
+
+      <OrderDetailModal
+        offer={selectedOffer()}
+        onClose={() => setSelectedOfferId(null)}
+      />
+    </>
   );
 };
