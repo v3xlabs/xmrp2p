@@ -1,0 +1,38 @@
+name: Docs
+
+on:
+  push:
+    branches: ["master"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "deploy"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment:
+      name: deploy
+    #   url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup workspace
+        uses: ./.github/actions/setup-workspace
+        with:
+          build-packages: false
+      - name: Build dependencies
+        run: pnpm --filter "web^..." build
+      - name: Build Web
+        run: pnpm --filter web build
+        env:
+          NODE_ENV: "production"
+      - name: Install omnipin
+        run: pnpm install -g omnipin
+      - name: Deploy the site
+        run: omnipin deploy web/dist
+        env:
+          OMNIPIN_FILECOIN_TOKEN: ${{ secrets.OMNIPIN_FILECOIN_TOKEN }}
