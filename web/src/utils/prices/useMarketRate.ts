@@ -1,11 +1,12 @@
 import { createQuery } from "@tanstack/solid-query";
 
+import { queryKeys } from "../queryKeys";
 import { fetchETHPrice } from "./fetchETHPrice";
 import { fetchXMRPrice } from "./fetchXMRPrice";
 
 export const useMarketRate = () =>
   createQuery(() => ({
-    queryKey: ["market-rate", "xmr-eth"],
+    queryKey: queryKeys.marketRate(),
     queryFn: async () => {
       const [ethUsd, xmrUsd] = await Promise.all([
         fetchETHPrice(),

@@ -16,6 +16,7 @@
     "@wagmi/core": "^3.4.2",
     "@wagmi/solid": "^0.0.5",
     "classnames": "^2.5.1",
+    "qr": "^0.5.5",
     "solid-icons": "^1.2.0",
     "solid-js": "^1.9.11",
     "ts-pattern": "^5.9.0",

@@ -91,6 +91,9 @@ importers:
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
+      qr:
+        specifier: ^0.5.5
+        version: 0.5.5
       solid-icons:
         specifier: ^1.2.0
         version: 1.2.0(solid-js@1.9.12)
@@ -2104,6 +2107,10 @@ packages:
   pvutils@1.1.5:
     resolution: {integrity: sha512-KTqnxsgGiQ6ZAzZCVlJH5eOjSnvlyEgx1m8bkRJfOhmGRqfo5KLvmAlACQkrjEtOQ4B7wF9TdSLIs9O90MX9xA==}
     engines: {node: '>=16.0.0'}
+
+  qr@0.5.5:
+    resolution: {integrity: sha512-iQBvKj7MRKO+co+MY0IZpyLO+ezvttxsmV86WywrgPuAmgBkv0pytyi03wourniSoPgzffeBW6cBgIkpqcvjTg==}
+    engines: {node: '>= 20.19.0'}
 
   qrcode-generator@1.5.2:
     resolution: {integrity: sha512-pItrW0Z9HnDBnFmgiNrY1uxRdri32Uh9EjNYLPVC2zZ3ZRIIEqBoDgm4DkvDwNNDHTK7FNkmr8zAa77BYc9xNw==}
@@ -4754,6 +4761,8 @@ snapshots:
 
   pvutils@1.1.5:
     optional: true
+
+  qr@0.5.5: {}
 
   qrcode-generator@1.5.2: {}
 

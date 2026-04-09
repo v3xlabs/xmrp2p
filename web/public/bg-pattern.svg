@@ -13,6 +13,6 @@
       <polygon points="0,650.54 392.07,882.29 392.07,472.33" fill="#E8E8E8"/>
     </g>
   </defs>
-  <use href="#xmr" transform="translate(25,25) rotate(45) scale(0.00533) translate(-1878,-1878)"/>
-  <use href="#eth" transform="translate(75,75) rotate(45) scale(0.01566) translate(-392,-639)"/>
+  <use href="#xmr" transform="translate(25,25) rotate(-20) scale(0.00533) translate(-1878,-1878)"/>
+  <use href="#eth" transform="translate(75,75) rotate(20) scale(0.01566) translate(-392,-639)"/>
 </svg>

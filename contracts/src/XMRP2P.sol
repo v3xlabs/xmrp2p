@@ -165,6 +165,8 @@ contract XMRP2P is Ownable {
         liability += offer.kind == OfferType.BUY ? offer.amount : offer.deposit;
 
         offers[offer.id] = offer;
+
+        emit OfferEvent(offer.id, offer.kind, offer.state);
     }
 
     /// Take an offer

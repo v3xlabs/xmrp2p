@@ -3,13 +3,14 @@ import { useConnection, useDisconnect } from "@wagmi/solid";
 import { Show } from "solid-js";
 
 import { truncateAddress } from "../utils/address";
+import { queryKeys } from "../utils/queryKeys";
 import { useEnsName } from "../utils/useEnstate";
 import { ConnectModal } from "./connectmodal";
 
 export const UserProfile = () => {
   const connection = useConnection();
   const disconnect = useDisconnect();
-  const name = createQuery(() => ({ queryKey: ["addy", connection().address], queryFn: x => useEnsName(x.queryKey[1]) }));
+  const name = createQuery(() => ({ queryKey: queryKeys.address(connection().address ?? ""), queryFn: () => useEnsName(connection().address), enabled: !!connection().address }));
 
   return (
     <Show when={connection().isConnected} fallback={<ConnectModal />}>

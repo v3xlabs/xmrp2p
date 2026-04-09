@@ -4,7 +4,7 @@ body {
   font-family: "Satoshi", sans-serif;
   background-color: var(--thorin-background-secondary);
   background-image: url('/bg-pattern.svg');
-  background-size: 100px 100px;
+  background-size: 60px 60px;
   background-repeat: repeat;
   color: var(--thorin-text-primary);
   font-feature-settings: "ss01" on, "ss03" on;

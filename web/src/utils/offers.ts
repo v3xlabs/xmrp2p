@@ -1,24 +1,25 @@
 import { createInfiniteQuery } from "@tanstack/solid-query";
 import { readContract } from "@wagmi/solid/actions";
+import type { Accessor } from "solid-js";
 import { ABI, getOffers } from "xmrp2p";
 
 import { config } from "../config";
 import { useApp } from "../hooks/useApp";
+import { queryKeys } from "./queryKeys";
 
 export type Offer = Awaited<ReturnType<typeof getOffers>>[number];
 
 const PAGE_SIZE = 10n;
 
-export const useOffers = () => {
+const POLL_INTERVAL_DEFAULT = 50_000;
+const POLL_INTERVAL_ACTIVE = 10_000;
+
+export const useOffers = (activeOfferId?: Accessor<bigint | null>) => {
   const { chainId, contractAddress } = useApp();
 
   return createInfiniteQuery(() => ({
-    queryKey: ["c", chainId(), "offers"],
+    queryKey: queryKeys.offers.all(chainId()!),
     queryFn: async ({ pageParam }) => {
-      console.log({ pageParam });
-
-      // await new Promise(resolve => setTimeout(resolve, 2000));
-
       const offers = await readContract(config, {
         abi: ABI,
         functionName: "listOffers",
@@ -27,12 +28,10 @@ export const useOffers = () => {
         chainId: chainId(),
       });
 
-      console.log({ offers });
-
       return offers.filter(offer => offer.state !== 0);
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => (lastPage.length >= 10 ? pages.length : undefined),
-    refetchInterval: 50000,
+    refetchInterval: activeOfferId?.() ? POLL_INTERVAL_ACTIVE : POLL_INTERVAL_DEFAULT,
   }));
 };
