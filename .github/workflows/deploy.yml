@@ -1,4 +1,4 @@
-name: Docs
+name: Build and Deploy
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment:
-      name: deploy
+      name: production
     #   url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
