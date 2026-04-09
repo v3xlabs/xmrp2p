@@ -7,6 +7,7 @@ import { render } from "solid-js/web";
 
 import { App } from "./App.tsx";
 import { config, queryClient } from "./config.ts";
+import { SettingsProvider } from "./context/SettingsContext.tsx";
 
 const root = document.querySelector("#root");
 
@@ -21,9 +22,11 @@ BigInt.prototype.toJSON = function () {
 };
 
 render(() => (
-  <WagmiProvider config={config}>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </WagmiProvider>
+  <SettingsProvider>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </WagmiProvider>
+  </SettingsProvider>
 ), root!);

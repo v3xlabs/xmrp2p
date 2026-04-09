@@ -14,12 +14,12 @@ export const CONTRACT_ADDRESS: Record<number, string | undefined> = {
 
 export const config = createConfig({
   chains: [
-    // mainnet,
+    mainnet,
     anvil,
     sepolia,
   ],
   transports: {
-    // [mainnet.id]: http(),
+    [mainnet.id]: http(),
     [anvil.id]: http("http://127.0.0.1:8545"),
     [sepolia.id]: http(),
   },

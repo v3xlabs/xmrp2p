@@ -1,13 +1,14 @@
 /* eslint-disable @stylistic/indent */
 /* eslint-disable no-restricted-syntax */
 import { Select } from "@kobalte/core/select";
-import { useChains, useSwitchChain } from "@wagmi/solid";
+import { useSwitchChain } from "@wagmi/solid";
 import { FaSolidCheck, FaSolidChevronDown } from "solid-icons/fa";
 
+import { useSettings } from "../context/SettingsContext";
 import { useApp } from "../hooks/useApp";
 
 export const ChainSelector = () => {
-    const chains = useChains();
+    const { availableChains } = useSettings();
     const switchChain = useSwitchChain();
     const { chainId } = useApp();
 
@@ -15,11 +16,11 @@ export const ChainSelector = () => {
         <div>
             <Select
               value={chainId()?.toString()}
-              options={chains().map(chain => chain.id)}
+              options={availableChains().map(chain => chain.id)}
               placeholder="Select a chain…"
               class="input"
               itemComponent={(props) => {
-                    const chain = chains().find(chain => chain.id === Number(props.item.rawValue));
+                    const chain = availableChains().find(chain => chain.id === Number(props.item.rawValue));
 
                     return (
                         <Select.Item item={props.item} class="flex items-center gap-1">
@@ -32,9 +33,9 @@ export const ChainSelector = () => {
                 }}
               onChange={value => switchChain.mutate({ chainId: Number(value) })}
             >
-                <Select.Trigger class="flex items-center gap-2" aria-label="Fruit">
+                <Select.Trigger class="flex items-center gap-2" aria-label="Chain">
                     <Select.Value class="select__value">
-                        {state => chains().find(chain => chain.id === Number(state.selectedOption()))?.name}
+                        {state => availableChains().find(chain => chain.id === Number(state.selectedOption()))?.name}
                     </Select.Value>
                     <Select.Icon class="select__icon">
                         <FaSolidChevronDown class="w-2.5 h-2.5" />

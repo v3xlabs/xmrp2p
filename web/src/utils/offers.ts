@@ -23,9 +23,9 @@ export const useOffers = (activeOfferId?: Accessor<bigint | null>) => {
       const offers = await readContract(config, {
         abi: ABI,
         functionName: "listOffers",
-        args: [BigInt(pageParam) * PAGE_SIZE, PAGE_SIZE + 1n, true],
-        address: contractAddress(),
-        chainId: chainId(),
+        args: [BigInt(pageParam) * PAGE_SIZE, PAGE_SIZE + 1n, false],
+        address: contractAddress() as `0x${string}`,
+        chainId: chainId() as unknown,
       });
 
       return offers.filter(offer => offer.state !== 0);
