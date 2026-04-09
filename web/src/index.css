@@ -2,7 +2,10 @@
 
 body {
   font-family: "Satoshi", sans-serif;
-  background: var(--thorin-background-secondary);
+  background-color: var(--thorin-background-secondary);
+  background-image: url('/bg-pattern.svg');
+  background-size: 100px 100px;
+  background-repeat: repeat;
   color: var(--thorin-text-primary);
   font-feature-settings: "ss01" on, "ss03" on;
 }
@@ -150,6 +153,10 @@ html {
 }
 
 @media (prefers-color-scheme: dark) {
+  html:not(.no-system) body {
+    background-image: url('/bg-pattern-dark.svg');
+  }
+
   html:not(.no-system) {
       --thorin-blue-primary: #3889FF;
       --thorin-blue-active: #EEF5FF;
@@ -214,6 +221,10 @@ html {
       --thorin-background-disabled: #424347;
       --thorin-border: #42464E;
   }
+}
+
+html.dark body {
+  background-image: url('/bg-pattern-dark.svg');
 }
 
 html.dark {

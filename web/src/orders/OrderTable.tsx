@@ -17,7 +17,6 @@ import { Price } from "../swap/price";
 import { Addr } from "../utils/address";
 import { type Offer, useOffers } from "../utils/offers";
 import { StatusBadge } from "./StatusBadge";
-import { FaSolidTrash } from "solid-icons/fa";
 
 const columnHelper = createColumnHelper<Offer>();
 
