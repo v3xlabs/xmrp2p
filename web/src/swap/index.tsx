@@ -5,7 +5,6 @@ import { formatEther } from "viem";
 
 import ethIcon from "../assets/eth.svg";
 import { useCreateOrder } from "../hooks/useCreateOrder";
-import { useMarketRate } from "../utils/prices/useMarketRate";
 import { Price } from "./price";
 import { TokenSelector } from "./TokenSelector";
 
@@ -33,8 +32,6 @@ export const Swap = () => {
       buyAmountValue,
       sellAmountValue,
     } } = useCreateOrder();
-
-  const market = useMarketRate();
 
   return (
     <div class="card p-4 space-y-2">

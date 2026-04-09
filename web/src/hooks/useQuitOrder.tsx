@@ -1,51 +1,74 @@
-import { useMutation } from "@tanstack/solid-query";
+import { createQuery, useMutation } from "@tanstack/solid-query";
 import { simulateContract, writeContract } from "@wagmi/solid/actions";
+import type { Accessor } from "solid-js";
 import { ABI } from "xmrp2p";
 
 import { config, queryClient } from "../config";
 import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
-import { updateOfferInCache } from "./utils/optimisticOffers";
 
-export const useQuitOrder = () => {
+export type QuitParams = {
+  offer_id: bigint;
+  privateSpendKey: bigint;
+  privateViewKey: bigint;
+};
+
+export const useQuitOrder = (params: Accessor<QuitParams | undefined>) => {
   const { chainId, contractAddress } = useApp();
 
-  return useMutation(() => ({
-    mutationFn: async (params: {
-      offer_id: bigint;
-      privateSpendKey: bigint;
-      privateViewKey: bigint;
-    }) => {
-      const address = contractAddress();
+  const simulation = createQuery(() => {
+    const p = params();
+    const address = contractAddress();
 
-      if (!address) throw new Error("Contract address not configured");
+    return {
+      queryKey: queryKeys.simulate.quit(
+        chainId()!,
+        p?.offer_id ?? 0n,
+        p?.privateSpendKey ?? 0n,
+        p?.privateViewKey ?? 0n,
+      ),
+      queryFn: async () => {
+        if (!p?.offer_id || !p?.privateSpendKey || !p?.privateViewKey || !address) return undefined;
 
-      const { request } = await simulateContract(config, {
-        abi: ABI,
-        functionName: "quit",
-        args: [params.offer_id, params.privateSpendKey, params.privateViewKey],
-        address,
-      });
+        console.log("simulating quit", {
+          offer_id: p.offer_id,
+          privateSpendKey: p.privateSpendKey,
+          privateViewKey: p.privateViewKey,
+          address,
+        });
 
-      return writeContract(config, request);
-    },
-    onMutate: async (params: { offer_id: bigint; privateSpendKey: bigint; privateViewKey: bigint; }) => {
-      const key = queryKeys.offers.all(chainId()!);
+        try {
+          const data = await simulateContract(config, {
+            abi: ABI,
+            functionName: "quit",
+            args: [p.offer_id, p.privateSpendKey, p.privateViewKey],
+            address,
+          });
 
-      await queryClient.cancelQueries({ queryKey: key });
-      const previousOffers = queryClient.getQueryData(key);
+          console.log("simulation result", data);
 
-      updateOfferInCache(key, params.offer_id, { state: 4 });
+          return data;
+        }
+        catch (error) {
+          console.error("error simulating quit", error);
 
-      return { previousOffers };
-    },
-    onError: (_err: unknown, _params: unknown, context: { previousOffers: unknown; } | undefined) => {
-      if (context?.previousOffers) {
-        queryClient.setQueryData(queryKeys.offers.all(chainId()!), context.previousOffers);
-      }
+          return { error: error as Error };
+        }
+      },
+      enabled: !!p && !!address && p.privateSpendKey !== 0n && p.privateViewKey !== 0n,
+    };
+  });
+
+  const write = useMutation(() => ({
+    mutationFn: async () => {
+      if (!simulation.data) throw new Error("Simulation not ready");
+
+      return writeContract(config, simulation.data.request);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(chainId()!) });
     },
   }));
+
+  return { simulation, write };
 };

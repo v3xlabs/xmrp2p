@@ -12,7 +12,13 @@ const Addry = (props: { address: string | Address | undefined; }) => (
 );
 
 export const Addr: Component<{ address: string | Address | undefined; }> = (props) => {
-  const ensData = createQuery(() => ({ queryKey: queryKeys.address(props.address ?? ""), queryFn: () => useEnsName(props.address), enabled: !!props.address }));
+  const ensData = createQuery(() => ({
+    queryKey: queryKeys.address(props.address ?? ""),
+    queryFn: () => useEnsName(props.address),
+    enabled: !!props.address,
+    retry: false,
+    staleTime: Number(60 * 60 * 1000), // 1 hour
+  }));
 
   return (
     <span>

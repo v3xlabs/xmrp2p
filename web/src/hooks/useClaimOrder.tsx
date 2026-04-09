@@ -1,47 +1,49 @@
-import { useMutation } from "@tanstack/solid-query";
+import { createQuery, useMutation } from "@tanstack/solid-query";
 import { simulateContract, writeContract } from "@wagmi/solid/actions";
+import type { Accessor } from "solid-js";
 import { ABI } from "xmrp2p";
 
 import { config, queryClient } from "../config";
 import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
-import { updateOfferInCache } from "./utils/optimisticOffers";
 
-export const useClaimOrder = () => {
+export type ClaimParams = {
+  offer_id: bigint;
+  privateSpendKey: bigint;
+};
+
+export const useClaimOrder = (params: Accessor<ClaimParams | undefined>) => {
   const { chainId, contractAddress } = useApp();
 
-  return useMutation(() => ({
-    mutationFn: async (params: { offer_id: bigint; privateSpendKey: bigint; }) => {
-      const address = contractAddress();
+  const simulation = createQuery(() => ({
+    queryKey: queryKeys.simulate.claim(
+      chainId()!,
+      params()?.offer_id ?? 0n,
+      params()?.privateSpendKey ?? 0n,
+    ),
+    queryFn: () => {
+      const p = params()!;
 
-      if (!address) throw new Error("Contract address not configured");
-
-      const { request } = await simulateContract(config, {
+      return simulateContract(config, {
         abi: ABI,
         functionName: "claim",
-        args: [params.offer_id, params.privateSpendKey],
-        address,
+        args: [p.offer_id, p.privateSpendKey],
+        address: contractAddress()!,
       });
-
-      return writeContract(config, request);
     },
-    onMutate: async (params: { offer_id: bigint; privateSpendKey: bigint; }) => {
-      const key = queryKeys.offers.all(chainId()!);
+    enabled: !!params() && !!contractAddress(),
+  }));
 
-      await queryClient.cancelQueries({ queryKey: key });
-      const previousOffers = queryClient.getQueryData(key);
+  const write = useMutation(() => ({
+    mutationFn: async () => {
+      if (!simulation.data) throw new Error("Simulation not ready");
 
-      updateOfferInCache(key, params.offer_id, { state: 6 });
-
-      return { previousOffers };
-    },
-    onError: (_err: unknown, _params: unknown, context: { previousOffers: unknown; } | undefined) => {
-      if (context?.previousOffers) {
-        queryClient.setQueryData(queryKeys.offers.all(chainId()!), context.previousOffers);
-      }
+      return writeContract(config, simulation.data.request);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(chainId()!) });
     },
   }));
+
+  return { simulation, write };
 };

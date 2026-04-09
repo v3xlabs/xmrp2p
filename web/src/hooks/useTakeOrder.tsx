@@ -1,5 +1,6 @@
-import { useMutation } from "@tanstack/solid-query";
+import { createQuery, useMutation } from "@tanstack/solid-query";
 import { getAccount, simulateContract, writeContract } from "@wagmi/core";
+import type { Accessor } from "solid-js";
 import { english, generateMnemonic } from "viem/accounts";
 import { ABI, generateMoneroKeys } from "xmrp2p";
 
@@ -8,42 +9,72 @@ import { storeOrderKeys } from "../utils/keyStore";
 import type { Offer } from "../utils/offers";
 import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
-import { updateOfferInCache } from "./utils/optimisticOffers";
 
-export const useTakeOrder = () => {
+export const useTakeOrder = (offer: Accessor<Offer | undefined>) => {
   const { chainId, contractAddress } = useApp();
 
-  return useMutation(() => ({
-    mutationFn: async (offer: Offer) => {
-      const address = contractAddress();
+  const seedphrase = generateMnemonic(english);
+  const keys = generateMoneroKeys(seedphrase);
 
-      if (!address) throw new Error("Contract address not configured");
+  const simulationArgs = () => {
+    const o = offer();
+
+    if (!o) return undefined;
+
+    const isBuy = o.kind === 1;
+
+    return {
+      offerId: o.id, // eslint-disable-line no-restricted-syntax
+      spendingKey: keys.publicSpendKey,
+      viewingKey: isBuy ? keys.privateViewKey : keys.publicViewKey,
+      value: isBuy ? o.deposit : o.amount,
+    };
+  };
+
+  const simulation = createQuery(() => {
+    const args = simulationArgs();
+
+    return {
+      queryKey: queryKeys.simulate.take(
+        chainId()!,
+        args?.offerId ?? 0n,
+        keys.publicSpendKey,
+        args?.viewingKey ?? 0n,
+      ),
+      queryFn: () => {
+        const a = simulationArgs()!;
+
+        return simulateContract(config, {
+          abi: ABI,
+          functionName: "take",
+          args: [a.offerId, a.spendingKey, a.viewingKey],
+          address: contractAddress()!,
+          value: a.value,
+        });
+      },
+      enabled: !!args && !!contractAddress(),
+    };
+  });
+
+  const write = useMutation(() => ({
+    mutationFn: async () => {
+      if (!simulation.data) throw new Error("Simulation not ready");
+
+      const o = offer();
+
+      if (!o) throw new Error("No offer");
 
       const account = getAccount(config);
 
       if (!account.address) throw new Error("Wallet not connected");
 
-      const seedphrase = generateMnemonic(english);
-      const keys = generateMoneroKeys(seedphrase);
+      const hash = await writeContract(config, simulation.data.request);
 
-      const isBuy = offer.kind === 1;
-      const spendingKey = keys.publicSpendKey;
-      const viewingKey = isBuy ? keys.privateViewKey : keys.publicViewKey;
-      const value = isBuy ? offer.deposit : offer.amount;
+      const isBuy = o.kind === 1;
       const role = isBuy ? "xmr" : "evm";
 
-      const { request } = await simulateContract(config, {
-        abi: ABI,
-        functionName: "take",
-        args: [offer.id, spendingKey, viewingKey], // eslint-disable-line no-restricted-syntax
-        address,
-        value,
-      });
-
-      const hash = await writeContract(config, request);
-
       storeOrderKeys({
-        offer_id: offer.id.toString(), // eslint-disable-line no-restricted-syntax
+        offer_id: o.id.toString(), // eslint-disable-line no-restricted-syntax
         chain_id: chainId()!,
         wallet_address: account.address,
         role: role as "evm" | "xmr",
@@ -56,23 +87,10 @@ export const useTakeOrder = () => {
 
       return hash;
     },
-    onMutate: async (offer: Offer) => {
-      const key = queryKeys.offers.all(chainId()!);
-
-      await queryClient.cancelQueries({ queryKey: key });
-      const previousOffers = queryClient.getQueryData(key);
-
-      updateOfferInCache(key, offer.id, { state: 2 }); // eslint-disable-line no-restricted-syntax
-
-      return { previousOffers };
-    },
-    onError: (_err: unknown, _offer: Offer, context: { previousOffers: unknown; } | undefined) => {
-      if (context?.previousOffers) {
-        queryClient.setQueryData(queryKeys.offers.all(chainId()!), context.previousOffers);
-      }
-    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(chainId()!) });
     },
   }));
+
+  return { simulation, write };
 };

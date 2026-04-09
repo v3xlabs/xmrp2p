@@ -1,5 +1,5 @@
 import { Tabs } from "@kobalte/core/tabs";
-import { type Component, createMemo, Show } from "solid-js";
+import { type Component, createMemo, createSignal, Show } from "solid-js";
 
 import {
   combinePrivateKeys,
@@ -127,27 +127,42 @@ export const EscrowSpendKeys: Component<{
     return createMoneroWalletUri(addr, spendKey, viewKey, `XMRP2P-${props.offer.id}-spend`, props.restoreHeight); // eslint-disable-line no-restricted-syntax
   });
 
+  const [showKeys, setShowKeys] = createSignal(false);
+
   return (
     <div class="space-y-3">
-      <h4 class="text-sm font-bold">Sweep Monero</h4>
-      <p class="text-xs text-(--thorin-text-secondary)">
-        Scan this QR code to import the escrow wallet and sweep the XMR to your own wallet.
-      </p>
-      <Show when={walletUri()}>
-        {uri => (
-          <div class="flex flex-col items-center gap-2">
-            <QRCodeDisplay data={uri()} />
+      <div class="flex justify-between items-stretch h-fit gap-2">
+        <div class="flex flex-col justify-between gap-1 pb-2">
+          <div class="space-y-1">
+            <h4 class="text-sm font-bold">Collect XMR</h4>
+            <p class="text-xs text-(--thorin-text-secondary)">
+              Scan this QR code to import the escrow wallet and sweep the XMR to your own wallet.
+            </p>
           </div>
-        )}
-      </Show>
-      <Show when={escrowAddress()}>
-        {addr => <KeyDisplay label="Escrow Monero Address" value={addr()} />}
-      </Show>
-      <Show when={combinedSpendKey()}>
-        {key => <KeyDisplay label="Spend Key" value={toMoneroKeyHex(key())} />}
-      </Show>
-      <Show when={combinedViewKey()}>
-        {key => <KeyDisplay label="View Key" value={toMoneroKeyHex(key())} />}
+          <div>
+            <button class="btn-primary w-fit py-2 text-sm" onClick={() => setShowKeys(!showKeys())}>
+              Show Keys
+            </button>
+          </div>
+        </div>
+        <Show when={walletUri()}>
+          {uri => (
+            <div class="flex flex-col items-center gap-2 blur-md hover:blur-none">
+              <QRCodeDisplay data={uri()} />
+            </div>
+          )}
+        </Show>
+      </div>
+      <Show when={showKeys()}>
+        <Show when={escrowAddress()}>
+          {addr => <KeyDisplay label="Escrow Monero Address" value={addr()} />}
+        </Show>
+        <Show when={combinedSpendKey()}>
+          {key => <KeyDisplay label="Spend Key" value={toMoneroKeyHex(key())} />}
+        </Show>
+        <Show when={combinedViewKey()}>
+          {key => <KeyDisplay label="View Key" value={toMoneroKeyHex(key())} />}
+        </Show>
       </Show>
     </div>
   );

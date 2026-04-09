@@ -118,6 +118,8 @@ const columns = [
   }),
 ];
 
+const isPast = (offer: Offer) => offer.state == 3 || offer.state == 4 || offer.state == 6;
+
 export const OrderTable: Component = () => {
   const [selectedOfferId, setSelectedOfferId] = createSignal<bigint | null>(null);
   const query = useOffers(selectedOfferId);
@@ -135,11 +137,11 @@ export const OrderTable: Component = () => {
   });
 
   const openOffers = createMemo(() =>
-    allOffers().filter(offer => offer.state === 1),
+    allOffers().filter(offer => !isPast(offer)),
   );
 
   const pastOffers = createMemo(() =>
-    allOffers().filter(offer => offer.state > 1),
+    allOffers().filter(isPast),
   );
 
   const openTable = createSolidTable(() => ({
