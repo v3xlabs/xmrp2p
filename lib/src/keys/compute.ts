@@ -11,7 +11,7 @@ export const computeEscrowWallet = ({
     xmrPrivateViewKey: bigint;
     evmPublicSpendKey: bigint;
     xmrPublicSpendKey: bigint;
-}, seed: string) => {
+}) => {
     const xmrPublicViewKeyPoint: Point = Point.BASE.multiply(xmrPrivateViewKey, true);
     const evmPublicViewKeyPoint: Point = Point.fromHex(numberToHex(evmPublicViewKey, { size: 32 }).slice(2, 66));
     const publicViewKeyPoint: Point = evmPublicViewKeyPoint.add(xmrPublicViewKeyPoint);

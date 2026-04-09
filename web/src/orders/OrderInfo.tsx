@@ -5,8 +5,8 @@ import { formatEther, formatUnits } from "viem";
 
 import ethIcon from "../assets/eth.svg";
 import xmrIcon from "../assets/xmr.svg";
+import type { Offer } from "../hooks/useOffers";
 import { isXmrSide } from "../utils/escrow";
-import type { Offer } from "../utils/offers";
 import { StatusBadge } from "./StatusBadge";
 
 export const OrderInfo: Component<{

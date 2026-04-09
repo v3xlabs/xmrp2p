@@ -1,7 +1,7 @@
 import { formatUnits } from "viem";
 import { computeEscrowWallet, encodeMoneroAddress } from "xmrp2p";
 
-import type { Offer } from "./offers";
+import type { Offer } from "../hooks/useOffers";
 
 const ED25519_L = 2n ** 252n + 27_742_317_777_372_353_535_851_937_790_883_648_493n;
 
@@ -43,7 +43,6 @@ export const getEscrowAddress = (offer: Offer): string | null => {
         evmPublicSpendKey: offer.evmPublicSpendKey,
         xmrPublicSpendKey: offer.xmrPublicSpendKey,
       },
-      "",
     );
 
     return encodeMoneroAddress(publicSpendKey, publicViewKey, true);

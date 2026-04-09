@@ -7,7 +7,7 @@ import { type Component, Show } from "solid-js";
 
 import { useBlockTimestamp } from "../hooks/useBlockTimestamp";
 import { useMoneroHeight } from "../hooks/useMoneroHeight";
-import type { Offer } from "../utils/offers";
+import type { Offer } from "../hooks/useOffers";
 import { OrderActions } from "./OrderActions";
 import { OrderEvents } from "./OrderEvents";
 import { OrderInfo } from "./OrderInfo";

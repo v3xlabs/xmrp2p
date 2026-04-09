@@ -75,16 +75,13 @@ importers:
         version: 0.13.11(solid-js@1.9.12)
       '@openlv/connector':
         specifier: 0.0.1-beta.12
-        version: 0.0.1-beta.12(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(tailwindcss@4.2.2)(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)
+        version: 0.0.1-beta.12(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(tailwindcss@4.2.2)(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)
       '@tanstack/solid-query':
         specifier: ^5.96.2
         version: 5.96.2(solid-js@1.9.12)
       '@tanstack/solid-table':
         specifier: ^8.21.3
         version: 8.21.3(solid-js@1.9.12)
-      '@wagmi/core':
-        specifier: ^3.4.2
-        version: 3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
       '@wagmi/solid':
         specifier: ^0.0.5
         version: 0.0.5(@tanstack/query-core@5.96.2)(@tanstack/solid-query@5.96.2(solid-js@1.9.12))(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(solid-js@1.9.12)(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
@@ -984,21 +981,6 @@ packages:
 
   '@wagmi/core@3.4.1':
     resolution: {integrity: sha512-sEiwTERUmmxYwcvTEmKfN8ERDftt7JwutSAwa8RRAjmtJblUNBJp5VcPEzgQ+NPfnSO9Kq05OBSKSiocLNhhOQ==}
-    peerDependencies:
-      '@tanstack/query-core': '>=5.0.0'
-      ox: '>=0.11.1'
-      typescript: '>=5.7.3'
-      viem: 2.x
-    peerDependenciesMeta:
-      '@tanstack/query-core':
-        optional: true
-      ox:
-        optional: true
-      typescript:
-        optional: true
-
-  '@wagmi/core@3.4.2':
-    resolution: {integrity: sha512-01i0ILBe74G8eairY2AIKC4Atrd00xw7EckZ5luU1ARl/6789UH79wXHwJDkHyktXtjn6QoSoBRW2brtlS8SWg==}
     peerDependencies:
       '@tanstack/query-core': '>=5.0.0'
       ox: '>=0.11.1'
@@ -2962,12 +2944,12 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.1
 
-  '@openlv/connector@0.0.1-beta.12(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(tailwindcss@4.2.2)(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)':
+  '@openlv/connector@0.0.1-beta.12(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(tailwindcss@4.2.2)(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)':
     dependencies:
-      '@openlv/core': 0.0.1-beta.9(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@openlv/modal': 0.0.1-beta.11(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(tailwindcss@4.2.2)(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)
-      '@openlv/provider': 0.0.1-beta.11(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@wagmi/core': 3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/core': 0.0.1-beta.9(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/modal': 0.0.1-beta.11(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(tailwindcss@4.2.2)(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)
+      '@openlv/provider': 0.0.1-beta.11(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@wagmi/core': 3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
       eventemitter3: 5.0.1
       viem: 2.47.6(typescript@5.9.3)(zod@4.3.6)
     transitivePeerDependencies:
@@ -2979,19 +2961,19 @@ snapshots:
       - wagmi
       - zod
 
-  '@openlv/core@0.0.1-beta.9(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))':
+  '@openlv/core@0.0.1-beta.9(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))':
     dependencies:
-      '@wagmi/core': 3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@wagmi/core': 3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
       eventemitter3: 5.0.1
       tweetnacl: 1.0.3
       viem: 2.47.6(typescript@5.9.3)(zod@4.3.6)
 
-  '@openlv/modal@0.0.1-beta.11(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(tailwindcss@4.2.2)(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)':
+  '@openlv/modal@0.0.1-beta.11(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(tailwindcss@4.2.2)(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)':
     dependencies:
-      '@openlv/core': 0.0.1-beta.9(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@openlv/provider': 0.0.1-beta.11(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@openlv/session': 0.0.1-beta.11(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@openlv/signaling': 0.0.1-beta.8(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/core': 0.0.1-beta.9(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/provider': 0.0.1-beta.11(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/session': 0.0.1-beta.11(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/signaling': 0.0.1-beta.8(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
       classnames: 2.5.1
       eventemitter3: 5.0.1
       lucide-solid: 0.574.0(solid-js@1.9.12)
@@ -3012,13 +2994,13 @@ snapshots:
       - wagmi
       - zod
 
-  '@openlv/provider@0.0.1-beta.11(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))':
+  '@openlv/provider@0.0.1-beta.11(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))':
     dependencies:
-      '@openlv/core': 0.0.1-beta.9(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@openlv/session': 0.0.1-beta.11(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@openlv/signaling': 0.0.1-beta.8(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@openlv/transport': 0.0.1-beta.8(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@wagmi/core': 3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/core': 0.0.1-beta.9(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/session': 0.0.1-beta.11(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/signaling': 0.0.1-beta.8(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/transport': 0.0.1-beta.8(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@wagmi/core': 3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
       eventemitter3: 5.0.1
       ox: 0.9.17(typescript@5.9.3)(zod@4.3.6)
       ts-pattern: 5.9.0
@@ -3030,12 +3012,12 @@ snapshots:
       - utf-8-validate
       - wagmi
 
-  '@openlv/session@0.0.1-beta.11(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))':
+  '@openlv/session@0.0.1-beta.11(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))':
     dependencies:
-      '@openlv/core': 0.0.1-beta.9(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@openlv/signaling': 0.0.1-beta.8(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@openlv/transport': 0.0.1-beta.8(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@wagmi/core': 3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/core': 0.0.1-beta.9(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/signaling': 0.0.1-beta.8(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/transport': 0.0.1-beta.8(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@wagmi/core': 3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
       eventemitter3: 5.0.1
       globals: 16.5.0
       ts-pattern: 5.9.0
@@ -3044,10 +3026,10 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@openlv/signaling@0.0.1-beta.8(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))':
+  '@openlv/signaling@0.0.1-beta.8(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))':
     dependencies:
-      '@openlv/core': 0.0.1-beta.9(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@wagmi/core': 3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/core': 0.0.1-beta.9(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@wagmi/core': 3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
       eventemitter3: 5.0.1
       globals: 16.5.0
       gun: 0.2020.1241
@@ -3058,10 +3040,10 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@openlv/transport@0.0.1-beta.8(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))':
+  '@openlv/transport@0.0.1-beta.8(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))':
     dependencies:
-      '@openlv/core': 0.0.1-beta.9(@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
-      '@wagmi/core': 3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@openlv/core': 0.0.1-beta.9(@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6)))(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
+      '@wagmi/core': 3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))
       eventemitter3: 5.0.1
       globals: 16.5.0
       ts-pattern: 5.9.0
@@ -3457,22 +3439,6 @@ snapshots:
       typescript: 5.9.3
 
   '@wagmi/core@3.4.1(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))':
-    dependencies:
-      eventemitter3: 5.0.1
-      mipd: 0.0.7(typescript@5.9.3)
-      viem: 2.47.6(typescript@5.9.3)(zod@4.3.6)
-      zustand: 5.0.0
-    optionalDependencies:
-      '@tanstack/query-core': 5.96.2
-      ox: 0.14.10(typescript@5.9.3)(zod@4.3.6)
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - '@types/react'
-      - immer
-      - react
-      - use-sync-external-store
-
-  '@wagmi/core@3.4.2(@tanstack/query-core@5.96.2)(ox@0.14.10(typescript@5.9.3)(zod@4.3.6))(typescript@5.9.3)(viem@2.47.6(typescript@5.9.3)(zod@4.3.6))':
     dependencies:
       eventemitter3: 5.0.1
       mipd: 0.0.7(typescript@5.9.3)

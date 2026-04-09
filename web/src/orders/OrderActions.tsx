@@ -3,9 +3,9 @@ import { type Component, Show } from "solid-js";
 import { match } from "ts-pattern";
 
 import { useApp } from "../hooks/useApp";
+import type { Offer } from "../hooks/useOffers";
 import { isEvmSide, isOwner, isXmrSide } from "../utils/escrow";
 import { getStoredKeys } from "../utils/keyStore";
-import type { Offer } from "../utils/offers";
 import { CancelAction } from "./actions/CancelAction";
 import { ClaimAction } from "./actions/ClaimAction";
 import { QuitAction } from "./actions/QuitAction";

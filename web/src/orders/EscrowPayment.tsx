@@ -1,11 +1,11 @@
 import { type Component, createMemo, Show } from "solid-js";
 
+import type { Offer } from "../hooks/useOffers";
 import {
   createMoneroPaymentUri,
   getEscrowAddress,
   getXmrAmount,
 } from "../utils/escrow";
-import type { Offer } from "../utils/offers";
 import { QRCodeDisplay } from "./QRCode";
 
 export const EscrowPayment: Component<{

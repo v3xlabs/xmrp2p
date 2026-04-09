@@ -1,8 +1,8 @@
 import { CgSpinner } from "solid-icons/cg";
 import { type Component, Show } from "solid-js";
 
+import type { Offer } from "../../hooks/useOffers";
 import { useTakeOrder } from "../../hooks/useTakeOrder";
-import type { Offer } from "../../utils/offers";
 import { ActionFeedback } from "./ActionFeedback";
 
 export const TakeAction: Component<{

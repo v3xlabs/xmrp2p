@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/solid-query";
-import { getAccount, simulateContract, writeContract } from "@wagmi/core";
+import { getAccount, simulateContract, writeContract } from "@wagmi/solid/actions";
 import { english, generateMnemonic } from "viem/accounts";
 import { ABI, generateMoneroKeys } from "xmrp2p";
 
@@ -17,7 +17,7 @@ export const useCreateOrder = () => {
   const keys = generateMoneroKeys(seedphrase);
 
   const prepareOrder = useQuery(() => ({
-    queryKey: queryKeys.prepareOrder(chainId()!, offerType(), rateValue(), ethAmount()),
+    queryKey: queryKeys.prepareOrder(chainId()!, offerType(), rateValue() ?? 0n, ethAmount()),
     queryFn: async () => {
       const address = contractAddress();
       const value = ethAmount();

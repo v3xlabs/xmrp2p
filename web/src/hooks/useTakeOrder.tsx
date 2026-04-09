@@ -1,14 +1,14 @@
 import { createQuery, useMutation } from "@tanstack/solid-query";
-import { getAccount, simulateContract, writeContract } from "@wagmi/core";
+import { getConnection, simulateContract, writeContract } from "@wagmi/solid/actions";
 import type { Accessor } from "solid-js";
 import { english, generateMnemonic } from "viem/accounts";
 import { ABI, generateMoneroKeys } from "xmrp2p";
 
 import { config, queryClient } from "../config";
 import { storeOrderKeys } from "../utils/keyStore";
-import type { Offer } from "../utils/offers";
 import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
+import type { Offer } from "./useOffers";
 
 export const useTakeOrder = (offer: Accessor<Offer | undefined>) => {
   const { chainId, contractAddress } = useApp();
@@ -64,7 +64,7 @@ export const useTakeOrder = (offer: Accessor<Offer | undefined>) => {
 
       if (!o) throw new Error("No offer");
 
-      const account = getAccount(config);
+      const account = getConnection(config);
 
       if (!account.address) throw new Error("Wallet not connected");
 

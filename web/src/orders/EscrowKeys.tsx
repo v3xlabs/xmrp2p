@@ -1,6 +1,7 @@
 import { Tabs } from "@kobalte/core/tabs";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 
+import type { Offer } from "../hooks/useOffers";
 import {
   combinePrivateKeys,
   createMoneroViewUri,
@@ -9,7 +10,6 @@ import {
   toMoneroKeyHex,
 } from "../utils/escrow";
 import type { StoredOrderKeys } from "../utils/keyStore";
-import type { Offer } from "../utils/offers";
 import { KeyDisplay } from "./KeyDisplay";
 import { QRCodeDisplay } from "./QRCode";
 

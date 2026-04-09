@@ -63,6 +63,8 @@ export const useQuitOrder = (params: Accessor<QuitParams | undefined>) => {
     mutationFn: async () => {
       if (!simulation.data) throw new Error("Simulation not ready");
 
+      if ("error" in simulation.data) throw new Error("Simulation failed");
+
       return writeContract(config, simulation.data.request);
     },
     onSettled: () => {

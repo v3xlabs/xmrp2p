@@ -4,8 +4,8 @@ import type { Accessor } from "solid-js";
 import { ABI, getOffers } from "xmrp2p";
 
 import { config } from "../config";
-import { useApp } from "../hooks/useApp";
-import { queryKeys } from "./queryKeys";
+import { queryKeys } from "../utils/queryKeys";
+import { useApp } from "./useApp";
 
 export type Offer = Awaited<ReturnType<typeof getOffers>>[number];
 
@@ -25,7 +25,7 @@ export const useOffers = (activeOfferId?: Accessor<bigint | null>) => {
         functionName: "listOffers",
         args: [BigInt(pageParam) * PAGE_SIZE, PAGE_SIZE + 1n, false],
         address: contractAddress() as `0x${string}`,
-        chainId: chainId() as unknown,
+        chainId: chainId()!,
       });
 
       return offers.filter(offer => offer.state !== 0);

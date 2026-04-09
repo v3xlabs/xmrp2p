@@ -1,14 +1,14 @@
-import { FaBrandsGit, FaBrandsGitAlt, FaBrandsGithub, FaSolidFileContract, FaSolidUpDown } from "solid-icons/fa";
+import { useChainId, useChains } from "@wagmi/solid";
+import { FaBrandsGitAlt, FaSolidFileContract, FaSolidUpDown } from "solid-icons/fa";
 import { Show, Suspense } from "solid-js";
 import { match } from "ts-pattern";
 import { formatEther } from "viem";
 
 import ethIcon from "../assets/eth.svg";
+import { useApp } from "../hooks/useApp";
 import { useCreateOrder } from "../hooks/useCreateOrder";
 import { Price } from "./price";
 import { TokenSelector } from "./TokenSelector";
-import { useApp } from "../hooks/useApp";
-import { useChainId, useChains } from "@wagmi/solid";
 
 export const Swap = () => {
   const {

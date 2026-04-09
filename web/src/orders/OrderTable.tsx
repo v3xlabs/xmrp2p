@@ -13,9 +13,9 @@ import { formatEther, formatUnits } from "viem";
 
 import ethIcon from "../assets/eth.svg";
 import xmrIcon from "../assets/xmr.svg";
+import { type Offer, useOffers } from "../hooks/useOffers";
 import { Price } from "../swap/price";
 import { Addr } from "../utils/address";
-import { type Offer, useOffers } from "../utils/offers";
 import { OrderDetailModal } from "./OrderDetailModal";
 import { StatusBadge } from "./StatusBadge";
 
@@ -144,19 +144,19 @@ export const OrderTable: Component = () => {
     allOffers().filter(isPast),
   );
 
-  const openTable = createSolidTable(() => ({
+  const openTable = createSolidTable({
     columns,
     data: openOffers(),
     getCoreRowModel: getCoreRowModel(),
-  }));
+  });
 
-  const pastTable = createSolidTable(() => ({
+  const pastTable = createSolidTable({
     columns,
     data: pastOffers(),
     getCoreRowModel: getCoreRowModel(),
-  }));
+  });
 
-  const renderTable = (table: ReturnType<typeof createSolidTable>, offers: () => Offer[]) => (
+  const renderTable = (table: typeof openTable | typeof pastTable, offers: () => Offer[]) => (
     <Show
       when={offers().length > 0}
       fallback={(
