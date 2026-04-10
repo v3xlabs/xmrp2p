@@ -16,3 +16,9 @@ deploy-sepolia:
 
 verify-sepolia:
 	cd contracts && forge verify-contract 0x4fd57ad6fF61FE7455772fB49647a8fa3aA2C33A src/XMRP2P.sol:XMRP2P --chain sepolia --constructor-args 0x225f137127d9067788314bc7fcc1f36746a3c3B5
+
+test:
+	cd contracts && forge test
+
+cov:
+	cd contracts && forge test --gas-report --match-path "tests/solidity/XMRP2P*" && forge snapshot
