@@ -1,13 +1,12 @@
 /* eslint-disable @stylistic/indent */
 /* eslint-disable no-restricted-syntax */
 import { Select } from "@kobalte/core/select";
-import { useChains, useSwitchChain } from "@wagmi/solid";
+import { useSwitchChain } from "@wagmi/solid";
 import { FaSolidCheck, FaSolidChevronDown } from "solid-icons/fa";
-import { createMemo } from "solid-js";
+import { createEffect } from "solid-js";
 import { anvil, hoodi, mainnet, sepolia } from "viem/chains";
 
 import ethIcon from "../assets/eth_tint.svg?raw";
-import { useSettings } from "../context/SettingsContext";
 import { useApp } from "../hooks/useApp";
 
 const chainIdToColor = (chainId: number) => {
@@ -48,30 +47,26 @@ const ChainIcon = (props: { chainId: number; }) => {
 };
 
 export const ChainSelector = () => {
-    const { modes } = useSettings();
     const switchChain = useSwitchChain();
-    const { chainId } = useApp();
-    const chains = useChains();
+    const { chainId, chains } = useApp();
 
-    const availableChains = createMemo(() => chains().filter((chain) => {
-        if (modes.devnets && chain.id === anvil.id) return true;
+    createEffect(() => {
+        const chainIdent = chainId();
 
-        if (modes.testnets && chain.id === sepolia.id) return true;
-
-        if (modes.mainnets && chain.id === mainnet.id) return true;
-
-        return false;
-    }));
+        if (!chains().some(chain => chain.id === chainIdent)) {
+            switchChain.mutate({ chainId: chains()[0].id });
+        }
+    });
 
     return (
         <div>
             <Select
               value={chainId()?.toString()}
-              options={availableChains().map(chain => chain.id)}
+              options={chains().map(chain => chain.id)}
               placeholder="Select a chain…"
               class="input"
               itemComponent={(props) => {
-                    const chain = availableChains().find(chain => chain.id === Number(props.item.rawValue));
+                    const chain = chains().find(chain => chain.id === Number(props.item.rawValue));
 
                     return (
                         <Select.Item item={props.item} class="flex items-center gap-1 px-2 py-1 hover:bg-(--thorin-background-secondary) hover:cursor-pointer">
@@ -90,7 +85,7 @@ export const ChainSelector = () => {
                         {state => (
                             <span class="flex items-center gap-1">
                                 <ChainIcon chainId={Number(state.selectedOption())} />
-                                {availableChains().find(chain => chain.id === Number(state.selectedOption()))?.name}
+                                {chains().find(chain => chain.id === Number(state.selectedOption()))?.name}
                             </span>
                         )}
                     </Select.Value>

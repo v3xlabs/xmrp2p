@@ -1,4 +1,4 @@
-import { useChainId, useChains } from "@wagmi/solid";
+import { useChains } from "@wagmi/solid";
 import { FaBrandsGitAlt, FaSolidFileContract, FaSolidUpDown } from "solid-icons/fa";
 import { Show, Suspense } from "solid-js";
 import { match } from "ts-pattern";
@@ -35,9 +35,8 @@ export const Swap = () => {
       sellAmountValue,
     } } = useCreateOrder();
 
-  const { contractAddress } = useApp();
+  const { contractAddress, chainId } = useApp();
   const chains = useChains();
-  const chainId = useChainId();
   // eslint-disable-next-line no-restricted-syntax
   const chain = () => chains().find(chain => chain.id === chainId());
 

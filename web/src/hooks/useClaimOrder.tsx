@@ -29,6 +29,7 @@ export const useClaimOrder = (params: Accessor<ClaimParams | undefined>) => {
         functionName: "claim",
         args: [p.offer_id, p.privateSpendKey],
         address: contractAddress()!,
+        chainId: chainId()!,
       });
     },
     enabled: !!params() && !!contractAddress(),

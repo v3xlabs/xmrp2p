@@ -40,6 +40,7 @@ export const useCreateOrder = () => {
         ],
         address,
         value,
+        chainId: chainId()!,
       });
 
       return data;
