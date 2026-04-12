@@ -1,6 +1,7 @@
 import { createInfiniteQuery } from "@tanstack/solid-query";
-import { readContract } from "@wagmi/solid/actions";
-import type { Accessor } from "solid-js";
+import { readContract, watchContractEvent } from "@wagmi/solid/actions";
+import { anvil, sepolia } from "@wagmi/solid/chains";
+import { type Accessor, createEffect, onCleanup } from "solid-js";
 import { ABI, getOffers } from "xmrp2p";
 
 import { config, queryClient } from "../config";
@@ -8,16 +9,18 @@ import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
 
 export type Offer = Awaited<ReturnType<typeof getOffers>>[number];
+type SupportedChainId = typeof anvil.id | typeof sepolia.id;
 
 const PAGE_SIZE = 10n;
 
 const POLL_INTERVAL_DEFAULT = 50_000;
 const POLL_INTERVAL_ACTIVE = 10_000;
+const EVENT_POLL_INTERVAL = 4_000;
 
 export const useOffers = (activeOfferId?: Accessor<bigint | null>) => {
   const { chainId, contractAddress } = useApp();
 
-  return createInfiniteQuery(() => ({
+  const query = createInfiniteQuery(() => ({
     queryKey: queryKeys.offers.all(chainId()!),
     queryFn: async ({ pageParam }) => {
       const offers = await readContract(config, {
@@ -48,4 +51,31 @@ export const useOffers = (activeOfferId?: Accessor<bigint | null>) => {
     getNextPageParam: (lastPage, pages) => (lastPage.length >= 10 ? pages.length : undefined),
     refetchInterval: activeOfferId?.() ? POLL_INTERVAL_ACTIVE : POLL_INTERVAL_DEFAULT,
   }));
+
+  createEffect(() => {
+    const currentChainId = chainId() as SupportedChainId | undefined;
+    const address = contractAddress();
+
+    if (!currentChainId || !address) return;
+
+    const unwatch = watchContractEvent(config, {
+      abi: ABI,
+      address,
+      chainId: currentChainId,
+      eventName: "OfferEvent",
+      poll: true,
+      pollingInterval: EVENT_POLL_INTERVAL,
+      onLogs: (logs) => {
+        if (logs.length === 0) return;
+
+        void query.refetch();
+      },
+    });
+
+    onCleanup(() => {
+      unwatch();
+    });
+  });
+
+  return query;
 };
