@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import { Tabs } from "@kobalte/core/tabs";
 import {
   createColumnHelper,
@@ -5,10 +6,9 @@ import {
   flexRender,
   getCoreRowModel,
 } from "@tanstack/solid-table";
-import { createVirtualizer } from "@tanstack/solid-virtual";
 import classnames from "classnames";
 import { CgSpinner } from "solid-icons/cg";
-import { type Accessor, type Component, createEffect, createMemo, createSignal, For, Show } from "solid-js";
+import { type Accessor, type Component, createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
 import { match } from "ts-pattern";
 import { formatEther, formatUnits } from "viem";
 
@@ -21,7 +21,6 @@ import { OrderDetailModal } from "./OrderDetailModal";
 import { StatusBadge } from "./StatusBadge";
 
 const columnHelper = createColumnHelper<Offer>();
-const ROW_HEIGHT = 76;
 const TABLE_GRID_COLUMNS = "minmax(72px,0.7fr) minmax(150px,1.2fr) minmax(170px,1.35fr) minmax(132px,0.95fr) minmax(132px,0.95fr) minmax(132px,0.95fr) minmax(96px,0.8fr)";
 
 const columns = [
@@ -123,11 +122,14 @@ type TableProps = {
   isLoading: boolean;
   isError: boolean;
   emptyLabel: string;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  fetchNextPage: () => Promise<unknown>;
   onSelectOffer: (offerId: bigint) => void;
 };
 
 const Table: Component<TableProps> = (props) => {
-  let scrollElement: HTMLDivElement | undefined;
+  let loadMoreElement: HTMLDivElement | undefined;
 
   const table = createSolidTable({
     columns,
@@ -139,123 +141,158 @@ const Table: Component<TableProps> = (props) => {
   });
 
   const tableRows = createMemo(() => table.getRowModel().rows);
-  const rowVirtualizer = createVirtualizer<HTMLDivElement, HTMLDivElement>({
-    get count() {
-      return tableRows().length;
-    },
-    getScrollElement: () => scrollElement ?? null,
-    estimateSize: () => ROW_HEIGHT,
-    overscan: 12,
-  });
-  const virtualRows = createMemo(() => rowVirtualizer.getVirtualItems());
-  const paddingTop = createMemo(() => (virtualRows().length > 0 ? virtualRows()[0]!.start : 0));
-  const paddingBottom = createMemo(() => {
-    const items = virtualRows();
-
-    if (items.length === 0) return 0;
-
-    return rowVirtualizer.getTotalSize() - items[items.length - 1]!.end;
-  });
 
   createEffect(() => {
-    tableRows().length;
-    queueMicrotask(() => {
-      rowVirtualizer.scrollToOffset(0);
-      rowVirtualizer.measure();
+    const element = loadMoreElement;
+
+    if (!element) {
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+
+      if (entry?.isIntersecting && props.hasNextPage && !props.isFetchingNextPage) {
+        void props.fetchNextPage();
+      }
+    }, { rootMargin: "400px 0px" });
+
+    observer.observe(element);
+
+    onCleanup(() => {
+      observer.disconnect();
     });
   });
 
   return (
-    <div class="card flex h-[70vh] min-h-[32rem] flex-col p-2 xl:h-full xl:min-h-0">
-      <div
-        ref={element => {
-          scrollElement = element;
-        }}
-        class="min-h-0 flex-1 overflow-auto"
-      >
-        <div class="min-w-[980px]">
-          <div class="sticky top-0 z-10 bg-(--thorin-background-primary)">
-            <For each={table.getHeaderGroups()}>
-              {headerGroup => (
-                <div class="grid border-b border-(--thorin-border)" style={{ "grid-template-columns": TABLE_GRID_COLUMNS }}>
-                  <For each={headerGroup.headers}>
-                    {header => {
-                      const isRightAligned = ["price", "eth_amount", "xmr_amount", "state"].includes(header.column.id);
+    <div class="card flex min-h-[32rem] flex-col p-2">
+      <div class="min-w-[980px]">
+        <div class="sticky top-0 z-10 bg-(--thorin-background-primary)">
+          <For each={table.getHeaderGroups()}>
+            {headerGroup => (
+              <div class="grid border-b border-(--thorin-border)" style={{ "grid-template-columns": TABLE_GRID_COLUMNS }}>
+                <For each={headerGroup.headers}>
+                  {(header) => {
+                    const isRightAligned = ["price", "eth_amount", "xmr_amount", "state"].includes(header.column.id);
 
-                      return (
-                        <div class="px-3 py-2 text-left text-xs font-medium text-(--thorin-text-secondary) uppercase tracking-wider">
-                          <div class={classnames("w-full", isRightAligned ? "text-right" : "text-left")}>
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(header.column.columnDef.header, header.getContext())}
-                          </div>
+                    return (
+                      <div class="px-3 py-2 text-left text-xs font-medium text-(--thorin-text-secondary) uppercase tracking-wider">
+                        <div class={classnames("w-full", isRightAligned ? "text-right" : "text-left")}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(header.column.columnDef.header, header.getContext())}
                         </div>
-                      );
-                    }}
-                  </For>
-                </div>
-              )}
-            </For>
-          </div>
-          <Show
-            when={tableRows().length > 0}
-            fallback={(
-              <div class="py-8 text-center text-(--thorin-text-secondary) text-sm">
-                {match(props)
-                  .when(q => q.isLoading, () => "Loading offers...")
-                  .when(q => q.isError, () => "Failed to load offers")
-                  .otherwise(() => props.emptyLabel)}
+                      </div>
+                    );
+                  }}
+                </For>
               </div>
             )}
-          >
-            <Show when={paddingTop() > 0}>
-              <div style={{ height: `${paddingTop()}px` }} />
-            </Show>
-            <For each={virtualRows()}>
-              {virtualRow => {
-                const row = () => tableRows()[virtualRow.index];
-
-                return (
-                  <div
-                    class="grid cursor-pointer transition-colors hover:bg-(--thorin-background-secondary)"
-                    style={{ "grid-template-columns": TABLE_GRID_COLUMNS }}
-                    onClick={() => row() && props.onSelectOffer(row()!.original.id)}
-                  >
-                    <For each={row()?.getVisibleCells() ?? []}>
-                      {cell => (
-                        <div class="px-3 py-2.5 text-sm flex items-center min-h-[76px]">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </div>
-                      )}
-                    </For>
-                  </div>
-                );
-              }}
-            </For>
-            <Show when={paddingBottom() > 0}>
-              <div style={{ height: `${paddingBottom()}px` }} />
-            </Show>
-          </Show>
+          </For>
         </div>
+        <Show
+          when={tableRows().length > 0}
+          fallback={(
+            <div class="py-8 text-center text-(--thorin-text-secondary) text-sm">
+              {match(props)
+                .when(q => q.isLoading, () => "Loading offers...")
+                .when(q => q.isError, () => "Failed to load offers")
+                .otherwise(() => props.emptyLabel)}
+            </div>
+          )}
+        >
+          <For each={tableRows()}>
+            {row => (
+              <div
+                class="grid cursor-pointer transition-colors hover:bg-(--thorin-background-secondary)"
+                style={{ "grid-template-columns": TABLE_GRID_COLUMNS }}
+                onClick={() => props.onSelectOffer(row.original.id)}
+              >
+                <For each={row.getVisibleCells()}>
+                  {cell => (
+                    <div class="px-3 py-2.5 text-sm flex items-center min-h-[76px]">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </div>
+                  )}
+                </For>
+              </div>
+            )}
+          </For>
+        </Show>
+        <Show when={props.hasNextPage || props.isFetchingNextPage}>
+          <div ref={loadMoreElement} class="flex justify-center py-3 text-sm text-(--thorin-text-secondary)">
+            <Show when={props.isFetchingNextPage} fallback={<span>Scroll to load more</span>}>
+              <span class="inline-flex items-center gap-2">
+                <CgSpinner class="animate-spin shrink-0" />
+                Loading more...
+              </span>
+            </Show>
+          </div>
+        </Show>
       </div>
     </div>
   );
 };
 
+type OrdersTabContentProps = {
+  allOffers: Accessor<Offer[]>;
+  isLoading: boolean;
+  isError: boolean;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  fetchNextPage: () => Promise<unknown>;
+  onSelectOffer: (offerId: bigint) => void;
+};
+
+const OpenOrdersTab: Component<OrdersTabContentProps> = (props) => {
+  const offers = createMemo(() => props.allOffers().filter(offer => !isPast(offer)));
+
+  return (
+    <Tabs.Content value="open" class="flex flex-col gap-2">
+      <Table
+        offers={offers}
+        isLoading={props.isLoading}
+        isError={props.isError}
+        emptyLabel="No open offers"
+        hasNextPage={props.hasNextPage}
+        isFetchingNextPage={props.isFetchingNextPage}
+        fetchNextPage={props.fetchNextPage}
+        onSelectOffer={props.onSelectOffer}
+      />
+    </Tabs.Content>
+  );
+};
+
+const PastOrdersTab: Component<OrdersTabContentProps> = (props) => {
+  const offers = createMemo(() => props.allOffers().filter(isPast));
+
+  return (
+    <Tabs.Content value="history" class="flex flex-col gap-2">
+      <Table
+        offers={offers}
+        isLoading={props.isLoading}
+        isError={props.isError}
+        emptyLabel="No matching history yet"
+        hasNextPage={props.hasNextPage}
+        isFetchingNextPage={props.isFetchingNextPage}
+        fetchNextPage={props.fetchNextPage}
+        onSelectOffer={props.onSelectOffer}
+      />
+    </Tabs.Content>
+  );
+};
+
 export const OrderTable: Component = () => {
   const [selectedOfferId, setSelectedOfferId] = createSignal<bigint | null>(null);
-  const query = useOffers(selectedOfferId);
+  const query = useOffers();
 
   const allOffers = createMemo(() =>
-    ((query.data?.pages.flat() ?? []) as Offer[]).filter(offer => offer.state !== 0),
+    (query.data?.pages.flatMap(page => page.offers) ?? []) as Offer[],
   );
-
-  const openOffers = createMemo(() => allOffers().filter(offer => !isPast(offer)));
-  const pastOffers = createMemo(() => allOffers().filter(isPast));
 
   return (
     <>
-      <Tabs aria-label="Orders" defaultValue="open" class="relative h-full">
+      <Tabs aria-label="Orders" defaultValue="open" class="relative flex flex-col">
         <div class="px-2 flex flex-col gap-3 md:flex-row md:justify-between md:items-end">
           <div class="space-y-2">
             <Tabs.List class="relative flex items-center">
@@ -271,39 +308,29 @@ export const OrderTable: Component = () => {
             </Tabs.List>
           </div>
           <div class="flex items-center gap-2 md:items-end">
-            <Show when={query.isLoading || query.isFetching}>
+            <Show when={query.isLoading || (query.isFetching && !query.isFetchingNextPage)}>
               <CgSpinner class="animate-spin shrink-0" />
             </Show>
           </div>
         </div>
-        <Tabs.Content value="open" class="h-full space-y-2">
-          <Table
-            offers={openOffers}
-            isLoading={query.isLoading}
-            isError={query.isError}
-            emptyLabel="No open offers"
-            onSelectOffer={setSelectedOfferId}
-          />
-          <Show when={query.hasNextPage}>
-            <button class="btn px-3 py-2" onClick={() => query.fetchNextPage()}>
-              Load more
-            </button>
-          </Show>
-        </Tabs.Content>
-        <Tabs.Content value="history" class="h-full space-y-2">
-          <Table
-            offers={pastOffers}
-            isLoading={query.isLoading}
-            isError={query.isError}
-            emptyLabel="No matching history yet"
-            onSelectOffer={setSelectedOfferId}
-          />
-          <Show when={query.hasNextPage}>
-            <button class="btn px-3 py-2" onClick={() => query.fetchNextPage()}>
-              Load more
-            </button>
-          </Show>
-        </Tabs.Content>
+        <OpenOrdersTab
+          allOffers={allOffers}
+          isLoading={query.isLoading}
+          isError={query.isError}
+          hasNextPage={query.hasNextPage}
+          isFetchingNextPage={query.isFetchingNextPage}
+          fetchNextPage={query.fetchNextPage}
+          onSelectOffer={setSelectedOfferId}
+        />
+        <PastOrdersTab
+          allOffers={allOffers}
+          isLoading={query.isLoading}
+          isError={query.isError}
+          hasNextPage={query.hasNextPage}
+          isFetchingNextPage={query.isFetchingNextPage}
+          fetchNextPage={query.fetchNextPage}
+          onSelectOffer={setSelectedOfferId}
+        />
       </Tabs>
 
       <Show when={selectedOfferId()}>
