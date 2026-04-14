@@ -6,9 +6,10 @@ import {
   flexRender,
   getCoreRowModel,
 } from "@tanstack/solid-table";
+import { createVirtualizer } from "@tanstack/solid-virtual";
 import classnames from "classnames";
 import { CgSpinner } from "solid-icons/cg";
-import { type Accessor, type Component, createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
+import { type Accessor, type Component, createEffect, createMemo, createSignal, For, Show } from "solid-js";
 import { match } from "ts-pattern";
 import { formatEther, formatUnits } from "viem";
 
@@ -129,7 +130,7 @@ type TableProps = {
 };
 
 const Table: Component<TableProps> = (props) => {
-  let loadMoreElement: HTMLDivElement | undefined;
+  const [scrollElement, setScrollElement] = createSignal<HTMLDivElement | null>(null);
 
   const table = createSolidTable({
     columns,
@@ -141,27 +142,50 @@ const Table: Component<TableProps> = (props) => {
   });
 
   const tableRows = createMemo(() => table.getRowModel().rows);
+  const virtualCount = createMemo(() => {
+    const rowCount = tableRows().length;
+
+    return props.hasNextPage ? rowCount + 1 : rowCount;
+  });
+
+  const rowVirtualizer = createVirtualizer<HTMLDivElement, HTMLDivElement>({
+    get count() {
+      return virtualCount();
+    },
+    getScrollElement: () => scrollElement(),
+    initialRect: {
+      height: 900,
+      width: 700,
+    },
+    estimateSize: () => 76,
+    overscan: 8,
+  });
 
   createEffect(() => {
-    const element = loadMoreElement;
+    const element = scrollElement();
+    const rowCount = tableRows().length;
 
-    if (!element) {
+    if (!element || rowCount === 0) {
       return;
     }
 
-    const observer = new IntersectionObserver((entries) => {
-      const entry = entries[0];
-
-      if (entry?.isIntersecting && props.hasNextPage && !props.isFetchingNextPage) {
-        void props.fetchNextPage();
-      }
-    }, { rootMargin: "400px 0px" });
-
-    observer.observe(element);
-
-    onCleanup(() => {
-      observer.disconnect();
+    queueMicrotask(() => {
+      rowVirtualizer.measure();
     });
+  });
+
+  createEffect(() => {
+    const rowCount = tableRows().length;
+    const virtualItems = rowVirtualizer.getVirtualItems();
+    const lastItem = virtualItems[virtualItems.length - 1];
+
+    if (!lastItem || rowCount === 0) {
+      return;
+    }
+
+    if (lastItem.index >= rowCount - 1 && props.hasNextPage && !props.isFetchingNextPage) {
+      void props.fetchNextPage();
+    }
   });
 
   return (
@@ -201,32 +225,56 @@ const Table: Component<TableProps> = (props) => {
             </div>
           )}
         >
-          <For each={tableRows()}>
-            {row => (
-              <div
-                class="grid cursor-pointer transition-colors hover:bg-(--thorin-background-secondary)"
-                style={{ "grid-template-columns": TABLE_GRID_COLUMNS }}
-                onClick={() => props.onSelectOffer(row.original.id)}
-              >
-                <For each={row.getVisibleCells()}>
-                  {cell => (
-                    <div class="px-3 py-2.5 text-sm flex items-center min-h-[76px]">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          <div ref={setScrollElement} class="h-[68vh] overflow-auto">
+            <div
+              class="relative w-full"
+              style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+            >
+              <For each={rowVirtualizer.getVirtualItems()}>
+                {(virtualRow) => {
+                  const row = createMemo(() => tableRows()[virtualRow.index]);
+                  const isLoaderRow = createMemo(() => virtualRow.index >= tableRows().length);
+
+                  return (
+                    <div
+                      class="absolute left-0 top-0 w-full"
+                      style={{
+                        height: `${virtualRow.size}px`,
+                        transform: `translateY(${virtualRow.start}px)`,
+                      }}
+                    >
+                      <Show
+                        when={!isLoaderRow() && row()}
+                        fallback={(
+                          <div class="flex min-h-[76px] items-center justify-center px-3 py-2.5 text-sm text-(--thorin-text-secondary)">
+                            <Show when={props.isFetchingNextPage} fallback={<span>Scroll to load more</span>}>
+                              <span class="inline-flex items-center gap-2">
+                                <CgSpinner class="animate-spin shrink-0" />
+                                Loading more...
+                              </span>
+                            </Show>
+                          </div>
+                        )}
+                      >
+                        <div
+                          class="grid cursor-pointer transition-colors hover:bg-(--thorin-background-secondary)"
+                          style={{ "grid-template-columns": TABLE_GRID_COLUMNS }}
+                          onClick={() => props.onSelectOffer(row()!.original.id)}
+                        >
+                          <For each={row()!.getVisibleCells()}>
+                            {cell => (
+                              <div class="px-3 py-2.5 text-sm flex items-center min-h-[76px]">
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </div>
+                            )}
+                          </For>
+                        </div>
+                      </Show>
                     </div>
-                  )}
-                </For>
-              </div>
-            )}
-          </For>
-        </Show>
-        <Show when={props.hasNextPage || props.isFetchingNextPage}>
-          <div ref={loadMoreElement} class="flex justify-center py-3 text-sm text-(--thorin-text-secondary)">
-            <Show when={props.isFetchingNextPage} fallback={<span>Scroll to load more</span>}>
-              <span class="inline-flex items-center gap-2">
-                <CgSpinner class="animate-spin shrink-0" />
-                Loading more...
-              </span>
-            </Show>
+                  );
+                }}
+              </For>
+            </div>
           </div>
         </Show>
       </div>
@@ -242,6 +290,7 @@ type OrdersTabContentProps = {
   isFetchingNextPage: boolean;
   fetchNextPage: () => Promise<unknown>;
   onSelectOffer: (offerId: bigint) => void;
+  isActive: boolean;
 };
 
 const OpenOrdersTab: Component<OrdersTabContentProps> = (props) => {
@@ -249,41 +298,46 @@ const OpenOrdersTab: Component<OrdersTabContentProps> = (props) => {
 
   return (
     <Tabs.Content value="open" class="flex flex-col gap-2">
-      <Table
-        offers={offers}
-        isLoading={props.isLoading}
-        isError={props.isError}
-        emptyLabel="No open offers"
-        hasNextPage={props.hasNextPage}
-        isFetchingNextPage={props.isFetchingNextPage}
-        fetchNextPage={props.fetchNextPage}
-        onSelectOffer={props.onSelectOffer}
-      />
+      <Show when={props.isActive}>
+        <Table
+          offers={offers}
+          isLoading={props.isLoading}
+          isError={props.isError}
+          emptyLabel="No open offers"
+          hasNextPage={props.hasNextPage}
+          isFetchingNextPage={props.isFetchingNextPage}
+          fetchNextPage={props.fetchNextPage}
+          onSelectOffer={props.onSelectOffer}
+        />
+      </Show>
     </Tabs.Content>
   );
 };
 
 const PastOrdersTab: Component<OrdersTabContentProps> = (props) => {
-  const offers = createMemo(() => props.allOffers().filter(isPast));
+  const offers = createMemo(() => props.allOffers().filter(offer => isPast(offer)));
 
   return (
     <Tabs.Content value="history" class="flex flex-col gap-2">
-      <Table
-        offers={offers}
-        isLoading={props.isLoading}
-        isError={props.isError}
-        emptyLabel="No matching history yet"
-        hasNextPage={props.hasNextPage}
-        isFetchingNextPage={props.isFetchingNextPage}
-        fetchNextPage={props.fetchNextPage}
-        onSelectOffer={props.onSelectOffer}
-      />
+      <Show when={props.isActive}>
+        <Table
+          offers={offers}
+          isLoading={props.isLoading}
+          isError={props.isError}
+          emptyLabel="No matching history yet"
+          hasNextPage={props.hasNextPage}
+          isFetchingNextPage={props.isFetchingNextPage}
+          fetchNextPage={props.fetchNextPage}
+          onSelectOffer={props.onSelectOffer}
+        />
+      </Show>
     </Tabs.Content>
   );
 };
 
 export const OrderTable: Component = () => {
   const [selectedOfferId, setSelectedOfferId] = createSignal<bigint | null>(null);
+  const [activeTab, setActiveTab] = createSignal("open");
   const query = useOffers();
 
   const allOffers = createMemo(() =>
@@ -292,7 +346,7 @@ export const OrderTable: Component = () => {
 
   return (
     <>
-      <Tabs aria-label="Orders" defaultValue="open" class="relative flex flex-col">
+      <Tabs aria-label="Orders" value={activeTab()} onChange={setActiveTab} class="relative flex flex-col">
         <div class="px-2 flex flex-col gap-3 md:flex-row md:justify-between md:items-end">
           <div class="space-y-2">
             <Tabs.List class="relative flex items-center">
@@ -317,6 +371,7 @@ export const OrderTable: Component = () => {
           allOffers={allOffers}
           isLoading={query.isLoading}
           isError={query.isError}
+          isActive={activeTab() === "open"}
           hasNextPage={query.hasNextPage}
           isFetchingNextPage={query.isFetchingNextPage}
           fetchNextPage={query.fetchNextPage}
@@ -326,6 +381,7 @@ export const OrderTable: Component = () => {
           allOffers={allOffers}
           isLoading={query.isLoading}
           isError={query.isError}
+          isActive={activeTab() === "history"}
           hasNextPage={query.hasNextPage}
           isFetchingNextPage={query.isFetchingNextPage}
           fetchNextPage={query.fetchNextPage}
