@@ -90,7 +90,7 @@ export const ChainSelector = () => {
             label: "Devnets",
             options: chainList().filter(chain => chain.category === "devnet"),
         },
-    ]);
+    ].filter(category => category.options.length > 0));
 
     const chain = createMemo(() => chainList().find(chain => chain.value === chainId()?.toString()));
 
