@@ -3,7 +3,7 @@
 import { Select } from "@kobalte/core/select";
 import { useSwitchChain } from "@wagmi/solid";
 import { FaSolidCheck, FaSolidChevronDown } from "solid-icons/fa";
-import { createEffect, createMemo } from "solid-js";
+import { type Accessor, createEffect, createMemo } from "solid-js";
 import { anvil, hoodi, mainnet, sepolia } from "viem/chains";
 
 import ethIcon from "../assets/eth_tint.svg?raw";
@@ -30,8 +30,8 @@ const chainIdToColor = (chainId: number) => {
     }
 };
 
-const ChainIcon = (props: { chainId: number; }) => {
-    const color = chainIdToColor(props.chainId);
+const ChainIcon = (props: { chainId: Accessor<number>; }) => {
+    const color = () => chainIdToColor(props.chainId());
 
     return (
         <div class="w-5 h-5 flex justify-center items-center rounded-full">
@@ -39,7 +39,7 @@ const ChainIcon = (props: { chainId: number; }) => {
               innerHTML={ethIcon}
               class="w-4 h-4 fill-current"
               style={{
-                    color,
+                    color: color(),
                 }}
             />
         </div>
@@ -106,14 +106,14 @@ export const ChainSelector = () => {
               placeholder="Select a chain…"
               class="input"
               itemComponent={props => (
-                        <Select.Item item={props.item} class="flex items-center gap-1 px-2 py-1 hover:bg-(--thorin-background-secondary) hover:cursor-pointer">
-                            <ChainIcon chainId={Number(props.item.rawValue.value)} />
-                            <Select.ItemLabel>{props.item.rawValue.label}</Select.ItemLabel>
-                            <Select.ItemIndicator class="select__item-indicator">
-                                <FaSolidCheck />
-                            </Select.ItemIndicator>
-                        </Select.Item>
-                    )}
+                    <Select.Item item={props.item} class="flex items-center gap-1 px-2 py-1 hover:bg-(--thorin-background-secondary) hover:cursor-pointer">
+                        <ChainIcon chainId={() => Number(props.item.rawValue.value)} />
+                        <Select.ItemLabel>{props.item.rawValue.label}</Select.ItemLabel>
+                        <Select.ItemIndicator class="select__item-indicator">
+                            <FaSolidCheck />
+                        </Select.ItemIndicator>
+                    </Select.Item>
+                )}
               sectionComponent={props => (
                     <Select.Section class="px-2 font-medium">
                         {props.section.rawValue.label}
@@ -125,7 +125,7 @@ export const ChainSelector = () => {
                     <Select.Value<Chain> class="select__value">
                         {state => (
                             <span class="flex items-center gap-1">
-                                <ChainIcon chainId={Number(state.selectedOption().value)} />
+                                <ChainIcon chainId={() => Number(state.selectedOption().value)} />
                                 {state.selectedOption().label}
                             </span>
                         )}

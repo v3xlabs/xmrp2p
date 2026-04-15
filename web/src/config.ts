@@ -15,14 +15,14 @@ export const CONTRACT_ADDRESS: Record<number, string | undefined> = {
 export const config = createConfig({
   chains: [
     // mainnet,
-    anvil,
     sepolia,
+    anvil,
     hoodi,
   ],
   transports: {
     // [mainnet.id]: http(),
-    [anvil.id]: http("http://127.0.0.1:8545"),
     [sepolia.id]: http("https://sepolia.drpc.org"),
+    [anvil.id]: http("http://127.0.0.1:8545"),
     [hoodi.id]: http("https://rpc.hoodi.ethpandaops.io"),
   },
   connectors: [
