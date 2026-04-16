@@ -5,7 +5,7 @@ import { UserProfile } from "./profile";
 
 export const Navbar = () => (
   <>
-    <nav class="w-full flex justify-between px-4 pt-4 md:pt-6 pb-2">
+    <nav class="relative z-20 w-full flex justify-between px-4 pt-4 md:pt-6 pb-2">
       <div class="flex items-center gap-2 px-2">
         <img src={logo} alt="xmrp2p.eth" class="h-10" />
         <div>

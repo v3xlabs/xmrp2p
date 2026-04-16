@@ -12,10 +12,10 @@ import { StatusBadge } from "./StatusBadge";
 
 const columnHelper = createColumnHelper<Offer>();
 
-export const TABLE_GRID_COLUMNS = "minmax(72px,0.7fr) minmax(150px,1.2fr) minmax(170px,1.35fr) minmax(132px,0.95fr) minmax(132px,0.95fr) minmax(132px,0.95fr) minmax(96px,0.8fr)";
-
 export const orderTableColumns = [
   columnHelper.accessor("kind", {
+    size: 88,
+    minSize: 72,
     header: "Side",
     cell: ({ row }) => {
       const isBuy = row.original.kind === 1;
@@ -35,6 +35,8 @@ export const orderTableColumns = [
     },
   }),
   columnHelper.accessor("owner", {
+    size: 160,
+    minSize: 150,
     header: "Owner",
     cell: ({ row }) => (
       <div class="text-left tabular-nums">
@@ -43,6 +45,8 @@ export const orderTableColumns = [
     ),
   }),
   columnHelper.accessor("counterparty", {
+    size: 190,
+    minSize: 170,
     header: "Counterparty",
     cell: ({ row }) => (
       <div class="text-left tabular-nums">
@@ -51,6 +55,8 @@ export const orderTableColumns = [
     ),
   }),
   columnHelper.accessor("price", {
+    size: 144,
+    minSize: 132,
     header: () => <div class="text-right">Rate</div>,
     cell: ({ row }) => (
       <div class="text-right tabular-nums text-(--thorin-text-secondary) text-sm wrap-normal">
@@ -61,6 +67,8 @@ export const orderTableColumns = [
   }),
   columnHelper.display({
     id: "eth_amount",
+    size: 148,
+    minSize: 132,
     header: () => (
       <div class="flex items-center gap-1 justify-end">
         <img src={ethIcon} alt="ETH" class="w-4 h-4" />
@@ -76,6 +84,8 @@ export const orderTableColumns = [
   }),
   columnHelper.display({
     id: "xmr_amount",
+    size: 184,
+    minSize: 168,
     header: () => (
       <div class="flex items-center gap-1 justify-end">
         <img src={xmrIcon} alt="XMR" class="w-4 h-4" />
@@ -97,9 +107,11 @@ export const orderTableColumns = [
     },
   }),
   columnHelper.accessor("state", {
+    size: 124,
+    minSize: 112,
     header: () => <div class="text-right">Status</div>,
     cell: ({ row }) => (
-      <div class="flex justify-end">
+      <div class="flex w-full items-center justify-end">
         <StatusBadge state={row.original.state} />
       </div>
     ),
