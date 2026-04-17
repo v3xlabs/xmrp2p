@@ -44,6 +44,11 @@ type OfferSyncOwner = {
   refCount: number;
   cleanup: () => void;
 };
+type OfferEventLog = {
+  args?: {
+    offer_id?: bigint;
+  };
+};
 
 const PAGE_SIZE = 25n;
 const REPLAY_HEALTH_CHECK_INTERVAL = 30_000;
@@ -91,6 +96,22 @@ export const invalidateOfferCaches = async (chainId: number, offerId?: bigint) =
       ? Promise.resolve()
       : queryClient.invalidateQueries({ queryKey: queryKeys.offers.single(chainId, offerId) }),
   ]);
+};
+
+const getOfferIdsFromLogs = (logs: OfferEventLog[]) => [...new Set(logs
+  .map(log => log.args?.offer_id)
+  .filter((offerId): offerId is bigint => offerId !== undefined))];
+
+const readOffer = async (chainId: SupportedChainId, address: `0x${string}`, offerId: bigint) => {
+  const offerRaw = await readContract(config, {
+    abi: ABI,
+    functionName: "offers",
+    args: [offerId],
+    address,
+    chainId,
+  });
+
+  return decodeOfferTuple(offerRaw);
 };
 
 const upsertOfferInPages = (pages: OffersPage[], offer: Offer): OffersPage[] => {
@@ -142,17 +163,7 @@ const createOfferSyncOwner = (currentChainId: SupportedChainId, address: `0x${st
     if (offerIds.length === 0) return;
 
     await Promise.all(offerIds.map(async (offerId) => {
-      const offerRaw = await readContract(config, {
-        abi: ABI,
-        functionName: "offers",
-        args: [offerId],
-        address,
-        chainId: currentChainId,
-      });
-
-      const offer = decodeOfferTuple(offerRaw);
-
-      applyOfferToCaches(currentChainId, offer);
+      applyOfferToCaches(currentChainId, await readOffer(currentChainId, address, offerId));
     }));
   };
 
@@ -184,9 +195,7 @@ const createOfferSyncOwner = (currentChainId: SupportedChainId, address: `0x${st
         toBlock: latestBlock,
       });
 
-      const offerIds = [...new Set(logs
-        .map(log => log.args.offer_id)
-        .filter((offerId): offerId is bigint => offerId !== undefined))];
+      const offerIds = getOfferIdsFromLogs(logs);
 
       await syncOfferIds(offerIds);
       lastSyncedBlock = latestBlock;
@@ -212,9 +221,7 @@ const createOfferSyncOwner = (currentChainId: SupportedChainId, address: `0x${st
     onLogs: (logs) => {
       if (logs.length === 0) return;
 
-      const offerIds = [...new Set(logs
-        .map(log => log.args.offer_id)
-        .filter((offerId): offerId is bigint => offerId !== undefined))];
+      const offerIds = getOfferIdsFromLogs(logs);
       const maxBlockInBatch = logs.reduce<bigint | undefined>((max, log) => {
         if (max === undefined || log.blockNumber > max) return log.blockNumber;
 
@@ -306,13 +313,7 @@ export const useOffers = () => {
         .filter(offer => offer.state !== 0)
         .reverse();
 
-      for (const offer of pageOffers) {
-        const stale = queryClient.getQueryData(queryKeys.offers.single(chainId()!, offer.id));
-
-        if (JSON.stringify(stale) !== JSON.stringify(offer)) {
-          applyOfferToCaches(chainId()!, offer);
-        }
-      }
+      pageOffers.forEach(offer => applyOfferToCaches(chainId()!, offer));
 
       return {
         offers: pageOffers,
