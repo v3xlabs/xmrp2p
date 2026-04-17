@@ -1,14 +1,15 @@
+/* eslint-disable no-restricted-syntax */
 import { createQuery, useMutation } from "@tanstack/solid-query";
 import { getConnection, simulateContract, writeContract } from "@wagmi/solid/actions";
 import type { Accessor } from "solid-js";
 import { english, generateMnemonic } from "viem/accounts";
 import { ABI, generateMoneroKeys } from "xmrp2p";
 
-import { config, queryClient } from "../config";
+import { config } from "../config";
 import { storeOrderKeys } from "../utils/keyStore";
 import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
-import type { Offer } from "./useOffers";
+import { invalidateOfferCaches, type Offer } from "./useOffers";
 
 export const useTakeOrder = (offer: Accessor<Offer | undefined>) => {
   const { chainId, contractAddress } = useApp();
@@ -88,8 +89,7 @@ export const useTakeOrder = (offer: Accessor<Offer | undefined>) => {
       return hash;
     },
     onSettled: () => {
-      // eslint-disable-next-line no-restricted-syntax
-      queryClient.invalidateQueries({ queryKey: queryKeys.offers.single(chainId()!, offer()?.id ?? 0n) });
+      void invalidateOfferCaches(chainId()!, offer()?.id);
     },
   }));
 

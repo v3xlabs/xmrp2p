@@ -3,9 +3,10 @@ import { simulateContract, writeContract } from "@wagmi/solid/actions";
 import type { Accessor } from "solid-js";
 import { ABI } from "xmrp2p";
 
-import { config, queryClient } from "../config";
+import { config } from "../config";
 import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
+import { invalidateOfferCaches } from "./useOffers";
 
 export type ClaimParams = {
   offer_id: bigint;
@@ -42,7 +43,7 @@ export const useClaimOrder = (params: Accessor<ClaimParams | undefined>) => {
       return writeContract(config, simulation.data.request);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.offers.single(chainId()!, params()?.offer_id ?? 0n) });
+      void invalidateOfferCaches(chainId()!, params()?.offer_id);
     },
   }));
 

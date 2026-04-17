@@ -72,6 +72,27 @@ export const decodeOfferTuple = (offer: OfferTuple): Offer => ({
   t1: offer[18],
 });
 
+export const applyOfferToCaches = (chainId: number, offer: Offer) => {
+  queryClient.setQueryData(queryKeys.offers.single(chainId, offer.id), () => offer);
+  queryClient.setQueryData(queryKeys.offers.all(chainId), (stale: OffersInfiniteData | undefined) => {
+    if (!stale) return stale;
+
+    return {
+      ...stale,
+      pages: upsertOfferInPages(stale.pages, offer),
+    };
+  });
+};
+
+export const invalidateOfferCaches = async (chainId: number, offerId?: bigint) => {
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(chainId) }),
+    offerId === undefined
+      ? Promise.resolve()
+      : queryClient.invalidateQueries({ queryKey: queryKeys.offers.single(chainId, offerId) }),
+  ]);
+};
+
 const upsertOfferInPages = (pages: OffersPage[], offer: Offer): OffersPage[] => {
   let found = false;
 
@@ -113,7 +134,7 @@ const createOfferSyncOwner = (currentChainId: SupportedChainId, address: `0x${st
   let replayRunning = false;
 
   const refetchSnapshot = async () => {
-    await queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(currentChainId) });
+    await invalidateOfferCaches(currentChainId);
     lastSyncedBlock = await getBlockNumber(config, { chainId: currentChainId });
   };
 
@@ -131,15 +152,7 @@ const createOfferSyncOwner = (currentChainId: SupportedChainId, address: `0x${st
 
       const offer = decodeOfferTuple(offerRaw);
 
-      queryClient.setQueryData(queryKeys.offers.single(currentChainId, offerId), () => offer);
-      queryClient.setQueryData(queryKeys.offers.all(currentChainId), (stale: OffersInfiniteData | undefined) => {
-        if (!stale) return stale;
-
-        return {
-          ...stale,
-          pages: upsertOfferInPages(stale.pages, offer),
-        };
-      });
+      applyOfferToCaches(currentChainId, offer);
     }));
   };
 
@@ -297,7 +310,7 @@ export const useOffers = () => {
         const stale = queryClient.getQueryData(queryKeys.offers.single(chainId()!, offer.id));
 
         if (JSON.stringify(stale) !== JSON.stringify(offer)) {
-          queryClient.setQueryData(queryKeys.offers.single(chainId()!, offer.id), () => offer);
+          applyOfferToCaches(chainId()!, offer);
         }
       }
 
