@@ -102,6 +102,22 @@ const getOfferIdsFromLogs = (logs: OfferEventLog[]) => [...new Set(logs
   .map(log => log.args?.offer_id)
   .filter((offerId): offerId is bigint => offerId !== undefined))];
 
+const repartitionOffers = (pages: OffersPage[], offers: Offer[]): OffersPage[] => {
+  let cursor = 0;
+
+  return pages.map((page) => {
+    const nextCursor = cursor + page.offers.length;
+    const nextPageOffers = offers.slice(cursor, nextCursor);
+
+    cursor = nextCursor;
+
+    return {
+      ...page,
+      offers: nextPageOffers,
+    };
+  });
+};
+
 const readOffer = async (chainId: SupportedChainId, address: `0x${string}`, offerId: bigint) => {
   const offerRaw = await readContract(config, {
     abi: ABI,
@@ -115,44 +131,39 @@ const readOffer = async (chainId: SupportedChainId, address: `0x${string}`, offe
 };
 
 const upsertOfferInPages = (pages: OffersPage[], offer: Offer): OffersPage[] => {
-  let found = false;
+  if (pages.length === 0) return pages;
 
-  const nextPages = pages.map((page) => {
-    let changed = false;
-    const offers = page.offers
-      .map((entry) => {
-        if (entry.id !== offer.id) return entry;
+  const loadedOffers = pages.flatMap(page => page.offers);
+  const existingIndex = loadedOffers.findIndex(entry => entry.id === offer.id);
 
-        found = true;
-        changed = true;
+  if (existingIndex !== -1) {
+    const nextOffers = [...loadedOffers];
 
-        return offer;
-      })
-      .filter(entry => entry.state !== 0);
+    if (offer.state === 0) {
+      nextOffers.splice(existingIndex, 1);
+    }
+    else {
+      nextOffers[existingIndex] = offer;
+    }
 
-    return changed ? { ...page, offers } : page;
-  });
-
-  if (found || offer.state === 0 || nextPages.length === 0) {
-    return nextPages;
+    return repartitionOffers(pages, nextOffers);
   }
 
-  const firstPage = nextPages[0]!;
-  const newestLoadedId = firstPage.offers[0]?.id;
+  if (offer.state === 0) return pages;
 
-  if (newestLoadedId === undefined || offer.id > newestLoadedId) {
-    return [{
-      ...firstPage,
-      offers: [offer, ...firstPage.offers].slice(0, Number(PAGE_SIZE)),
-    }, ...nextPages.slice(1)];
+  const newestLoadedId = loadedOffers[0]?.id;
+
+  if (newestLoadedId !== undefined && offer.id <= newestLoadedId) {
+    return pages;
   }
 
-  return nextPages;
+  return repartitionOffers(pages, [offer, ...loadedOffers].slice(0, loadedOffers.length));
 };
 
 const createOfferSyncOwner = (currentChainId: SupportedChainId, address: `0x${string}`) => {
   let lastSyncedBlock: bigint | undefined;
   let replayRunning = false;
+  let syncReady = false;
 
   const refetchSnapshot = async () => {
     await invalidateOfferCaches(currentChainId);
@@ -168,7 +179,7 @@ const createOfferSyncOwner = (currentChainId: SupportedChainId, address: `0x${st
   };
 
   const replaySinceLastSyncedBlock = async () => {
-    if (replayRunning || lastSyncedBlock === undefined) return;
+    if (replayRunning || lastSyncedBlock === undefined || !syncReady) return;
 
     replayRunning = true;
 
@@ -208,10 +219,14 @@ const createOfferSyncOwner = (currentChainId: SupportedChainId, address: `0x${st
     }
   };
 
-  void (async () => {
-    lastSyncedBlock = await getBlockNumber(config, { chainId: currentChainId });
+  const bootstrapSync = async () => {
+    const bootBlock = await getBlockNumber(config, { chainId: currentChainId });
+
+    lastSyncedBlock = bootBlock > 0n ? bootBlock - 1n : 0n;
+    syncReady = true;
+
     await replaySinceLastSyncedBlock();
-  })();
+  };
 
   const unwatch = watchContractEvent(config, {
     abi: ABI,
@@ -242,6 +257,8 @@ const createOfferSyncOwner = (currentChainId: SupportedChainId, address: `0x${st
   const healthCheck = setInterval(() => {
     void replaySinceLastSyncedBlock();
   }, REPLAY_HEALTH_CHECK_INTERVAL);
+
+  void bootstrapSync();
 
   return () => {
     unwatch();
