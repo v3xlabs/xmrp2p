@@ -35,6 +35,7 @@ export type OrdersDataTableProps = {
 
 export const OrdersDataTable: Component<OrdersDataTableProps> = (props) => {
   const [scrollElement, setScrollElement] = createSignal<HTMLDivElement | null>(null);
+  const canLoadMore = () => props.hasNextPage && !props.isLoading && !props.isError;
 
   const table = createSolidTable({
     columns: orderTableColumns,
@@ -97,11 +98,27 @@ export const OrdersDataTable: Component<OrdersDataTableProps> = (props) => {
       <Show
         when={tableRows().length > 0}
         fallback={(
-          <div class="flex flex-1 items-center justify-center px-4 py-8 text-center text-(--thorin-text-secondary) text-sm min-h-[28rem] xl:min-h-[68vh]">
-            {match(props)
-              .when(q => q.isLoading, () => "Loading offers...")
-              .when(q => q.isError, () => "Failed to load offers")
-              .otherwise(() => props.emptyLabel)}
+          <div class="flex min-h-[28rem] flex-1 flex-col items-center justify-center gap-4 px-4 py-8 text-center text-(--thorin-text-secondary) text-sm xl:min-h-[68vh]">
+            <div>
+              {match(props)
+                .when(q => q.isLoading, () => "Loading offers...")
+                .when(q => q.isError, () => "Failed to load offers")
+                .otherwise(() => props.emptyLabel)}
+            </div>
+            <Show when={canLoadMore()}>
+              <button
+                type="button"
+                class="btn flex items-center justify-center gap-2 px-4 py-3 text-sm"
+                onClick={() => void props.fetchNextPage()}
+              >
+                <Show when={props.isFetchingNextPage} fallback={<span>Load more offers</span>}>
+                  <>
+                    <CgSpinner class="shrink-0 animate-spin" />
+                    Loading more...
+                  </>
+                </Show>
+              </button>
+            </Show>
           </div>
         )}
       >

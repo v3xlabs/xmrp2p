@@ -1,17 +1,19 @@
-import { useConnection } from "@wagmi/solid";
 import { Tabs } from "@kobalte/core/tabs";
+import { useConnection } from "@wagmi/solid";
 import { CgSpinner } from "solid-icons/cg";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 
-import { type Offer, useOffers } from "../hooks/useOffers";
+import { type Offer, useOffers, useOfferSync } from "../hooks/useOffers";
 import { OrderDetailModal } from "./OrderDetailModal";
-import { OrdersTabContent } from "./OrdersTabContent";
+import { OrdersDataTable } from "./OrdersDataTable";
 
 const isPast = (offer: Offer) => offer.state == 3 || offer.state == 4 || offer.state == 6;
 
 const isUserInvolved = (offer: Offer, userAddress: string | undefined): boolean => {
   if (!userAddress) return false;
+
   const addr = userAddress.toLowerCase();
+
   return offer.owner.toLowerCase() === addr || offer.counterparty.toLowerCase() === addr;
 };
 
@@ -19,13 +21,17 @@ export const OrderTable: Component = () => {
   const connection = useConnection();
   const [selectedOfferId, setSelectedOfferId] = createSignal<bigint | null>(null);
   const [activeTab, setActiveTab] = createSignal("open");
+
+  useOfferSync();
   const query = useOffers();
 
   const allOffers = createMemo(() =>
     (query.data?.pages.flatMap(page => page.offers) ?? []) as Offer[],
   );
-
-  const userAddress = () => connection().address;
+  const openOffers = createMemo(() => allOffers().filter(offer => !isPast(offer)));
+  const historyOffers = createMemo(() =>
+    allOffers().filter(offer => isPast(offer) && isUserInvolved(offer, connection().address)),
+  );
 
   return (
     <>
@@ -50,32 +56,34 @@ export const OrderTable: Component = () => {
             </Show>
           </div>
         </div>
-        <OrdersTabContent
-          allOffers={allOffers}
-          tabValue="open"
-          emptyLabel="No open offers"
-          filterOffer={offer => !isPast(offer)}
-          isLoading={query.isLoading}
-          isError={query.isError}
-          isActive={activeTab() === "open"}
-          hasNextPage={query.hasNextPage}
-          isFetchingNextPage={query.isFetchingNextPage}
-          fetchNextPage={query.fetchNextPage}
-          onSelectOffer={setSelectedOfferId}
-        />
-        <OrdersTabContent
-          allOffers={allOffers}
-          tabValue="history"
-          emptyLabel="No matching history yet"
-          filterOffer={offer => isPast(offer) && isUserInvolved(offer, userAddress())}
-          isLoading={query.isLoading}
-          isError={query.isError}
-          isActive={activeTab() === "history"}
-          hasNextPage={query.hasNextPage}
-          isFetchingNextPage={query.isFetchingNextPage}
-          fetchNextPage={query.fetchNextPage}
-          onSelectOffer={setSelectedOfferId}
-        />
+        <Tabs.Content value="open" class="flex flex-col gap-2">
+          <Show when={activeTab() === "open"}>
+            <OrdersDataTable
+              emptyLabel="No open offers"
+              offers={openOffers}
+              isLoading={query.isLoading}
+              isError={query.isError}
+              hasNextPage={query.hasNextPage}
+              isFetchingNextPage={query.isFetchingNextPage}
+              fetchNextPage={query.fetchNextPage}
+              onSelectOffer={setSelectedOfferId}
+            />
+          </Show>
+        </Tabs.Content>
+        <Tabs.Content value="history" class="flex flex-col gap-2">
+          <Show when={activeTab() === "history"}>
+            <OrdersDataTable
+              emptyLabel="No matching history yet"
+              offers={historyOffers}
+              isLoading={query.isLoading}
+              isError={query.isError}
+              hasNextPage={query.hasNextPage}
+              isFetchingNextPage={query.isFetchingNextPage}
+              fetchNextPage={query.fetchNextPage}
+              onSelectOffer={setSelectedOfferId}
+            />
+          </Show>
+        </Tabs.Content>
       </Tabs>
 
       <Show when={selectedOfferId()}>

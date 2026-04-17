@@ -14,6 +14,10 @@ type OffersPage = {
   offers: Offer[];
   hasMore: boolean;
 };
+type OffersInfiniteData = {
+  pages: OffersPage[];
+  pageParams: number[];
+};
 type SupportedChainId = typeof anvil.id | typeof sepolia.id;
 
 const PAGE_SIZE = 25n;
@@ -63,44 +67,36 @@ const decodeOfferTuple = (offer: readonly [
 });
 
 const upsertOfferInPages = (pages: OffersPage[], offer: Offer): OffersPage[] => {
-  let existsInPages = false;
+  let found = false;
 
   const nextPages = pages.map((page) => {
     let changed = false;
-    const nextOffers = page.offers
+    const offers = page.offers
       .map((entry) => {
         if (entry.id !== offer.id) return entry;
 
-        existsInPages = true;
+        found = true;
         changed = true;
 
         return offer;
       })
       .filter(entry => entry.state !== 0);
 
-    if (!changed) return page;
-
-    return {
-      ...page,
-      offers: nextOffers,
-    };
+    return changed ? { ...page, offers } : page;
   });
 
-  if (existsInPages || offer.state === 0 || nextPages.length === 0) {
+  if (found || offer.state === 0 || nextPages.length === 0) {
     return nextPages;
   }
 
   const firstPage = nextPages[0]!;
-  const maxLoadedOfferId = firstPage.offers[0]?.id;
+  const newestLoadedId = firstPage.offers[0]?.id;
 
-  if (maxLoadedOfferId === undefined || offer.id > maxLoadedOfferId) {
-    return [
-      {
-        ...firstPage,
-        offers: [offer, ...firstPage.offers].slice(0, Number(PAGE_SIZE)),
-      },
-      ...nextPages.slice(1),
-    ];
+  if (newestLoadedId === undefined || offer.id > newestLoadedId) {
+    return [{
+      ...firstPage,
+      offers: [offer, ...firstPage.offers].slice(0, Number(PAGE_SIZE)),
+    }, ...nextPages.slice(1)];
   }
 
   return nextPages;
@@ -109,7 +105,7 @@ const upsertOfferInPages = (pages: OffersPage[], offer: Offer): OffersPage[] => 
 export const useOffers = () => {
   const { chainId, contractAddress } = useApp();
 
-  const query = createInfiniteQuery(() => ({
+  return createInfiniteQuery(() => ({
     queryKey: queryKeys.offers.all(chainId()!),
     queryFn: async ({ pageParam }) => {
       const nextOfferId = await readContract(config, {
@@ -119,43 +115,40 @@ export const useOffers = () => {
         chainId: chainId()!,
       });
 
-      const totalOffers = nextOfferId > 0n ? nextOfferId - 1n : 0n;
       const pageIndex = BigInt(pageParam);
-      const pageEnd = totalOffers - pageIndex * PAGE_SIZE;
+      const pageEndExclusive = nextOfferId - pageIndex * PAGE_SIZE;
 
-      if (pageEnd <= 0n) {
+      if (pageEndExclusive <= 1n) {
         return {
           offers: [],
           hasMore: false,
         } satisfies OffersPage;
       }
 
-      const pageStart = pageEnd > PAGE_SIZE ? pageEnd - PAGE_SIZE : 0n;
+      const pageStart = pageEndExclusive > PAGE_SIZE ? pageEndExclusive - PAGE_SIZE : 1n;
       const offers = await readContract(config, {
         abi: ABI,
         functionName: "listOffers",
-        args: [pageStart, pageEnd - pageStart, false],
+        args: [pageStart, pageEndExclusive - pageStart, false],
         address: contractAddress() as `0x${string}`,
         chainId: chainId()!,
       });
 
-      const offersFiltered = offers
+      const pageOffers = offers
         .filter(offer => offer.state !== 0)
         .reverse();
 
-      for (const offer of offersFiltered) {
+      for (const offer of pageOffers) {
         const stale = queryClient.getQueryData(queryKeys.offers.single(chainId()!, offer.id));
 
-        if (JSON.stringify(stale) === JSON.stringify(offer)) {
-          continue;
+        if (JSON.stringify(stale) !== JSON.stringify(offer)) {
+          queryClient.setQueryData(queryKeys.offers.single(chainId()!, offer.id), () => offer);
         }
-
-        queryClient.setQueryData(queryKeys.offers.single(chainId()!, offer.id), () => offer);
       }
 
       return {
-        offers: offersFiltered,
-        hasMore: pageStart > 0n,
+        offers: pageOffers,
+        hasMore: pageStart > 1n,
       } satisfies OffersPage;
     },
     initialPageParam: 0,
@@ -164,6 +157,10 @@ export const useOffers = () => {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   }));
+};
+
+export const useOfferSync = () => {
+  const { chainId, contractAddress } = useApp();
 
   createEffect(() => {
     const currentChainId = chainId() as SupportedChainId | undefined;
@@ -172,29 +169,34 @@ export const useOffers = () => {
     let replayRunning = false;
 
     const refetchSnapshot = async () => {
-      await query.refetch();
+      await queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(currentChainId!) });
       lastSyncedBlock = await getBlockNumber(config, { chainId: currentChainId! });
     };
 
-    const applyOfferUpdate = async (offerId: bigint) => {
-      const offerRaw = await readContract(config, {
-        abi: ABI,
-        functionName: "offers",
-        args: [offerId],
-        address: address as `0x${string}`,
-        chainId: currentChainId!,
-      });
-      const offer = decodeOfferTuple(offerRaw);
+    const syncOfferIds = async (offerIds: bigint[]) => {
+      if (offerIds.length === 0) return;
 
-      queryClient.setQueryData(queryKeys.offers.single(currentChainId!, offerId), () => offer);
-      queryClient.setQueryData(queryKeys.offers.all(currentChainId!), (stale: { pages: OffersPage[]; pageParams: number[]; } | undefined) => {
-        if (!stale) return stale;
+      await Promise.all(offerIds.map(async (offerId) => {
+        const offerRaw = await readContract(config, {
+          abi: ABI,
+          functionName: "offers",
+          args: [offerId],
+          address: address as `0x${string}`,
+          chainId: currentChainId!,
+        });
 
-        return {
-          ...stale,
-          pages: upsertOfferInPages(stale.pages, offer),
-        };
-      });
+        const offer = decodeOfferTuple(offerRaw);
+
+        queryClient.setQueryData(queryKeys.offers.single(currentChainId!, offerId), () => offer);
+        queryClient.setQueryData(queryKeys.offers.all(currentChainId!), (stale: OffersInfiniteData | undefined) => {
+          if (!stale) return stale;
+
+          return {
+            ...stale,
+            pages: upsertOfferInPages(stale.pages, offer),
+          };
+        });
+      }));
     };
 
     const replaySinceLastSyncedBlock = async () => {
@@ -225,12 +227,11 @@ export const useOffers = () => {
           toBlock: latestBlock,
         });
 
-        const changedOfferIds = [...new Set(logs
+        const offerIds = [...new Set(logs
           .map(log => log.args.offer_id)
           .filter((offerId): offerId is bigint => offerId !== undefined))];
 
-        await Promise.all(changedOfferIds.map(offerId => applyOfferUpdate(offerId)));
-
+        await syncOfferIds(offerIds);
         lastSyncedBlock = latestBlock;
       }
       catch {
@@ -265,7 +266,7 @@ export const useOffers = () => {
           return max;
         }, lastSyncedBlock);
 
-        void Promise.all(offerIds.map(offerId => applyOfferUpdate(offerId))).then(() => {
+        void syncOfferIds(offerIds).then(() => {
           if (maxBlockInBatch !== undefined) {
             lastSyncedBlock = maxBlockInBatch;
           }
@@ -285,6 +286,4 @@ export const useOffers = () => {
       clearInterval(healthCheck);
     });
   });
-
-  return query;
 };

@@ -29,7 +29,10 @@ export const config = createConfig({
       webSocket("wss://sepolia.drpc.org"),
       http("https://sepolia.drpc.org"),
     ]),
-    [hoodi.id]: http("https://rpc.hoodi.ethpandaops.io"),
+    [hoodi.id]: fallback([
+      webSocket("wss://hoodi.drpc.org"),
+      http("https://hoodi.drpc.org"),
+    ]),
   },
   connectors: [openlv()],
 });
