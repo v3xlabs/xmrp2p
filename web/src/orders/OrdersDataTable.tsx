@@ -27,6 +27,7 @@ export type OrdersDataTableProps = {
   isLoading: boolean;
   isError: boolean;
   emptyLabel: string;
+  loadMoreLabel: string;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   fetchNextPage: () => Promise<unknown>;
@@ -111,7 +112,7 @@ export const OrdersDataTable: Component<OrdersDataTableProps> = (props) => {
                 class="btn flex items-center justify-center gap-2 px-4 py-3 text-sm"
                 onClick={() => void props.fetchNextPage()}
               >
-                <Show when={props.isFetchingNextPage} fallback={<span>Load more offers</span>}>
+                <Show when={props.isFetchingNextPage} fallback={<span>{props.loadMoreLabel}</span>}>
                   <>
                     <CgSpinner class="shrink-0 animate-spin" />
                     Loading more...
@@ -132,7 +133,7 @@ export const OrdersDataTable: Component<OrdersDataTableProps> = (props) => {
               class="btn flex w-full items-center justify-center gap-2 px-4 py-3 text-sm"
               onClick={() => void props.fetchNextPage()}
             >
-              <Show when={props.isFetchingNextPage} fallback={<span>Load more offers</span>}>
+              <Show when={props.isFetchingNextPage} fallback={<span>{props.loadMoreLabel}</span>}>
                 <>
                   <CgSpinner class="shrink-0 animate-spin" />
                   Loading more...

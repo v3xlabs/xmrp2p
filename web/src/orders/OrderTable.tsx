@@ -1,7 +1,7 @@
 import { Tabs } from "@kobalte/core/tabs";
 import { useConnection } from "@wagmi/solid";
 import { CgSpinner } from "solid-icons/cg";
-import { type Component, createMemo, createSignal, Show } from "solid-js";
+import { type Component, createEffect, createMemo, createSignal, Show } from "solid-js";
 
 import { type Offer, useOffers } from "../hooks/useOffers";
 import { OrderDetailModal } from "./OrderDetailModal";
@@ -31,6 +31,36 @@ export const OrderTable: Component = () => {
   const historyOffers = createMemo(() =>
     allOffers().filter(offer => isPast(offer) && isUserInvolved(offer, connection().address)),
   );
+  const shouldAutoSearchHistory = createMemo(() => (
+    activeTab() === "history"
+    && !!connection().address
+    && historyOffers().length === 0
+    && query.hasNextPage
+  ));
+  const historyHasNextPage = createMemo(() => (
+    !!connection().address
+    && query.hasNextPage
+    && historyOffers().length > 0
+  ));
+  const historyEmptyLabel = createMemo(() => {
+    if (!connection().address) {
+      return "Connect your wallet to view past orders";
+    }
+
+    if (shouldAutoSearchHistory() || query.isFetchingNextPage) {
+      return "Searching past orders...";
+    }
+
+    return "No past orders for this wallet";
+  });
+
+  createEffect(() => {
+    if (!shouldAutoSearchHistory()) return;
+
+    if (query.isLoading || query.isError || query.isFetchingNextPage) return;
+
+    void query.fetchNextPage();
+  });
 
   return (
     <>
@@ -59,6 +89,7 @@ export const OrderTable: Component = () => {
           <Show when={activeTab() === "open"}>
             <OrdersDataTable
               emptyLabel="No open offers"
+              loadMoreLabel="Load more offers"
               offers={openOffers}
               isLoading={query.isLoading}
               isError={query.isError}
@@ -72,11 +103,12 @@ export const OrderTable: Component = () => {
         <Tabs.Content value="history" class="flex flex-col gap-2">
           <Show when={activeTab() === "history"}>
             <OrdersDataTable
-              emptyLabel="No matching history yet"
+              emptyLabel={historyEmptyLabel()}
+              loadMoreLabel="Search older offers"
               offers={historyOffers}
               isLoading={query.isLoading}
               isError={query.isError}
-              hasNextPage={query.hasNextPage}
+              hasNextPage={historyHasNextPage()}
               isFetchingNextPage={query.isFetchingNextPage}
               fetchNextPage={query.fetchNextPage}
               onSelectOffer={setSelectedOfferId}
