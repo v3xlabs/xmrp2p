@@ -3,7 +3,7 @@ import { useConnection } from "@wagmi/solid";
 import { CgSpinner } from "solid-icons/cg";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 
-import { type Offer, useOffers, useOfferSync } from "../hooks/useOffers";
+import { type Offer, useOffers } from "../hooks/useOffers";
 import { OrderDetailModal } from "./OrderDetailModal";
 import { OrdersDataTable } from "./OrdersDataTable";
 
@@ -22,7 +22,6 @@ export const OrderTable: Component = () => {
   const [selectedOfferId, setSelectedOfferId] = createSignal<bigint | null>(null);
   const [activeTab, setActiveTab] = createSignal("open");
 
-  useOfferSync();
   const query = useOffers();
 
   const allOffers = createMemo(() =>

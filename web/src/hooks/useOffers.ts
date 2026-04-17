@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 import { createInfiniteQuery } from "@tanstack/solid-query";
 import { getBlockNumber, getContractEvents, readContract, watchContractEvent } from "@wagmi/solid/actions";
-import { anvil, sepolia } from "@wagmi/solid/chains";
+import { anvil, hoodi, sepolia } from "@wagmi/solid/chains";
 import { createEffect, onCleanup } from "solid-js";
 import { ABI, getOffers } from "xmrp2p";
 
@@ -18,33 +18,39 @@ type OffersInfiniteData = {
   pages: OffersPage[];
   pageParams: number[];
 };
-type SupportedChainId = typeof anvil.id | typeof sepolia.id;
+type SupportedChainId = typeof anvil.id | typeof sepolia.id | typeof hoodi.id;
+type OfferTuple = readonly [
+  bigint,
+  number,
+  number,
+  `0x${string}`,
+  `0x${string}`,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+];
+type OfferSyncOwner = {
+  refCount: number;
+  cleanup: () => void;
+};
 
 const PAGE_SIZE = 25n;
 const REPLAY_HEALTH_CHECK_INTERVAL = 30_000;
 const MAX_REPLAY_BLOCK_WINDOW = 2000n;
+const offerSyncOwners = new Map<string, OfferSyncOwner>();
 
-const decodeOfferTuple = (offer: readonly [
-  bigint,
-  number,
-  number,
-  `0x${string}`,
-  `0x${string}`,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-]): Offer => ({
+export const decodeOfferTuple = (offer: OfferTuple): Offer => ({
   id: offer[0],
   kind: offer[1],
   state: offer[2],
@@ -102,10 +108,159 @@ const upsertOfferInPages = (pages: OffersPage[], offer: Offer): OffersPage[] => 
   return nextPages;
 };
 
+const createOfferSyncOwner = (currentChainId: SupportedChainId, address: `0x${string}`) => {
+  let lastSyncedBlock: bigint | undefined;
+  let replayRunning = false;
+
+  const refetchSnapshot = async () => {
+    await queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(currentChainId) });
+    lastSyncedBlock = await getBlockNumber(config, { chainId: currentChainId });
+  };
+
+  const syncOfferIds = async (offerIds: bigint[]) => {
+    if (offerIds.length === 0) return;
+
+    await Promise.all(offerIds.map(async (offerId) => {
+      const offerRaw = await readContract(config, {
+        abi: ABI,
+        functionName: "offers",
+        args: [offerId],
+        address,
+        chainId: currentChainId,
+      });
+
+      const offer = decodeOfferTuple(offerRaw);
+
+      queryClient.setQueryData(queryKeys.offers.single(currentChainId, offerId), () => offer);
+      queryClient.setQueryData(queryKeys.offers.all(currentChainId), (stale: OffersInfiniteData | undefined) => {
+        if (!stale) return stale;
+
+        return {
+          ...stale,
+          pages: upsertOfferInPages(stale.pages, offer),
+        };
+      });
+    }));
+  };
+
+  const replaySinceLastSyncedBlock = async () => {
+    if (replayRunning || lastSyncedBlock === undefined) return;
+
+    replayRunning = true;
+
+    try {
+      const latestBlock = await getBlockNumber(config, { chainId: currentChainId });
+
+      if (latestBlock <= lastSyncedBlock) return;
+
+      const fromBlock = lastSyncedBlock + 1n;
+      const gap = latestBlock - fromBlock;
+
+      if (gap > MAX_REPLAY_BLOCK_WINDOW) {
+        await refetchSnapshot();
+
+        return;
+      }
+
+      const logs = await getContractEvents(config, {
+        abi: ABI,
+        eventName: "OfferEvent",
+        address,
+        chainId: currentChainId,
+        fromBlock,
+        toBlock: latestBlock,
+      });
+
+      const offerIds = [...new Set(logs
+        .map(log => log.args.offer_id)
+        .filter((offerId): offerId is bigint => offerId !== undefined))];
+
+      await syncOfferIds(offerIds);
+      lastSyncedBlock = latestBlock;
+    }
+    catch {
+      await refetchSnapshot();
+    }
+    finally {
+      replayRunning = false;
+    }
+  };
+
+  void (async () => {
+    lastSyncedBlock = await getBlockNumber(config, { chainId: currentChainId });
+    await replaySinceLastSyncedBlock();
+  })();
+
+  const unwatch = watchContractEvent(config, {
+    abi: ABI,
+    address,
+    chainId: currentChainId,
+    eventName: "OfferEvent",
+    onLogs: (logs) => {
+      if (logs.length === 0) return;
+
+      const offerIds = [...new Set(logs
+        .map(log => log.args.offer_id)
+        .filter((offerId): offerId is bigint => offerId !== undefined))];
+      const maxBlockInBatch = logs.reduce<bigint | undefined>((max, log) => {
+        if (max === undefined || log.blockNumber > max) return log.blockNumber;
+
+        return max;
+      }, lastSyncedBlock);
+
+      void syncOfferIds(offerIds).then(() => {
+        if (maxBlockInBatch !== undefined) {
+          lastSyncedBlock = maxBlockInBatch;
+        }
+      });
+    },
+    onError: () => {
+      void replaySinceLastSyncedBlock();
+    },
+  });
+
+  const healthCheck = setInterval(() => {
+    void replaySinceLastSyncedBlock();
+  }, REPLAY_HEALTH_CHECK_INTERVAL);
+
+  return () => {
+    unwatch();
+    clearInterval(healthCheck);
+  };
+};
+
+const retainOfferSyncOwner = (currentChainId: SupportedChainId, address: `0x${string}`) => {
+  const key = `${currentChainId}:${address.toLowerCase()}`;
+  const existing = offerSyncOwners.get(key);
+
+  if (existing) {
+    existing.refCount += 1;
+  }
+  else {
+    offerSyncOwners.set(key, {
+      refCount: 1,
+      cleanup: createOfferSyncOwner(currentChainId, address),
+    });
+  }
+
+  return () => {
+    const owner = offerSyncOwners.get(key);
+
+    if (!owner) return;
+
+    owner.refCount -= 1;
+
+    if (owner.refCount > 0) return;
+
+    owner.cleanup();
+    offerSyncOwners.delete(key);
+  };
+};
+
 export const useOffers = () => {
   const { chainId, contractAddress } = useApp();
 
-  return createInfiniteQuery(() => ({
+  const query = createInfiniteQuery(() => ({
     queryKey: queryKeys.offers.all(chainId()!),
     queryFn: async ({ pageParam }) => {
       const nextOfferId = await readContract(config, {
@@ -157,133 +312,19 @@ export const useOffers = () => {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   }));
-};
-
-export const useOfferSync = () => {
-  const { chainId, contractAddress } = useApp();
 
   createEffect(() => {
     const currentChainId = chainId() as SupportedChainId | undefined;
     const address = contractAddress();
-    let lastSyncedBlock: bigint | undefined;
-    let replayRunning = false;
-
-    const refetchSnapshot = async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(currentChainId!) });
-      lastSyncedBlock = await getBlockNumber(config, { chainId: currentChainId! });
-    };
-
-    const syncOfferIds = async (offerIds: bigint[]) => {
-      if (offerIds.length === 0) return;
-
-      await Promise.all(offerIds.map(async (offerId) => {
-        const offerRaw = await readContract(config, {
-          abi: ABI,
-          functionName: "offers",
-          args: [offerId],
-          address: address as `0x${string}`,
-          chainId: currentChainId!,
-        });
-
-        const offer = decodeOfferTuple(offerRaw);
-
-        queryClient.setQueryData(queryKeys.offers.single(currentChainId!, offerId), () => offer);
-        queryClient.setQueryData(queryKeys.offers.all(currentChainId!), (stale: OffersInfiniteData | undefined) => {
-          if (!stale) return stale;
-
-          return {
-            ...stale,
-            pages: upsertOfferInPages(stale.pages, offer),
-          };
-        });
-      }));
-    };
-
-    const replaySinceLastSyncedBlock = async () => {
-      if (replayRunning || lastSyncedBlock === undefined) return;
-
-      replayRunning = true;
-
-      try {
-        const latestBlock = await getBlockNumber(config, { chainId: currentChainId! });
-
-        if (latestBlock <= lastSyncedBlock) return;
-
-        const fromBlock = lastSyncedBlock + 1n;
-        const gap = latestBlock - fromBlock;
-
-        if (gap > MAX_REPLAY_BLOCK_WINDOW) {
-          await refetchSnapshot();
-
-          return;
-        }
-
-        const logs = await getContractEvents(config, {
-          abi: ABI,
-          eventName: "OfferEvent",
-          address,
-          chainId: currentChainId!,
-          fromBlock,
-          toBlock: latestBlock,
-        });
-
-        const offerIds = [...new Set(logs
-          .map(log => log.args.offer_id)
-          .filter((offerId): offerId is bigint => offerId !== undefined))];
-
-        await syncOfferIds(offerIds);
-        lastSyncedBlock = latestBlock;
-      }
-      catch {
-        await refetchSnapshot();
-      }
-      finally {
-        replayRunning = false;
-      }
-    };
 
     if (!currentChainId || !address) return;
 
-    void (async () => {
-      lastSyncedBlock = await getBlockNumber(config, { chainId: currentChainId });
-      await replaySinceLastSyncedBlock();
-    })();
-
-    const unwatch = watchContractEvent(config, {
-      abi: ABI,
-      address,
-      chainId: currentChainId,
-      eventName: "OfferEvent",
-      onLogs: (logs) => {
-        if (logs.length === 0) return;
-
-        const offerIds = [...new Set(logs
-          .map(log => log.args.offer_id)
-          .filter((offerId): offerId is bigint => offerId !== undefined))];
-        const maxBlockInBatch = logs.reduce<bigint | undefined>((max, log) => {
-          if (max === undefined || log.blockNumber > max) return log.blockNumber;
-
-          return max;
-        }, lastSyncedBlock);
-
-        void syncOfferIds(offerIds).then(() => {
-          if (maxBlockInBatch !== undefined) {
-            lastSyncedBlock = maxBlockInBatch;
-          }
-        });
-      },
-      onError: () => {
-        void replaySinceLastSyncedBlock();
-      },
-    });
-
-    const healthCheck = setInterval(() => {
-      void replaySinceLastSyncedBlock();
-    }, REPLAY_HEALTH_CHECK_INTERVAL);
+    const release = retainOfferSyncOwner(currentChainId, address as `0x${string}`);
 
     onCleanup(() => {
-      unwatch();
-      clearInterval(healthCheck);
+      release();
     });
   });
+
+  return query;
 };
