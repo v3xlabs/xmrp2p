@@ -1,4 +1,3 @@
-
 import { Navbar } from "./navbar";
 import { OrderTable } from "./orders/OrderTable";
 import { SettingsButton } from "./settings";

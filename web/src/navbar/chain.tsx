@@ -3,7 +3,7 @@
 import { Select } from "@kobalte/core/select";
 import { useSwitchChain } from "@wagmi/solid";
 import { FaSolidCheck, FaSolidChevronDown } from "solid-icons/fa";
-import { createEffect } from "solid-js";
+import { type Accessor, createEffect, createMemo } from "solid-js";
 import { anvil, hoodi, mainnet, sepolia } from "viem/chains";
 
 import ethIcon from "../assets/eth_tint.svg?raw";
@@ -30,8 +30,8 @@ const chainIdToColor = (chainId: number) => {
     }
 };
 
-const ChainIcon = (props: { chainId: number; }) => {
-    const color = chainIdToColor(props.chainId);
+const ChainIcon = (props: { chainId: Accessor<number>; }) => {
+    const color = () => chainIdToColor(props.chainId());
 
     return (
         <div class="w-5 h-5 flex justify-center items-center rounded-full">
@@ -39,11 +39,22 @@ const ChainIcon = (props: { chainId: number; }) => {
               innerHTML={ethIcon}
               class="w-4 h-4 fill-current"
               style={{
-                    color,
+                    color: color(),
                 }}
             />
         </div>
     );
+};
+
+type Chain = {
+    value: string;
+    label: string;
+    disabled: boolean;
+};
+
+type Category = {
+    label: string;
+    options: Chain[];
 };
 
 export const ChainSelector = () => {
@@ -58,34 +69,64 @@ export const ChainSelector = () => {
         }
     });
 
+    const chainList = createMemo(() => chains().map(chain => ({
+        value: chain.id.toString(),
+        label: chain.name,
+        disabled: false,
+        category:
+            chain.testnet ? "testnet" : (chain.id === mainnet.id ? "mainnet" : "devnet"),
+    })));
+
+    const categories = createMemo(() => [
+        {
+            label: "Mainnets",
+            options: chainList().filter(chain => chain.category === "mainnet"),
+        },
+        {
+            label: "Testnets",
+            options: chainList().filter(chain => chain.category === "testnet"),
+        },
+        {
+            label: "Devnets",
+            options: chainList().filter(chain => chain.category === "devnet"),
+        },
+    ].filter(category => category.options.length > 0));
+
+    const chain = createMemo(() => chainList().find(chain => chain.value === chainId()?.toString()));
+
     return (
         <div>
-            <Select
-              value={chainId()?.toString()}
-              options={chains().map(chain => chain.id)}
+            <Select<Chain, Category>
+              value={chain()}
+              options={categories()}
+              optionValue="value"
+              optionTextValue="label"
+              optionDisabled="disabled"
+              optionGroupChildren="options"
               placeholder="Select a chain…"
               class="input"
-              itemComponent={(props) => {
-                    const chain = chains().find(chain => chain.id === Number(props.item.rawValue));
-
-                    return (
-                        <Select.Item item={props.item} class="flex items-center gap-1 px-2 py-1 hover:bg-(--thorin-background-secondary) hover:cursor-pointer">
-                            <ChainIcon chainId={Number(props.item.rawValue)} />
-                            <Select.ItemLabel>{chain?.name}</Select.ItemLabel>
-                            <Select.ItemIndicator class="select__item-indicator">
-                                <FaSolidCheck />
-                            </Select.ItemIndicator>
-                        </Select.Item>
-                    );
-                }}
-              onChange={value => switchChain.mutate({ chainId: Number(value) })}
+              itemComponent={props => (
+                    <Select.Item item={props.item} class="flex items-center gap-1 px-2 py-1 hover:bg-(--thorin-background-secondary) hover:cursor-pointer">
+                        <ChainIcon chainId={() => Number(props.item.rawValue.value)} />
+                        <Select.ItemLabel>{props.item.rawValue.label}</Select.ItemLabel>
+                        <Select.ItemIndicator class="select__item-indicator">
+                            <FaSolidCheck />
+                        </Select.ItemIndicator>
+                    </Select.Item>
+                )}
+              sectionComponent={props => (
+                    <Select.Section class="px-2 font-medium">
+                        {props.section.rawValue.label}
+                    </Select.Section>
+                )}
+              onChange={value => value && switchChain.mutate({ chainId: Number(value.value) })}
             >
                 <Select.Trigger class="flex items-center gap-2" aria-label="Chain">
-                    <Select.Value class="select__value">
+                    <Select.Value<Chain> class="select__value">
                         {state => (
                             <span class="flex items-center gap-1">
-                                <ChainIcon chainId={Number(state.selectedOption())} />
-                                {chains().find(chain => chain.id === Number(state.selectedOption()))?.name}
+                                <ChainIcon chainId={() => Number(state.selectedOption().value)} />
+                                {state.selectedOption().label}
                             </span>
                         )}
                     </Select.Value>

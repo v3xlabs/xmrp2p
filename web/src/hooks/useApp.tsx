@@ -8,15 +8,9 @@ import { useSettings } from "../context/SettingsContext";
 import { useParameters } from "./useParameters";
 
 export const useApp = () => {
-  const chainIdWagmi = useChainId();
-  const chainId = createMemo(() => chainIdWagmi() as (typeof config)["chains"][number]["id"]);
   const { modes, ...settings } = useSettings();
+
   const wagmiChains = useChains();
-
-  const contractAddress = () => CONTRACT_ADDRESS[chainId()!] as `0x${string}` | undefined;
-
-  const parameters = useParameters(chainId, contractAddress);
-
   const chains = createMemo(() => wagmiChains().filter((chain) => {
     if (modes.devnets && chain.id === anvil.id && CONTRACT_ADDRESS[chain.id] !== undefined) return true;
 
@@ -26,6 +20,19 @@ export const useApp = () => {
 
     return false;
   }));
+
+  const chainIdWagmi = useChainId();
+  const chainId = createMemo(() => {
+    const chainId2 = chainIdWagmi() as (typeof config)["chains"][number]["id"];
+
+    if (!chains().some(chain => chain.id === chainId2)) {
+      return chains()[0].id;
+    }
+
+    return chainId2;
+  });
+  const contractAddress = () => CONTRACT_ADDRESS[chainId()!] as `0x${string}` | undefined;
+  const parameters = useParameters(chainId, contractAddress);
 
   return {
     chainId,
