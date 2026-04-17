@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 import classnames from "classnames";
-import { type Component, createMemo } from "solid-js";
+import { type Component } from "solid-js";
 import { formatEther, formatUnits } from "viem";
 
 import ethIcon from "../assets/eth.svg";
@@ -16,7 +16,7 @@ type OrderTableMobileCardProps = {
 };
 
 export const OrderTableMobileCard: Component<OrderTableMobileCardProps> = (props) => {
-  const xmrAmountValue = createMemo(() => props.offer.amount * props.offer.price / 10n ** 18n);
+  const xmrAmountValue = () => props.offer.amount * props.offer.price / 10n ** 18n;
 
   return (
     <button

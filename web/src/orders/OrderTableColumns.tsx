@@ -17,22 +17,16 @@ export const orderTableColumns = [
     size: 88,
     minSize: 72,
     header: "Side",
-    cell: ({ row }) => {
-      const isBuy = row.original.kind === 1;
-
-      return (
-        <span
-          class={classnames(
-            "font-medium text-sm",
-            isBuy
-              ? "text-(--thorin-green-primary)"
-              : "text-(--thorin-red-primary)",
-          )}
-        >
-          {isBuy ? "Buy" : "Sell"}
-        </span>
-      );
-    },
+    cell: ({ row }) => (
+      <span
+        class={classnames(
+          "font-medium text-sm",
+          row.original.kind === 1 ? "text-(--thorin-green-primary)" : "text-(--thorin-red-primary)",
+        )}
+      >
+        {row.original.kind === 1 ? "Buy" : "Sell"}
+      </span>
+    ),
   }),
   columnHelper.accessor("owner", {
     size: 160,
@@ -94,11 +88,10 @@ export const orderTableColumns = [
     ),
     cell: ({ row }) => {
       const xmrAmountValue = row.original.amount * row.original.price / 10n ** 18n;
-      const xmrAmount = formatUnits(xmrAmountValue, 12);
 
       return (
         <div class="text-right tabular-nums">
-          <div class="font-medium">{xmrAmount}</div>
+          <div class="font-medium">{formatUnits(xmrAmountValue, 12)}</div>
           <div>
             <Price token={() => "xmr"} amount={() => xmrAmountValue} />
           </div>

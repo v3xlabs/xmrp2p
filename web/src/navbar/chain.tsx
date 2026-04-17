@@ -135,7 +135,7 @@ export const ChainSelector = () => {
                     </Select.Icon>
                 </Select.Trigger>
                 <Select.Portal>
-                    <Select.Content class="card p-0.5" style={{ "transform-origin": "var(--kb-select-content-transform-origin)" }}>
+                    <Select.Content class="card z-30 p-0.5" style={{ "transform-origin": "var(--kb-select-content-transform-origin)" }}>
                         <Select.Listbox class="select__listbox" />
                     </Select.Content>
                 </Select.Portal>
