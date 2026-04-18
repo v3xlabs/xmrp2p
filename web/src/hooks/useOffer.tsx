@@ -4,8 +4,8 @@ import { readContract } from "@wagmi/solid/actions";
 import { ABI } from "xmrp2p";
 
 import { queryKeys } from "../utils/queryKeys";
+import { decodeOfferTuple } from "./offerCodec";
 import { useApp } from "./useApp";
-import { decodeOfferTuple } from "./useOffers";
 
 export const useOffer = (offerId: bigint) => {
   const { chainId, contractAddress } = useApp();

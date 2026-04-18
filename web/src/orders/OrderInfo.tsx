@@ -5,6 +5,7 @@ import { formatEther, formatUnits } from "viem";
 
 import ethIcon from "../assets/eth.svg";
 import xmrIcon from "../assets/xmr.svg";
+import { getOfferXmrAmount } from "../hooks/offerCodec";
 import type { Offer } from "../hooks/useOffers";
 import { isXmrSide } from "../utils/escrow";
 import { StatusBadge } from "./StatusBadge";
@@ -15,7 +16,7 @@ export const OrderInfo: Component<{
   userAddress: string | undefined;
 }> = (props) => {
   const xmrAmount = () => {
-    const val = props.offer.amount * props.offer.price / 10n ** 18n;
+    const val = getOfferXmrAmount(props.offer);
 
     return formatUnits(val, 12);
   };

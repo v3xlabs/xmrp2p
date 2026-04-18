@@ -5,6 +5,7 @@ import { formatEther, formatUnits } from "viem";
 
 import ethIcon from "../assets/eth.svg";
 import xmrIcon from "../assets/xmr.svg";
+import { getOfferXmrAmount } from "../hooks/offerCodec";
 import { type Offer } from "../hooks/useOffers";
 import { Price } from "../swap/price";
 import { Addr } from "../utils/address";
@@ -87,7 +88,7 @@ export const orderTableColumns = [
       </div>
     ),
     cell: ({ row }) => {
-      const xmrAmountValue = row.original.amount * row.original.price / 10n ** 18n;
+      const xmrAmountValue = getOfferXmrAmount(row.original);
 
       return (
         <div class="text-right tabular-nums">

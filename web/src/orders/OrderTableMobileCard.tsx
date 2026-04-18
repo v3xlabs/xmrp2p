@@ -5,6 +5,7 @@ import { formatEther, formatUnits } from "viem";
 
 import ethIcon from "../assets/eth.svg";
 import xmrIcon from "../assets/xmr.svg";
+import { getOfferXmrAmount } from "../hooks/offerCodec";
 import { type Offer } from "../hooks/useOffers";
 import { Price } from "../swap/price";
 import { Addr } from "../utils/address";
@@ -16,7 +17,7 @@ type OrderTableMobileCardProps = {
 };
 
 export const OrderTableMobileCard: Component<OrderTableMobileCardProps> = (props) => {
-  const xmrAmountValue = () => props.offer.amount * props.offer.price / 10n ** 18n;
+  const xmrAmountValue = () => getOfferXmrAmount(props.offer);
 
   return (
     <button

@@ -22,6 +22,8 @@ import { type Offer } from "../hooks/useOffers";
 import { orderTableColumns } from "./OrderTableColumns";
 import { OrderTableMobileCard } from "./OrderTableMobileCard";
 
+const RIGHT_ALIGNED_COLUMN_IDS = new Set(["price", "eth_amount", "xmr_amount", "state"]);
+
 export type OrdersDataTableProps = {
   offers: Accessor<Offer[]>;
   isLoading: boolean;
@@ -170,7 +172,7 @@ export const OrdersDataTable: Component<OrdersDataTableProps> = (props) => {
                   <tr class="flex w-full border-b border-(--thorin-border)">
                     <For each={headerGroup.headers}>
                       {(header) => {
-                        const isRightAligned = ["price", "eth_amount", "xmr_amount", "state"].includes(header.column.id);
+                        const isRightAligned = RIGHT_ALIGNED_COLUMN_IDS.has(header.column.id);
 
                         return (
                           <th
@@ -241,7 +243,7 @@ export const OrdersDataTable: Component<OrdersDataTableProps> = (props) => {
                       >
                         <For each={row()!.getVisibleCells()}>
                           {(cell) => {
-                            const isRightAligned = ["price", "eth_amount", "xmr_amount", "state"].includes(cell.column.id);
+                            const isRightAligned = RIGHT_ALIGNED_COLUMN_IDS.has(cell.column.id);
 
                             return (
                               <td

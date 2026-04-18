@@ -25,7 +25,7 @@ export const useTakeOrder = (offer: Accessor<Offer | undefined>) => {
     const isBuy = o.kind === 1;
 
     return {
-      offerId: o.id, // eslint-disable-line no-restricted-syntax
+      offerId: o.id,
       spendingKey: keys.publicSpendKey,
       viewingKey: isBuy ? keys.privateViewKey : keys.publicViewKey,
       value: isBuy ? o.deposit : o.amount,
@@ -75,7 +75,7 @@ export const useTakeOrder = (offer: Accessor<Offer | undefined>) => {
       const role = isBuy ? "xmr" : "evm";
 
       storeOrderKeys({
-        offer_id: o.id.toString(), // eslint-disable-line no-restricted-syntax
+        offer_id: o.id.toString(),
         chain_id: chainId()!,
         wallet_address: account.address,
         role: role as "evm" | "xmr",
