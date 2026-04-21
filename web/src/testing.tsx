@@ -6,7 +6,7 @@ import { useOffers } from "./hooks/useOffers";
 export const Testing = () => {
   const x = useOffers();
   const allOffers = createMemo(() =>
-    (x.data?.pages.flat() ?? []) as Offer[],
+    (x.data?.pages.flatMap(page => page.offers) ?? []) as Offer[],
   );
 
   return (

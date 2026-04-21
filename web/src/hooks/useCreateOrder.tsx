@@ -1,12 +1,14 @@
+/* eslint-disable no-restricted-syntax */
 import { useMutation, useQuery } from "@tanstack/solid-query";
 import { getAccount, simulateContract, writeContract } from "@wagmi/solid/actions";
 import { english, generateMnemonic } from "viem/accounts";
 import { ABI, generateMoneroKeys } from "xmrp2p";
 
-import { config, queryClient } from "../config";
+import { config } from "../config";
 import { storeOrderKeys } from "../utils/keyStore";
 import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
+import { invalidateOfferCaches } from "./useOffers";
 import { useSwap } from "./useSwap";
 
 export const useCreateOrder = () => {
@@ -58,7 +60,7 @@ export const useCreateOrder = () => {
       if (!account.address) throw new Error("Wallet not connected");
 
       const simulatedOffer = prepareOrder.data.result;
-      const offerId = simulatedOffer.id; // eslint-disable-line no-restricted-syntax
+      const offerId = simulatedOffer.id;
       const type = offerType();
       const role = type === 1 ? "evm" : "xmr";
 
@@ -77,7 +79,7 @@ export const useCreateOrder = () => {
       return hash;
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.offers.all(chainId()!) });
+      void invalidateOfferCaches(chainId()!, prepareOrder.data?.result.id);
     },
   }));
 

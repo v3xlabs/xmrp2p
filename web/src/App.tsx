@@ -4,18 +4,18 @@ import { SettingsButton } from "./settings";
 import { Swap } from "./swap";
 
 export const App = () => (
-  <div class="w-full max-w-7xl mx-auto space-y-4">
+  <div class="min-h-screen w-full max-w-[1600px] mx-auto px-4 py-4 md:py-6 flex flex-col gap-4">
     <Navbar />
-    <div class="flex gap-4 flex-col lg:flex-row px-4">
-      <section class="w-full lg:w-[400px] space-y-2">
+    <div class="flex-1 flex gap-4 flex-col xl:flex-row">
+      <section class="w-full xl:w-[380px] xl:min-w-[380px] space-y-2">
         <div class="flex justify-between items-center">
           <h2 class="px-2">Create Offer</h2>
           <SettingsButton />
         </div>
         <Swap />
       </section>
-      <div class="space-y-2 grow">
-        <section class="grow space-y-2">
+      <div class="flex-1 min-h-[60vh] xl:min-h-0 space-y-2">
+        <section class="h-full space-y-2">
           <OrderTable />
         </section>
       </div>

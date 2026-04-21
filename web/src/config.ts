@@ -1,8 +1,8 @@
 /* eslint-disable no-restricted-syntax */
 import { openlv } from "@openlv/connector";
 import { QueryClient } from "@tanstack/solid-query";
-import { createConfig, http } from "@wagmi/solid";
-import { anvil, hoodi, mainnet, sepolia } from "@wagmi/solid/chains";
+import { createConfig, fallback, http, webSocket } from "@wagmi/solid";
+import { anvil, mainnet, sepolia } from "@wagmi/solid/chains";
 
 export const queryClient = new QueryClient();
 
@@ -17,15 +17,17 @@ export const config = createConfig({
     // mainnet,
     sepolia,
     anvil,
-    hoodi,
   ],
   transports: {
     // [mainnet.id]: http(),
-    [sepolia.id]: http("https://sepolia.drpc.org"),
-    [anvil.id]: http("http://127.0.0.1:8545"),
-    [hoodi.id]: http("https://rpc.hoodi.ethpandaops.io"),
+    [anvil.id]: fallback([
+      webSocket("ws://127.0.0.1:8545"),
+      http("http://127.0.0.1:8545"),
+    ]),
+    [sepolia.id]: fallback([
+      webSocket("wss://sepolia.drpc.org"),
+      http("https://sepolia.drpc.org"),
+    ]),
   },
-  connectors: [
-    openlv(),
-  ],
+  connectors: [openlv()],
 });

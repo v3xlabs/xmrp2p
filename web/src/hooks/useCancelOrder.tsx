@@ -4,10 +4,11 @@ import { simulateContract, writeContract } from "@wagmi/solid/actions";
 import { type Accessor } from "solid-js";
 import { ABI } from "xmrp2p";
 
-import { config, queryClient } from "../config";
+import { config } from "../config";
 import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
 import { useOffer } from "./useOffer";
+import { invalidateOfferCaches } from "./useOffers";
 
 export const useCancelOrder = (offerId: Accessor<bigint | undefined>) => {
   const { chainId, contractAddress } = useApp();
@@ -40,7 +41,7 @@ export const useCancelOrder = (offerId: Accessor<bigint | undefined>) => {
       return writeContract(config, simulation.data.request);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.offers.single(chainId()!, offerId() ?? 0n) });
+      void invalidateOfferCaches(chainId()!, offerId());
     },
     enabled: enabled(),
   }));

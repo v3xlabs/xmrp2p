@@ -36,7 +36,7 @@ export const UserProfile = () => {
             </div>
           </div>
         </div>
-        <div class="hidden group-hover:block absolute right-0">
+        <div class="hidden group-hover:block absolute right-0 top-full pt-2 z-50">
           <div class="card p-1 space-y-1 min-w-48">
             <div class="py-1 px-2">
               <Addr address={connection().address} />
