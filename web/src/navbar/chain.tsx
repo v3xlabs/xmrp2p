@@ -4,7 +4,7 @@ import { Select } from "@kobalte/core/select";
 import { useSwitchChain } from "@wagmi/solid";
 import { FaSolidCheck, FaSolidChevronDown } from "solid-icons/fa";
 import { type Accessor, createEffect, createMemo } from "solid-js";
-import { anvil, hoodi, mainnet, sepolia } from "viem/chains";
+import { anvil, mainnet, sepolia } from "viem/chains";
 
 import ethIcon from "../assets/eth_tint.svg?raw";
 import { useApp } from "../hooks/useApp";
@@ -22,10 +22,6 @@ const chainIdToColor = (chainId: number) => {
         case sepolia.id: {
             // hotpink
             return "rgba(255,105,180,0.5)";
-        }
-        case hoodi.id: {
-            // green
-            return "rgba(0,128,0,0.5)";
         }
     }
 };

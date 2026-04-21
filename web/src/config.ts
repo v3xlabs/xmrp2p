@@ -2,7 +2,7 @@
 import { openlv } from "@openlv/connector";
 import { QueryClient } from "@tanstack/solid-query";
 import { createConfig, fallback, http, webSocket } from "@wagmi/solid";
-import { anvil, hoodi, mainnet, sepolia } from "@wagmi/solid/chains";
+import { anvil, mainnet, sepolia } from "@wagmi/solid/chains";
 
 export const queryClient = new QueryClient();
 
@@ -17,7 +17,6 @@ export const config = createConfig({
     // mainnet,
     sepolia,
     anvil,
-    hoodi,
   ],
   transports: {
     // [mainnet.id]: http(),
@@ -28,10 +27,6 @@ export const config = createConfig({
     [sepolia.id]: fallback([
       webSocket("wss://sepolia.drpc.org"),
       http("https://sepolia.drpc.org"),
-    ]),
-    [hoodi.id]: fallback([
-      webSocket("wss://hoodi.drpc.org"),
-      http("https://hoodi.drpc.org"),
     ]),
   },
   connectors: [openlv()],

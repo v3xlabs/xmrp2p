@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 import { useChainId, useChains } from "@wagmi/solid";
 import { createMemo } from "solid-js";
-import { anvil, hoodi, mainnet, sepolia } from "viem/chains";
+import { anvil, mainnet, sepolia } from "viem/chains";
 
 import { config, CONTRACT_ADDRESS } from "../config";
 import { useSettings } from "../context/SettingsContext";
@@ -17,8 +17,6 @@ export const useApp = () => {
     if (modes.devnets && chain.id === anvil.id && CONTRACT_ADDRESS[chain.id] !== undefined) return true;
 
     if (modes.testnets && chain.id === sepolia.id && CONTRACT_ADDRESS[chain.id] !== undefined) return true;
-
-    if (modes.testnets && chain.id === hoodi.id && CONTRACT_ADDRESS[chain.id] !== undefined) return true;
 
     if (modes.mainnets && chain.id === mainnet.id && CONTRACT_ADDRESS[chain.id] !== undefined) return true;
 

@@ -1,13 +1,13 @@
 /* eslint-disable no-restricted-syntax */
 import { getBlockNumber, getContractEvents, readContract, watchContractEvent } from "@wagmi/solid/actions";
-import { anvil, hoodi, sepolia } from "@wagmi/solid/chains";
+import { anvil, sepolia } from "@wagmi/solid/chains";
 import { ABI } from "xmrp2p";
 
 import { config } from "../config";
 import { applyOfferToCaches, invalidateOfferCaches } from "./offerCache";
 import { decodeOfferTuple } from "./offerCodec";
 
-export type SupportedChainId = typeof anvil.id | typeof sepolia.id | typeof hoodi.id;
+export type SupportedChainId = typeof anvil.id | typeof sepolia.id;
 
 type OfferSyncOwner = {
   refCount: number;
