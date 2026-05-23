@@ -19,11 +19,10 @@ export const toMoneroKeyHex = (key: bigint): string => {
   return pairs.reverse().join("");
 };
 
-export const getXmrAmount = (offer: Offer): string => {
-  const piconeros = offer.amount * offer.price / 10n ** 18n;
+export const getXmrAmount = (offer: Offer): string => formatUnits(offer.xmrAmount, 12);
 
-  return formatUnits(piconeros, 12);
-};
+export const getXmrRate = (offer: Offer): bigint =>
+  (offer.amount > 0n ? (offer.xmrAmount * 10n ** 18n) / offer.amount : 0n);
 
 export const getEscrowAddress = (offer: Offer): string | null => {
   if (

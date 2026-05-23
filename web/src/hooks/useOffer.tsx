@@ -31,7 +31,7 @@ export const useOffer = (offerId: bigint) => {
         counterparty: offer[4],
         amount: offer[5],
         deposit: offer[6],
-        price: offer[7],
+        xmrAmount: offer[7],
         lastupdate: offer[8],
         blockTaken: offer[9],
         evmPublicSpendKey: offer[10],

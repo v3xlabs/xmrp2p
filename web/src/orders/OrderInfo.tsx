@@ -6,7 +6,7 @@ import { formatEther, formatUnits } from "viem";
 import ethIcon from "../assets/eth.svg";
 import xmrIcon from "../assets/xmr.svg";
 import type { Offer } from "../hooks/useOffers";
-import { isXmrSide } from "../utils/escrow";
+import { getXmrRate, isXmrSide } from "../utils/escrow";
 import { StatusBadge } from "./StatusBadge";
 
 export const OrderInfo: Component<{
@@ -14,11 +14,7 @@ export const OrderInfo: Component<{
   restoreHeight?: number;
   userAddress: string | undefined;
 }> = (props) => {
-  const xmrAmount = () => {
-    const val = props.offer.amount * props.offer.price / 10n ** 18n;
-
-    return formatUnits(val, 12);
-  };
+  const xmrAmount = () => formatUnits(props.offer.xmrAmount, 12);
 
   const tokens = () => [
     <div class="bg-(--thorin-background-secondary) rounded-lg p-3">
@@ -70,7 +66,7 @@ export const OrderInfo: Component<{
         <div class="flex justify-between text-sm">
           <span class="text-(--thorin-text-secondary)">Rate</span>
           <span>
-            {formatUnits(props.offer.price, 12)}
+            {formatUnits(getXmrRate(props.offer), 12)}
             {" "}
             XMR/ETH
           </span>

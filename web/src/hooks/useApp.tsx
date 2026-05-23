@@ -7,6 +7,8 @@ import { config, CONTRACT_ADDRESS } from "../config";
 import { useSettings } from "../context/SettingsContext";
 import { useParameters } from "./useParameters";
 
+type ChainId = (typeof config)["chains"][number]["id"];
+
 export const useApp = () => {
   const { modes, ...settings } = useSettings();
 
@@ -22,11 +24,11 @@ export const useApp = () => {
   }));
 
   const chainIdWagmi = useChainId();
-  const chainId = createMemo(() => {
-    const chainId2 = chainIdWagmi() as (typeof config)["chains"][number]["id"];
+  const chainId = createMemo<ChainId>(() => {
+    const chainId2 = chainIdWagmi() as ChainId;
 
     if (!chains().some(chain => chain.id === chainId2)) {
-      return chains()[0].id;
+      return chains()[0].id as ChainId;
     }
 
     return chainId2;

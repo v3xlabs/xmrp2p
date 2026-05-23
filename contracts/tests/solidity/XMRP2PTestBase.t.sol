@@ -11,7 +11,7 @@ abstract contract XMRP2PTestBase is Test {
     uint256 internal constant TRADE_AMOUNT = 1 ether;
     uint256 internal constant DEPOSIT_RATIO = 1000;
     uint256 internal constant REQUIRED_DEPOSIT = (TRADE_AMOUNT * DEPOSIT_RATIO) / 10_000;
-    uint256 internal constant TRADE_PRICE = 150;
+    uint256 internal constant XMR_AMOUNT = 150;
     uint256 internal constant STARTING_BALANCE = 10 ether;
 
     struct OfferKeys {

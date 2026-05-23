@@ -1,37 +1,32 @@
 import { createQuery, useMutation } from "@tanstack/solid-query";
-import { useBlockNumber } from "@wagmi/solid";
 import { simulateContract, writeContract } from "@wagmi/solid/actions";
-import { type Accessor } from "solid-js";
+import type { Accessor } from "solid-js";
 import { ABI } from "xmrp2p";
 
 import { config, queryClient } from "../config";
 import { queryKeys } from "../utils/queryKeys";
 import { useApp } from "./useApp";
-import { useOffer } from "./useOffer";
 
 export const useCancelOrder = (offerId: Accessor<bigint | undefined>) => {
   const { chainId, contractAddress } = useApp();
-  const blockNumber = useBlockNumber();
-  const offer = useOffer(offerId() ?? 0n);
 
-  const enabled = () => (
-    !!offerId()
-    && !!contractAddress()
-    && offer.data?.blockTaken
-    && !!blockNumber.data
-    && (blockNumber.data > (offer.data.blockTaken + 1n))
-  ) || false;
+  const simulation = createQuery(() => {
+    const _chainId = chainId();
+    const _offerId = offerId();
+    const _contractAddress = contractAddress();
 
-  const simulation = createQuery(() => ({
-    queryKey: queryKeys.simulate.cancel(chainId()!, offerId() ?? 0n),
-    queryFn: () => simulateContract(config, {
-      abi: ABI,
-      functionName: "cancel",
-      args: [offerId()!],
-      address: contractAddress()!,
-    }),
-    enabled: enabled(),
-  }));
+    return {
+      queryKey: queryKeys.simulate.cancel(_chainId!, _offerId ?? 0n),
+      queryFn: () => simulateContract(config, {
+        abi: ABI,
+        functionName: "cancel",
+        args: [_offerId!],
+        address: _contractAddress!,
+        chainId: _chainId!,
+      }),
+      enabled: !!_chainId && !!_offerId && !!_contractAddress,
+    };
+  });
 
   const write = useMutation(() => ({
     mutationFn: async () => {
@@ -42,7 +37,6 @@ export const useCancelOrder = (offerId: Accessor<bigint | undefined>) => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.offers.single(chainId()!, offerId() ?? 0n) });
     },
-    enabled: enabled(),
   }));
 
   return { simulation, write };

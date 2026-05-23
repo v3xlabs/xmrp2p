@@ -32,7 +32,11 @@ export const useSwap = () => {
 
   const marketRate = useMarketRate();
 
-  const rateValue = createMemo(() => (rate() ? BigInt(Math.round(Number.parseFloat(rate()) * 10 ** 12)) : undefined));
+  const xmrAmount = createMemo(() => {
+    const raw = fromToken() === "xmr" ? sellAmount() : buyAmount();
+
+    return raw && Number.parseFloat(raw) > 0 ? parseUnits(raw, 12) : undefined;
+  });
 
   const suggestedRate = () => marketRate.data?.xmrPerEth ?? null;
 
@@ -170,7 +174,7 @@ export const useSwap = () => {
     handleSellChange,
     handleBuyChange,
     applyRate,
-    rateValue,
+    xmrAmount,
     buyAmount,
     sellAmount,
     suggestedRate,

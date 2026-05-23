@@ -11,29 +11,29 @@ import { useSwap } from "./useSwap";
 
 export const useCreateOrder = () => {
   const { chainId, contractAddress } = useApp();
-  const { offerType, rateValue, ethAmount, ...swap } = useSwap();
+  const { offerType, xmrAmount, ethAmount, ...swap } = useSwap();
 
   const seedphrase = generateMnemonic(english);
   const keys = generateMoneroKeys(seedphrase);
 
   const prepareOrder = useQuery(() => ({
-    queryKey: queryKeys.prepareOrder(chainId()!, offerType(), rateValue() ?? 0n, ethAmount()),
+    queryKey: queryKeys.prepareOrder(chainId()!, offerType(), xmrAmount() ?? 0n, ethAmount()),
     queryFn: async () => {
       const address = contractAddress();
       const value = ethAmount();
-      const rateValuex = rateValue();
+      const xmrAmountValue = xmrAmount();
 
-      if (!address || !rateValuex) return null;
+      if (!address || !xmrAmountValue) return null;
 
       const type = offerType();
       const viewKey = type === 1 ? keys.publicViewKey : keys.privateViewKey;
 
       const data = await simulateContract(config, {
         abi: ABI,
-        functionName: "offer",
+        functionName: "openOffer",
         args: [
           type,
-          rateValuex,
+          xmrAmountValue,
           "0x0000000000000000000000000000000000000000",
           keys.publicSpendKey,
           viewKey,
@@ -85,7 +85,7 @@ export const useCreateOrder = () => {
     prepareOrder,
     createOffer,
     offerType,
-    rateValue,
+    xmrAmount,
     ethAmount,
     swap,
   };

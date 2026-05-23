@@ -16,6 +16,7 @@ import xmrIcon from "../assets/xmr.svg";
 import { type Offer, useOffers } from "../hooks/useOffers";
 import { Price } from "../swap/price";
 import { Addr } from "../utils/address";
+import { getXmrRate } from "../utils/escrow";
 import { OrderDetailModal } from "./OrderDetailModal";
 import { StatusBadge } from "./StatusBadge";
 
@@ -57,12 +58,14 @@ const columns = [
       </div>
     ),
   }),
-  columnHelper.accessor("price", {
+  columnHelper.display({
+    // eslint-disable-next-line no-restricted-syntax
+    id: "rate",
     header: () => <div class="text-right">Rate</div>,
     cell: ({ row }) => (
       <div class="text-right tabular-nums text-(--thorin-text-secondary) text-sm wrap-normal">
         <div>
-          {formatUnits(row.original.price, 12)}
+          {formatUnits(getXmrRate(row.original), 12)}
         </div>
         <span class="ml-1 text-xs opacity-60">XMR/ETH</span>
       </div>
@@ -92,7 +95,7 @@ const columns = [
       </div>
     ),
     cell: ({ row }) => {
-      const xmrAmountValue = row.original.amount * row.original.price / 10n ** 18n;
+      const xmrAmountValue = row.original.xmrAmount;
       const xmrAmount = formatUnits(
         xmrAmountValue,
         12,

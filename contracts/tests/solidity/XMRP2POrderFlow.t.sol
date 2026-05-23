@@ -13,14 +13,15 @@ contract XMRP2POrderFlowTest is XMRP2PTestBase {
         uint256 sellerBalanceBefore = seller.balance;
 
         vm.prank(buyer);
-        exchange.offer{value: TRADE_AMOUNT}(
-            OfferType.BUY, TRADE_PRICE, address(0), swapKeys.evmPublicSpendKey, swapKeys.evmPublicViewKey
+        exchange.openOffer{value: TRADE_AMOUNT}(
+            OfferType.BUY, XMR_AMOUNT, address(0), swapKeys.evmPublicSpendKey, swapKeys.evmPublicViewKey
         );
         uint256 offer_number = exchange.nextOfferId() - 1;
         XMRP2P.Offer memory createdOffer = _offerSnapshot(offer_number);
 
         assertEq(uint256(createdOffer.kind), uint256(OfferType.BUY));
         assertEq(uint256(createdOffer.state), uint256(OfferState.OPEN));
+        assertEq(createdOffer.xmrAmount, XMR_AMOUNT);
         assertEq(exchange.liability(), TRADE_AMOUNT);
 
         vm.prank(seller);
@@ -55,8 +56,8 @@ contract XMRP2POrderFlowTest is XMRP2PTestBase {
         uint256 buyerBalanceBefore = buyer.balance;
 
         vm.prank(buyer);
-        exchange.offer{value: TRADE_AMOUNT}(
-            OfferType.BUY, TRADE_PRICE, address(0), swapKeys.evmPublicSpendKey, swapKeys.evmPublicViewKey
+        exchange.openOffer{value: TRADE_AMOUNT}(
+            OfferType.BUY, XMR_AMOUNT, address(0), swapKeys.evmPublicSpendKey, swapKeys.evmPublicViewKey
         );
         uint256 offer_number = exchange.nextOfferId() - 1;
 
@@ -77,8 +78,8 @@ contract XMRP2POrderFlowTest is XMRP2PTestBase {
         uint256 sellerBalanceBefore = seller.balance;
 
         vm.prank(buyer);
-        exchange.offer{value: TRADE_AMOUNT}(
-            OfferType.BUY, TRADE_PRICE, address(0), swapKeys.evmPublicSpendKey, swapKeys.evmPublicViewKey
+        exchange.openOffer{value: TRADE_AMOUNT}(
+            OfferType.BUY, XMR_AMOUNT, address(0), swapKeys.evmPublicSpendKey, swapKeys.evmPublicViewKey
         );
         uint256 offer_number = exchange.nextOfferId() - 1;
 
@@ -105,14 +106,15 @@ contract XMRP2POrderFlowTest is XMRP2PTestBase {
         uint256 sellerBalanceBefore = seller.balance;
 
         vm.prank(seller);
-        exchange.offer{value: REQUIRED_DEPOSIT}(
-            OfferType.SELL, TRADE_PRICE, address(0), swapKeys.xmrPublicSpendKey, swapKeys.xmrPrivateViewKey
+        exchange.openOffer{value: REQUIRED_DEPOSIT}(
+            OfferType.SELL, XMR_AMOUNT, address(0), swapKeys.xmrPublicSpendKey, swapKeys.xmrPrivateViewKey
         );
         uint256 offer_number = exchange.nextOfferId() - 1;
         XMRP2P.Offer memory createdOffer = _offerSnapshot(offer_number);
 
         assertEq(uint256(createdOffer.kind), uint256(OfferType.SELL));
         assertEq(uint256(createdOffer.state), uint256(OfferState.OPEN));
+        assertEq(createdOffer.xmrAmount, XMR_AMOUNT);
         assertEq(exchange.liability(), REQUIRED_DEPOSIT);
 
         vm.prank(buyer);
@@ -147,8 +149,8 @@ contract XMRP2POrderFlowTest is XMRP2PTestBase {
         uint256 sellerBalanceBefore = seller.balance;
 
         vm.prank(seller);
-        exchange.offer{value: REQUIRED_DEPOSIT}(
-            OfferType.SELL, TRADE_PRICE, address(0), swapKeys.xmrPublicSpendKey, swapKeys.xmrPrivateViewKey
+        exchange.openOffer{value: REQUIRED_DEPOSIT}(
+            OfferType.SELL, XMR_AMOUNT, address(0), swapKeys.xmrPublicSpendKey, swapKeys.xmrPrivateViewKey
         );
         uint256 offer_number = exchange.nextOfferId() - 1;
 
@@ -169,8 +171,8 @@ contract XMRP2POrderFlowTest is XMRP2PTestBase {
         uint256 sellerBalanceBefore = seller.balance;
 
         vm.prank(seller);
-        exchange.offer{value: REQUIRED_DEPOSIT}(
-            OfferType.SELL, TRADE_PRICE, address(0), swapKeys.xmrPublicSpendKey, swapKeys.xmrPrivateViewKey
+        exchange.openOffer{value: REQUIRED_DEPOSIT}(
+            OfferType.SELL, XMR_AMOUNT, address(0), swapKeys.xmrPublicSpendKey, swapKeys.xmrPrivateViewKey
         );
         uint256 offer_number = exchange.nextOfferId() - 1;
 
