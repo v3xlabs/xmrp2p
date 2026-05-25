@@ -1,88 +1,65 @@
-XMRP2P Foundry gas report (forge test --gas-report)
-Regenerate: forge test --gas-report --match-path "tests/solidity/XMRP2P*" > gas-report.txt
-Per-test gas: forge snapshot
-
 No files changed, compilation skipped
 
+Ran 5 tests for tests/solidity/XMRP2PEscrowKeyMath.t.sol:XMRP2PEscrowKeyMathTest
+[PASS] testBuyClaimRevealsXmrShareSoBuyerCanRecoverEscrowKeys() (gas: 1522188)
+[PASS] testBuyRefundRevealsEvmShareSoSellerCanRecoverEscrowKeys() (gas: 1719792)
+[PASS] testFixedEscrowKeyMathVectors() (gas: 1197366)
+[PASS] testSellClaimRevealsXmrShareSoBuyerCanRecoverEscrowKeys() (gas: 1323069)
+[PASS] testSellRefundRevealsEvmShareSoSellerCanRecoverEscrowKeys() (gas: 1524417)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 6.57ms (22.15ms CPU time)
+
 Ran 6 tests for tests/solidity/XMRP2POrderFlow.t.sol:XMRP2POrderFlowTest
-[PASS] testBuyOrderCanBeCancelledByMaker() (gas: 2984166)
-[PASS] testBuyOrderCanBeExitedByBuyer() (gas: 5065212)
-[PASS] testBuyOrderHappyPath() (gas: 4551774)
-[PASS] testSellOrderCanBeCancelledByMaker() (gas: 3051959)
-[PASS] testSellOrderCanBeExitedByBuyer() (gas: 4478675)
-[PASS] testSellOrderHappyPath() (gas: 3969915)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 19.86ms (91.71ms CPU time)
+[PASS] testBuyOrderCanBeCancelledByMaker() (gas: 1267868)
+[PASS] testBuyOrderCanBeExitedByBuyer() (gas: 2144607)
+[PASS] testBuyOrderHappyPath() (gas: 2098345)
+[PASS] testSellOrderCanBeCancelledByMaker() (gas: 1268464)
+[PASS] testSellOrderCanBeExitedByBuyer() (gas: 1951031)
+[PASS] testSellOrderHappyPath() (gas: 1903428)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 8.86ms (37.97ms CPU time)
 
-Ran 18 tests for tests/solidity/XMRP2PQuitExpireSafety.t.sol:XMRP2PQuitExpireSafetyTest
-[PASS] testBuyClaimWhenTakenAfterT0BeforeT1_WithoutReady() (gas: 4472213)
-[PASS] testBuyQuitAfterT1WhenReady_RefundsBothParties() (gas: 5057229)
-[PASS] testBuyQuitAfterT1WhenTaken_RefundsBothParties() (gas: 5033054)
-[PASS] testBuyQuitRevertsWhenCallerIsCounterparty() (gas: 3733718)
-[PASS] testBuyQuitRevertsWhenTakenBetweenT0AndT1() (gas: 3821823)
-[PASS] testClaimRevertsAfterT1WhenReady() (gas: 3746052)
-[PASS] testClaimRevertsAfterT1WhenStillTaken() (gas: 3751960)
-[PASS] testClaimRevertsOnWrongXmrPrivateSpendKey() (gas: 4295685)
-[PASS] testQuitRevertsOnWrongEvmPrivateSpendKey() (gas: 4238998)
-[PASS] testQuitRevertsOnWrongEvmPrivateViewKey() (gas: 4957327)
-[PASS] testRecoverSendsSurplusToOwner() (gas: 2922586)
-[PASS] testSellClaimWhenTakenAfterT0BeforeT1_WithoutReady() (gas: 3913282)
-[PASS] testSellQuitAfterT1WhenReady_RefundsBothParties() (gas: 4571520)
-[PASS] testSellQuitAfterT1WhenTaken_RefundsBothParties() (gas: 4508721)
-[PASS] testSellQuitRevertsInSameBlockAsTake() (gas: 3190201)
-[PASS] testSellQuitRevertsWhenCallerIsMaker() (gas: 3135296)
-[PASS] testSellQuitRevertsWhenTakenBetweenT0AndT1() (gas: 3238176)
-[PASS] testSetParametersRevertsUnlessOwner() (gas: 102774)
-Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 27.12ms (278.06ms CPU time)
-
-╭--------------------------------+-----------------+--------+---------+---------+---------╮
-| src/XMRP2P.sol:XMRP2P Contract |                 |        |         |         |         |
-+=========================================================================================+
-| Deployment Cost                | Deployment Size |        |         |         |         |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| 1898408                        | 8263            |        |         |         |         |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-|                                |                 |        |         |         |         |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| Function Name                  | Min             | Avg    | Median  | Max     | # Calls |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| cancel                         | 55631           | 55642  | 55642   | 55654   | 2       |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| claim                          | 48902           | 450795 | 597709  | 627882  | 7       |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| liability                      | 389             | 1561   | 2389    | 2389    | 29      |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| listOffers                     | 38883           | 38883  | 38883   | 38883   | 28      |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| nextOfferId                    | 2367            | 2367   | 2367    | 2367    | 22      |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| offer                          | 304672          | 304713 | 304708  | 304739  | 23      |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| parameters                     | 13072           | 13072  | 13072   | 13072   | 1       |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| quit                           | 46974           | 745538 | 1225347 | 1292615 | 13      |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| ready                          | 46378           | 46946  | 46378   | 48083   | 6       |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| recover                        | 32736           | 32736  | 32736   | 32736   | 1       |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| setParameters                  | 24733           | 37159  | 37159   | 49585   | 2       |
-|--------------------------------+-----------------+--------+---------+---------+---------|
-| take                           | 226237          | 555877 | 760676  | 795679  | 20      |
-╰--------------------------------+-----------------+--------+---------+---------+---------╯
+╭--------------------------------+-----------------+--------+--------+--------+---------╮
+| src/XMRP2P.sol:XMRP2P Contract |                 |        |        |        |         |
++=======================================================================================+
+| Deployment Cost                | Deployment Size |        |        |        |         |
+|--------------------------------+-----------------+--------+--------+--------+---------|
+| 2039252                        | 8915            |        |        |        |         |
+|--------------------------------+-----------------+--------+--------+--------+---------|
+|                                |                 |        |        |        |         |
+|--------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                  | Min             | Avg    | Median | Max    | # Calls |
+|--------------------------------+-----------------+--------+--------+--------+---------|
+| cancel                         | 55648           | 55660  | 55660  | 55672  | 2       |
+|--------------------------------+-----------------+--------+--------+--------+---------|
+| claim                          | 263266          | 271523 | 271947 | 278934 | 4       |
+|--------------------------------+-----------------+--------+--------+--------+---------|
+| liability                      | 411             | 1661   | 2411   | 2411   | 16      |
+|--------------------------------+-----------------+--------+--------+--------+---------|
+| listOffers                     | 38883           | 38883  | 38883  | 38883  | 20      |
+|--------------------------------+-----------------+--------+--------+--------+---------|
+| nextOfferId                    | 2389            | 2389   | 2389   | 2389   | 10      |
+|--------------------------------+-----------------+--------+--------+--------+---------|
+| openOffer                      | 304465          | 304477 | 304475 | 304497 | 10      |
+|--------------------------------+-----------------+--------+--------+--------+---------|
+| quit                           | 500912          | 510503 | 509502 | 522095 | 4       |
+|--------------------------------+-----------------+--------+--------+--------+---------|
+| ready                          | 46378           | 47230  | 47230  | 48083  | 4       |
+|--------------------------------+-----------------+--------+--------+--------+---------|
+| take                           | 226271          | 326792 | 325512 | 430415 | 8       |
+╰--------------------------------+-----------------+--------+--------+--------+---------╯
 
 ╭-------------------------------------------+-----------------+------+--------+------+---------╮
 | tests/solidity/Utils.t.sol:Utils Contract |                 |      |        |      |         |
 +==============================================================================================+
 | Deployment Cost                           | Deployment Size |      |        |      |         |
 |-------------------------------------------+-----------------+------+--------+------+---------|
-| 523977                                    | 2649            |      |        |      |         |
+| 609066                                    | 3074            |      |        |      |         |
 |-------------------------------------------+-----------------+------+--------+------+---------|
 |                                           |                 |      |        |      |         |
 |-------------------------------------------+-----------------+------+--------+------+---------|
 | Function Name                             | Min             | Avg  | Median | Max  | # Calls |
 |-------------------------------------------+-----------------+------+--------+------+---------|
-| checkLiability                            | 6019            | 6852 | 6019   | 8519 | 12      |
+| checkLiability                            | 6041            | 6041 | 6041   | 6041 | 6       |
 ╰-------------------------------------------+-----------------+------+--------+------+---------╯
 
 
-Ran 2 test suites in 29.65ms (46.99ms CPU time): 24 tests passed, 0 failed, 0 skipped (24 total tests)
+Ran 2 test suites in 10.37ms (15.42ms CPU time): 11 tests passed, 0 failed, 0 skipped (11 total tests)
