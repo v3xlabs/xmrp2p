@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //
 // ==============================
-// xmrp2p.eth - v1
+// xmrp2p.eth - v1.1 ed25519 compressed
 //
 // Published by v3xlabs
 // ==============================

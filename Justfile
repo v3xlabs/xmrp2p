@@ -12,7 +12,8 @@ deploy-sepolia:
   cd contracts && forge script XMRP2PDeployer --broadcast --slow --rpc-url https://sepolia.drpc.org --account deployer
 
 verify-sepolia:
-	cd contracts && forge verify-contract 0xAd6871D44804288ba4393464C63544d6691D76BA src/XMRP2P.sol:XMRP2P --chain sepolia --constructor-args 0x225f137127d9067788314bc7fcc1f36746a3c3B5
+	cd contracts && forge verify-contract 0x24be36Db392A8c69E9336A5Fdb53fFB6c978CDA8 src/XMRP2P.sol:XMRP2P --verifier etherscan --chain sepolia --constructor-args $(cast abi-encode "constructor((uint256,uint256,uint256,uint256,uint256,uint256),address)" "(10000000000000,10000000000000000000,500,100,86400,86400)" "0x225f137127d9067788314bc7fcc1f36746a3c3B5")
+	cd contracts && forge verify-contract 0x24be36Db392A8c69E9336A5Fdb53fFB6c978CDA8 src/XMRP2P.sol:XMRP2P --verifier sourcify --chain sepolia --constructor-args $(cast abi-encode "constructor((uint256,uint256,uint256,uint256,uint256,uint256),address)" "(10000000000000,10000000000000000000,500,100,86400,86400)" "0x225f137127d9067788314bc7fcc1f36746a3c3B5")
 
 # via frame
 deploy-mainnet:
