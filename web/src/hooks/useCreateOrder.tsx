@@ -71,7 +71,6 @@ export const useCreateOrder = () => {
       if (!account.address) throw new Error("Wallet not connected");
 
       const simulatedOffer = prepareOrder.data.result;
-      // @ts-expect-error - simulatedOffer is not typed
       // eslint-disable-next-line no-restricted-syntax
       const offerId = simulatedOffer.id;
       const type = offerType();
