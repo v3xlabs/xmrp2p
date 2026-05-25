@@ -115,7 +115,7 @@ const columns = [
     header: () => <div class="text-right">Status</div>,
     cell: ({ row }) => (
       <div class="flex justify-end">
-        <StatusBadge state={row.original.state} />
+        <StatusBadge state={() => row.original.state} />
       </div>
     ),
   }),

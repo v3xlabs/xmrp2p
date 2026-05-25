@@ -31,7 +31,7 @@ export const OrderEvents: Component<{
             <For each={data()}>
               {event => (
                 <div class="flex items-center justify-between py-1 border-b border-(--thorin-border) last:border-0">
-                  <StatusBadge state={event.state} />
+                  <StatusBadge state={() => event.state} />
                   <div class="flex items-center gap-3 text-xs text-(--thorin-text-secondary) tabular-nums">
                     <span>{new Date(Number(event.timestamp) * 1000).toLocaleString()}</span>
                     <span class="font-mono opacity-60">

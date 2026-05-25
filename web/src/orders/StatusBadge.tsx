@@ -1,10 +1,10 @@
 import classnames from "classnames";
-import { type Component } from "solid-js";
+import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import { match } from "ts-pattern";
 
-export const StatusBadge: Component<{ state: number; }> = (props) => {
-  const config = () =>
-    match(props.state)
+export const StatusBadge: Component<{ state: Accessor<number>; }> = (props) => {
+  const c = createMemo(() =>
+    match(props.state())
       .with(1, () => ({
         label: "Open",
         className: "bg-(--thorin-green-surface) text-(--thorin-green-primary)",
@@ -32,20 +32,22 @@ export const StatusBadge: Component<{ state: number; }> = (props) => {
         className:
           "bg-(--thorin-purple-surface) text-(--thorin-purple-primary)",
       }))
-      .otherwise(() => null);
-
-  const c = config();
-
-  if (!c) return null;
+      .otherwise(() => null));
 
   return (
-    <span
-      class={classnames(
-        "text-xs font-medium px-1.5 py-0.5 whitespace-nowrap",
-        c.className,
-      )}
-    >
-      {c.label}
-    </span>
+    <Show when={c()}>
+      {
+        c => (
+          <span
+            class={classnames(
+              "text-xs font-medium px-1.5 py-0.5 whitespace-nowrap",
+              c().className,
+            )}
+          >
+            {c().label}
+          </span>
+        )
+      }
+    </Show>
   );
 };

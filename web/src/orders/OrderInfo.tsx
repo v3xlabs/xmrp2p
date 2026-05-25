@@ -47,7 +47,7 @@ export const OrderInfo: Component<{
         <div class="flex justify-between text-sm">
           <span class="text-(--thorin-text-secondary)">Status</span>
           <span>
-            <StatusBadge state={props.offer.state} />
+            <StatusBadge state={() => props.offer.state} />
           </span>
         </div>
         <div class="flex justify-between text-sm">
