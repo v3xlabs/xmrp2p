@@ -21,21 +21,17 @@ library Utils {
         returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256)
     {
         // Generate private view/spend keys
-        uint256 evmPrivateViewKey = vm.randomUint() % ED25519_L;
-        uint256 evmPrivateSpendKey = vm.randomUint() % ED25519_L;
-        uint256 xmrPrivateViewKey = vm.randomUint() % ED25519_L;
-        uint256 xmrPrivateSpendKey = vm.randomUint() % ED25519_L;
+        uint256 evmPrivateViewKey = _randomScalar(vm);
+        uint256 evmPrivateSpendKey = _randomScalar(vm);
+        uint256 xmrPrivateViewKey = _randomScalar(vm);
+        uint256 xmrPrivateSpendKey = _randomScalar(vm);
 
         // Compute the public keys
-        (uint256 x, uint256 y) = Ed25519.scalarMultBase(evmPrivateSpendKey);
-        uint256 evmPublicSpendKey = Ed25519.changeEndianness(Ed25519.compressPoint(x, y));
-        (x, y) = Ed25519.scalarMultBase(evmPrivateViewKey);
-        uint256 evmPublicViewKey = Ed25519.changeEndianness(Ed25519.compressPoint(x, y));
+        uint256 evmPublicSpendKey = Ed25519.scalarMultBaseCompressed(evmPrivateSpendKey);
+        uint256 evmPublicViewKey = Ed25519.scalarMultBaseCompressed(evmPrivateViewKey);
 
-        (x, y) = Ed25519.scalarMultBase(xmrPrivateSpendKey);
-        uint256 xmrPublicSpendKey = Ed25519.changeEndianness(Ed25519.compressPoint(x, y));
-        (x, y) = Ed25519.scalarMultBase(xmrPrivateViewKey);
-        uint256 xmrPublicViewKey = Ed25519.changeEndianness(Ed25519.compressPoint(x, y));
+        uint256 xmrPublicSpendKey = Ed25519.scalarMultBaseCompressed(xmrPrivateSpendKey);
+        uint256 xmrPublicViewKey = Ed25519.scalarMultBaseCompressed(xmrPrivateViewKey);
 
         return (
             evmPrivateViewKey,
@@ -60,5 +56,9 @@ library Utils {
         console.log("");
         // Liability should always be less than the total contract balance
         assert(liability <= contractBalance);
+    }
+
+    function _randomScalar(VmSafe vm) private returns (uint256) {
+        return (vm.randomUint() % (ED25519_L - 1)) + 1;
     }
 }

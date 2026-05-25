@@ -166,8 +166,7 @@ contract XMRP2P is Ownable {
 
         _keySanity(spendingKey);
         if (offer.kind == OfferType.BUY) {
-            (uint256 x, uint256 y) = Ed25519.scalarMultBase(viewingKey);
-            uint256 publicViewingKey = Ed25519.changeEndianness(Ed25519.compressPoint(x, y));
+            uint256 publicViewingKey = Ed25519.scalarMultBaseCompressed(viewingKey);
             _keySanity(publicViewingKey);
             offer.xmrPublicSpendKey = spendingKey;
             offer.xmrPrivateViewKey = viewingKey;
@@ -231,9 +230,8 @@ contract XMRP2P is Ownable {
             require(offer.state == OfferState.READY || offer.state == OfferState.TAKEN, ErrorOfferNotReadyOrTaken());
             require(block.timestamp > offer.t1, ErrorClaimUnavailable());
 
-            (uint256 x, uint256 y) = Ed25519.scalarMultBase(spendingKey);
             require(
-                offer.xmrPublicSpendKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
+                offer.xmrPublicSpendKey == Ed25519.scalarMultBaseCompressed(spendingKey),
                 ErrorInvalidPrivateSpendKey()
             );
             offer.xmrPrivateSpendKey = spendingKey;
@@ -253,14 +251,12 @@ contract XMRP2P is Ownable {
                 offer.kind != OfferType.SELL || block.number > offer.blockTaken, ErrorSellOfferCannotQuitInTakenBlock()
             );
 
-            (uint256 x, uint256 y) = Ed25519.scalarMultBase(spendingKey);
             require(
-                offer.evmPublicSpendKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
+                offer.evmPublicSpendKey == Ed25519.scalarMultBaseCompressed(spendingKey),
                 ErrorBuyOfferInvalidEVMPrivateSpendKey()
             );
-            (x, y) = Ed25519.scalarMultBase(viewingKey);
             require(
-                offer.evmPublicViewKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
+                offer.evmPublicViewKey == Ed25519.scalarMultBaseCompressed(viewingKey),
                 ErrorInvalidEVMPrivateViewKey()
             );
             offer.evmPrivateSpendKey = spendingKey;
@@ -319,9 +315,8 @@ contract XMRP2P is Ownable {
             ErrorNonMember()
         );
 
-        (uint256 x, uint256 y) = Ed25519.scalarMultBase(privateSpendKey);
         require(
-            offer.xmrPublicSpendKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
+            offer.xmrPublicSpendKey == Ed25519.scalarMultBaseCompressed(privateSpendKey),
             ErrorInvalidPrivateSpendKey()
         );
         offer.xmrPrivateSpendKey = privateSpendKey;
