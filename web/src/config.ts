@@ -8,7 +8,7 @@ export const queryClient = new QueryClient();
 
 export const CONTRACT_ADDRESS: Record<number, string | undefined> = {
   [mainnet.id]: "0x4fd57ad6fF61FE7455772fB49647a8fa3aA2C33A",
-  [sepolia.id]: "0xad6871d44804288ba4393464c63544d6691d76ba",
+  [sepolia.id]: "0x24be36Db392A8c69E9336A5Fdb53fFB6c978CDA8",
   [anvil.id]: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
 };
 
