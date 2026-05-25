@@ -23,6 +23,12 @@ export const SettingsButton = () => {
             </Dialog.CloseButton>
             <div class="space-y-2">
               <div class="flex items-center gap-2">
+                <input type="checkbox" checked={modes.mainnets} onChange={() => setModes({ ...modes, mainnets: !modes.mainnets })} />
+                <label>Mainnet Mode</label>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
                 <input type="checkbox" checked={modes.devnets} onChange={() => setModes({ ...modes, devnets: !modes.devnets })} />
                 <label>Devnet Mode</label>
               </div>

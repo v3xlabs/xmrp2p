@@ -13,6 +13,7 @@ export const useApp = () => {
   const { modes, ...settings } = useSettings();
 
   const wagmiChains = useChains();
+
   const chains = createMemo(() => wagmiChains().filter((chain) => {
     if (modes.devnets && chain.id === anvil.id && CONTRACT_ADDRESS[chain.id] !== undefined) return true;
 

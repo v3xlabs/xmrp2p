@@ -39,7 +39,7 @@ export const SettingsProvider: Component<{ children: JSX.Element; }> = (props) =
   const [modes, setModes] = createStore({
     devnets: readBool(STORAGE_KEYS.devnet, import.meta.env.MODE === "development"),
     testnets: readBool(STORAGE_KEYS.testnet, true),
-    mainnets: readBool(STORAGE_KEYS.mainnet, import.meta.env.MODE === "production"),
+    mainnets: readBool(STORAGE_KEYS.mainnet, true),
   });
 
   createEffect(() => {
