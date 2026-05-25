@@ -15,7 +15,7 @@ deploy-sepolia:
   cd contracts && forge script XMRP2PDeployer --broadcast --slow --rpc-url https://sepolia.drpc.org --account deployer
 
 verify-sepolia:
-	cd contracts && forge verify-contract 0x4fd57ad6fF61FE7455772fB49647a8fa3aA2C33A src/XMRP2P.sol:XMRP2P --chain sepolia --constructor-args 0x225f137127d9067788314bc7fcc1f36746a3c3B5
+	cd contracts && forge verify-contract 0xAd6871D44804288ba4393464C63544d6691D76BA src/XMRP2P.sol:XMRP2P --chain sepolia --constructor-args 0x225f137127d9067788314bc7fcc1f36746a3c3B5
 
 test:
   cd contracts && forge test
