@@ -1,6 +1,7 @@
 import { CgSpinner } from "solid-icons/cg";
 import { type Component, Show } from "solid-js";
 
+import { useApp } from "../../hooks/useApp";
 import type { Offer } from "../../hooks/useOffers";
 import { useTakeOrder } from "../../hooks/useTakeOrder";
 import { ActionFeedback } from "./ActionFeedback";
@@ -8,6 +9,7 @@ import { ActionFeedback } from "./ActionFeedback";
 export const TakeAction: Component<{
   offer: Offer;
 }> = (props) => {
+  const { chainId } = useApp();
   const { simulation, write } = useTakeOrder(() => props.offer);
 
   return (
@@ -25,7 +27,9 @@ export const TakeAction: Component<{
       <ActionFeedback
         simulationIsError={simulation.isError}
         writeError={write.error}
+        writeHash={write.data}
         writeIsSuccess={write.isSuccess}
+        chainId={chainId()}
       />
     </div>
   );

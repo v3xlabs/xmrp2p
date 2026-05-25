@@ -51,6 +51,24 @@ h2 {
   @apply text-(--thorin-text-primary) font-bold;
 }
 
+.tx-progress-pending {
+  animation: tx-progress 18s ease-out infinite;
+}
+
+@keyframes tx-progress {
+  0% {
+    width: 8%;
+  }
+
+  55% {
+    width: 72%;
+  }
+
+  100% {
+    width: 94%;
+  }
+}
+
 .font-satoshi {
   font-family: "Satoshi", sans-serif;
   font-feature-settings: "ss01" on, "ss03" on;

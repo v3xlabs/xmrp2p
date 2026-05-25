@@ -2,6 +2,7 @@ import classnames from "classnames";
 import { CgSpinner } from "solid-icons/cg";
 import { type Component, Show } from "solid-js";
 
+import { useApp } from "../../hooks/useApp";
 import { useQuitOrder } from "../../hooks/useQuitOrder";
 import type { StoredOrderKeys } from "../../utils/keyStore";
 import { ActionFeedback } from "./ActionFeedback";
@@ -11,6 +12,7 @@ export const QuitAction: Component<{
   storedKeys: StoredOrderKeys;
   label: string;
 }> = (props) => {
+  const { chainId } = useApp();
   const { simulation, write } = useQuitOrder(() => ({
     offer_id: props.offer_id,
     privateSpendKey: BigInt(props.storedKeys.privateSpendKey),
@@ -32,7 +34,9 @@ export const QuitAction: Component<{
       <ActionFeedback
         simulationIsError={simulation.isError}
         writeError={write.error}
+        writeHash={write.data}
         writeIsSuccess={write.isSuccess}
+        chainId={chainId()}
       />
     </div>
   );

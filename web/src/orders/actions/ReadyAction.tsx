@@ -1,12 +1,14 @@
 import { CgSpinner } from "solid-icons/cg";
 import { type Component, Show } from "solid-js";
 
+import { useApp } from "../../hooks/useApp";
 import { useReadyOrder } from "../../hooks/useReadyOrder";
 import { ActionFeedback } from "./ActionFeedback";
 
 export const ReadyAction: Component<{
   offer_id: bigint;
 }> = (props) => {
+  const { chainId } = useApp();
   const { simulation, write } = useReadyOrder(() => props.offer_id);
 
   return (
@@ -24,7 +26,9 @@ export const ReadyAction: Component<{
       <ActionFeedback
         simulationIsError={simulation.isError}
         writeError={write.error}
+        writeHash={write.data}
         writeIsSuccess={write.isSuccess}
+        chainId={chainId()}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import { CgSpinner } from "solid-icons/cg";
 import { type Component, Show } from "solid-js";
 
+import { useApp } from "../../hooks/useApp";
 import { useClaimOrder } from "../../hooks/useClaimOrder";
 import type { StoredOrderKeys } from "../../utils/keyStore";
 import { ActionFeedback } from "./ActionFeedback";
@@ -10,6 +11,7 @@ export const ClaimAction: Component<{
   storedKeys: StoredOrderKeys;
   label: string;
 }> = (props) => {
+  const { chainId } = useApp();
   const { simulation, write } = useClaimOrder(() => ({
     offer_id: props.offer_id,
     privateSpendKey: BigInt(props.storedKeys.privateSpendKey),
@@ -30,7 +32,9 @@ export const ClaimAction: Component<{
       <ActionFeedback
         simulationIsError={simulation.isError}
         writeError={write.error}
+        writeHash={write.data}
         writeIsSuccess={write.isSuccess}
+        chainId={chainId()}
       />
     </div>
   );
