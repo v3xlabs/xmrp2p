@@ -21,7 +21,7 @@ export const Addr: Component<{ address: string | Address | undefined; }> = (prop
   }));
 
   return (
-    <span>
+    <span aria-label={props.address} title={props.address}>
       <Suspense fallback={<Addry address={props.address} />}>
         <Show when={ensData.isSuccess && ensData.data?.name} fallback={<Addry address={props.address} />}>
           {ensData.data!.name}

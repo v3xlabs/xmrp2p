@@ -1,4 +1,3 @@
-import classnames from "classnames";
 import { CgArrowRight } from "solid-icons/cg";
 import { type Component, Show } from "solid-js";
 import { formatEther, formatUnits } from "viem";
@@ -6,6 +5,7 @@ import { formatEther, formatUnits } from "viem";
 import ethIcon from "../assets/eth.svg";
 import xmrIcon from "../assets/xmr.svg";
 import type { Offer } from "../hooks/useOffers";
+import { Addr } from "../utils/address";
 import { getXmrRate, isXmrSide } from "../utils/escrow";
 import { StatusBadge } from "./StatusBadge";
 
@@ -50,19 +50,27 @@ export const OrderInfo: Component<{
             <StatusBadge state={() => props.offer.state} />
           </span>
         </div>
-        <div class="flex justify-between text-sm">
-          <span class="text-(--thorin-text-secondary)">Order Type</span>
-          <span
-            class={classnames(
-              "text-xs font-medium px-1.5 py-0.5 rounded",
-              props.offer.kind === 1
-                ? "bg-(--thorin-green-surface) text-(--thorin-green-primary)"
-                : "bg-(--thorin-red-surface) text-(--thorin-red-primary)",
-            )}
-          >
-            {props.offer.kind === 1 ? "Buy" : "Sell"}
-          </span>
-        </div>
+        <Show when={
+          props.offer.owner === props.userAddress
+            ? props.offer.counterparty
+            : (props.offer.counterparty === props.userAddress
+                ? props.offer.owner
+                : undefined)
+        }
+        >
+          {
+            counterparty => (
+              <div class="flex justify-between text-sm">
+                <span class="text-(--thorin-text-secondary)">Counterparty</span>
+                <span
+                  aria-label={counterparty()}
+                >
+                  <Addr address={counterparty()} />
+                </span>
+              </div>
+            )
+          }
+        </Show>
         <div class="flex justify-between text-sm">
           <span class="text-(--thorin-text-secondary)">Rate</span>
           <span>
