@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: MIT
+// 
+// ==============================
+// xmrp2p.eth - v1
+//
+// Published by v3xlabs
+// ==============================
 
 pragma solidity ^0.8.34;
 
