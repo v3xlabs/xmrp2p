@@ -1,21 +1,26 @@
 No files changed, compilation skipped
 
+Ran 2 tests for tests/solidity/Ed25519.t.sol:Ed25519Test
+[PASS] testChangeEndianness() (gas: 5675)
+[PASS] testScalarMultBase() (gas: 415446)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 6.81ms (2.03ms CPU time)
+
 Ran 5 tests for tests/solidity/XMRP2PEscrowKeyMath.t.sol:XMRP2PEscrowKeyMathTest
 [PASS] testBuyClaimRevealsXmrShareSoBuyerCanRecoverEscrowKeys() (gas: 1522188)
 [PASS] testBuyRefundRevealsEvmShareSoSellerCanRecoverEscrowKeys() (gas: 1719792)
 [PASS] testFixedEscrowKeyMathVectors() (gas: 1197366)
 [PASS] testSellClaimRevealsXmrShareSoBuyerCanRecoverEscrowKeys() (gas: 1323069)
 [PASS] testSellRefundRevealsEvmShareSoSellerCanRecoverEscrowKeys() (gas: 1524417)
-Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 6.57ms (22.15ms CPU time)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 6.82ms (22.71ms CPU time)
 
 Ran 6 tests for tests/solidity/XMRP2POrderFlow.t.sol:XMRP2POrderFlowTest
-[PASS] testBuyOrderCanBeCancelledByMaker() (gas: 1267868)
-[PASS] testBuyOrderCanBeExitedByBuyer() (gas: 2144607)
-[PASS] testBuyOrderHappyPath() (gas: 2098345)
-[PASS] testSellOrderCanBeCancelledByMaker() (gas: 1268464)
-[PASS] testSellOrderCanBeExitedByBuyer() (gas: 1951031)
-[PASS] testSellOrderHappyPath() (gas: 1903428)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 8.86ms (37.97ms CPU time)
+[PASS] testBuyOrderCanBeCancelledByMaker() (gas: 1264688)
+[PASS] testBuyOrderCanBeExitedByBuyer() (gas: 2153384)
+[PASS] testBuyOrderHappyPath() (gas: 2113836)
+[PASS] testSellOrderCanBeCancelledByMaker() (gas: 1269415)
+[PASS] testSellOrderCanBeExitedByBuyer() (gas: 1949261)
+[PASS] testSellOrderHappyPath() (gas: 1904884)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 7.10ms (33.43ms CPU time)
 
 ╭--------------------------------+-----------------+--------+--------+--------+---------╮
 | src/XMRP2P.sol:XMRP2P Contract |                 |        |        |        |         |
@@ -30,7 +35,7 @@ Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 8.86ms (37.97ms CPU
 |--------------------------------+-----------------+--------+--------+--------+---------|
 | cancel                         | 55648           | 55660  | 55660  | 55672  | 2       |
 |--------------------------------+-----------------+--------+--------+--------+---------|
-| claim                          | 263266          | 271523 | 271947 | 278934 | 4       |
+| claim                          | 263266          | 272703 | 272394 | 282757 | 4       |
 |--------------------------------+-----------------+--------+--------+--------+---------|
 | liability                      | 411             | 1661   | 2411   | 2411   | 16      |
 |--------------------------------+-----------------+--------+--------+--------+---------|
@@ -38,13 +43,13 @@ Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 8.86ms (37.97ms CPU
 |--------------------------------+-----------------+--------+--------+--------+---------|
 | nextOfferId                    | 2389            | 2389   | 2389   | 2389   | 10      |
 |--------------------------------+-----------------+--------+--------+--------+---------|
-| openOffer                      | 304465          | 304477 | 304475 | 304497 | 10      |
+| openOffer                      | 304453          | 304476 | 304475 | 304497 | 10      |
 |--------------------------------+-----------------+--------+--------+--------+---------|
-| quit                           | 500912          | 510503 | 509502 | 522095 | 4       |
+| quit                           | 500912          | 512371 | 512668 | 523235 | 4       |
 |--------------------------------+-----------------+--------+--------+--------+---------|
 | ready                          | 46378           | 47230  | 47230  | 48083  | 4       |
 |--------------------------------+-----------------+--------+--------+--------+---------|
-| take                           | 226271          | 326792 | 325512 | 430415 | 8       |
+| take                           | 226271          | 326932 | 325512 | 430456 | 8       |
 ╰--------------------------------+-----------------+--------+--------+--------+---------╯
 
 ╭-------------------------------------------+-----------------+------+--------+------+---------╮
@@ -62,4 +67,4 @@ Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 8.86ms (37.97ms CPU
 ╰-------------------------------------------+-----------------+------+--------+------+---------╯
 
 
-Ran 2 test suites in 10.37ms (15.42ms CPU time): 11 tests passed, 0 failed, 0 skipped (11 total tests)
+Ran 3 test suites in 8.95ms (20.73ms CPU time): 13 tests passed, 0 failed, 0 skipped (13 total tests)
