@@ -210,75 +210,60 @@ contract XMRP2P is Ownable {
     }
 
     /// Quit an offer
-    /// Callable by the EVM side of a trade. Reveals EVM keys and refunds both EVM escrows.
+    /// Reveals private spending key and refunds both escrows
     /// @param offerId Offer ID
-    /// @param spendingKey EVM spending key
-    /// @param viewingKey EVM viewing key
+    /// @param spendingKey private spending key
+    /// @param viewingKey private viewing key (0 for xmr-side)
     function quit(uint256 offerId, uint256 spendingKey, uint256 viewingKey) public nonReentrant {
         Offer storage offer = offers[offerId];
 
-        require(
-            (offer.kind == OfferType.BUY && msg.sender == offer.owner)
-                || (offer.kind == OfferType.SELL && msg.sender == offer.counterparty),
-            ErrorNonMember()
-        );
-
-        require(
-            (offer.state == OfferState.TAKEN && (block.timestamp <= offer.t0 || block.timestamp > offer.t1))
-                || (offer.kind != OfferType.INVALID && offer.state == OfferState.READY && block.timestamp > offer.t1),
-            ErrorInvalidOfferStateForQuit()
-        );
-        require(offer.kind != OfferType.SELL || block.number > offer.blockTaken, ErrorSellOfferCannotQuitInTakenBlock());
-
-        (uint256 x, uint256 y) = Ed25519.scalarMultBase(spendingKey);
-        require(
-            offer.evmPublicSpendKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
-            ErrorBuyOfferInvalidEVMPrivateSpendKey()
-        );
-        (x, y) = Ed25519.scalarMultBase(viewingKey);
-        require(
-            offer.evmPublicViewKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
-            ErrorInvalidEVMPrivateViewKey()
-        );
-
-        offer.evmPrivateSpendKey = spendingKey;
-        offer.evmPrivateViewKey = viewingKey;
-        offer.state = OfferState.REFUNDED;
-        offer.lastupdate = block.timestamp;
-
-        uint256 amountR1 = offer.kind == OfferType.BUY ? offer.amount : offer.kind == OfferType.SELL ? offer.deposit : 0;
-        uint256 amountR2 = offer.kind == OfferType.BUY ? offer.deposit : offer.kind == OfferType.SELL ? offer.amount : 0;
-        liability -= amountR1 + amountR2;
-        (bool res,) = payable(offer.owner).call{value: amountR1}("");
-        require(res, ErrorUnableToRefund());
-        (bool res2,) = payable(offer.counterparty).call{value: amountR2}("");
-        require(res2, ErrorUnableToRefund());
-
-        emit OfferEvent(offer.id, offer.kind, offer.state);
-    }
-
-    /// Resolve an expired offer
-    /// @param offerId Offer ID
-    /// @param privateSpendKey XMR private spend key
-    /// Callable by the XMR side after expiry. Reveals the XMR spend key and pays all EVM escrow to the XMR side.
-    function resolve(uint256 offerId, uint256 privateSpendKey) public nonReentrant {
-        Offer storage offer = offers[offerId];
-        require(offer.state == OfferState.READY || offer.state == OfferState.TAKEN, ErrorOfferNotReadyOrTaken());
-        require(block.timestamp > offer.t1, ErrorClaimUnavailable());
-        require(
+        if (
             (offer.kind == OfferType.BUY && msg.sender == offer.counterparty)
-                || (offer.kind == OfferType.SELL && msg.sender == offer.owner),
-            ErrorNonMember()
-        );
+                || (offer.kind == OfferType.SELL && msg.sender == offer.owner)
+        ) {
+            // xmr
+            require(offer.state == OfferState.READY || offer.state == OfferState.TAKEN, ErrorOfferNotReadyOrTaken());
+            require(block.timestamp > offer.t1, ErrorClaimUnavailable());
 
-        (uint256 x, uint256 y) = Ed25519.scalarMultBase(privateSpendKey);
-        require(
-            offer.xmrPublicSpendKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
-            ErrorInvalidPrivateSpendKey()
-        );
-        offer.xmrPrivateSpendKey = privateSpendKey;
+            (uint256 x, uint256 y) = Ed25519.scalarMultBase(spendingKey);
+            require(
+                offer.xmrPublicSpendKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
+                ErrorInvalidPrivateSpendKey()
+            );
+            offer.xmrPrivateSpendKey = spendingKey;
+        } else if (
+            (offer.kind == OfferType.BUY && msg.sender == offer.owner)
+                || (offer.kind == OfferType.SELL && msg.sender == offer.counterparty)
+        ) {
+            // evm
+            require(
+                (offer.state == OfferState.TAKEN && (block.timestamp <= offer.t0 || block.timestamp > offer.t1))
+                    || (offer.kind != OfferType.INVALID
+                        && offer.state == OfferState.READY
+                        && block.timestamp > offer.t1),
+                ErrorInvalidOfferStateForQuit()
+            );
+            require(
+                offer.kind != OfferType.SELL || block.number > offer.blockTaken, ErrorSellOfferCannotQuitInTakenBlock()
+            );
 
-        offer.state = OfferState.CLAIMED;
+            (uint256 x, uint256 y) = Ed25519.scalarMultBase(spendingKey);
+            require(
+                offer.evmPublicSpendKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
+                ErrorBuyOfferInvalidEVMPrivateSpendKey()
+            );
+            (x, y) = Ed25519.scalarMultBase(viewingKey);
+            require(
+                offer.evmPublicViewKey == Ed25519.changeEndianness(Ed25519.compressPoint(x, y)),
+                ErrorInvalidEVMPrivateViewKey()
+            );
+            offer.evmPrivateSpendKey = spendingKey;
+            offer.evmPrivateViewKey = viewingKey;
+        } else {
+            revert ErrorNonMember();
+        }
+
+        offer.state = OfferState.REFUNDED;
         offer.lastupdate = block.timestamp;
 
         uint256 amountR1 = offer.kind == OfferType.BUY ? offer.amount : offer.kind == OfferType.SELL ? offer.deposit : 0;

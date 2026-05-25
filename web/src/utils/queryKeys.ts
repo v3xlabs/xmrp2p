@@ -4,8 +4,8 @@ export const queryKeys = {
     single: (chainId: number, offerId: bigint) => ["c", chainId, "offers", offerId] as const,
   },
   parameters: (chainId: number) => ["c", chainId, "parameters"] as const,
-  prepareOrder: (chainId: number, offerType: number, rate: bigint, ethAmount: bigint) =>
-    ["c", chainId, "prepareOrder", offerType, rate, ethAmount] as const,
+  prepareOrder: (chainId: number, offerType: number, rate: bigint, ethAmount: bigint, seedHash: string) =>
+    ["c", chainId, "prepareOrder", offerType, rate, ethAmount, seedHash] as const,
   simulate: {
     cancel: (chainId: number, offerId: bigint) =>
       ["c", chainId, "simulate", "cancel", offerId] as const,
